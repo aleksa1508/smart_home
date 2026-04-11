@@ -1,0 +1,21 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs
+/SmartHome/.vs/SmartHome
+/SmartHome/CentralniServer/bin/Debug
+/SmartHome/CentralniServer/obj/Debug
+/SmartHome/Client/.vs
+/SmartHome/Client/bin/Debug
+/SmartHome/Client/obj/Debug
+/SmartHome/KucniUredjaji/.vs
+/SmartHome/KucniUredjaji/bin/Debug
+/SmartHome/KucniUredjaji/obj/Debug
+/SmartHome/UredjajiKomunikacija/bin/Debug
+/SmartHome/UredjajiKomunikacija/obj/Debug
+/SmartHome/UsersLibrary/.vs
+/SmartHome/UsersLibrary/bin/Debug
+/SmartHome/UsersLibrary/obj/Debug
+/SmartHome/CentralniServer/obj
+/SmartHome/packages
