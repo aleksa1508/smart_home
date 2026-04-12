@@ -1,6 +1,7 @@
 ﻿using Client.Helpers;
 using System.Collections.ObjectModel;
 using System.Windows.Controls;
+using UsersLibrary;
 
 namespace Client
 {

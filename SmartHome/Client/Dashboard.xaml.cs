@@ -9,6 +9,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using UsersLibrary;
 
 namespace Client
 {
@@ -154,7 +155,7 @@ namespace Client
 
         private void users_menu_button_Click(object sender, RoutedEventArgs e)
         {
-            var users = Korisnici.listaKorisnika;
+            var users = new Korisnici().GetAllUsers();
             Title.Content = "Users";
             MainContent.Content = new UsersView(new ObservableCollection<Korisnici>(users));
         }

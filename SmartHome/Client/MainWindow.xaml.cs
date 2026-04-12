@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using UsersLibrary;
 
 namespace Client
 {
@@ -85,11 +86,12 @@ namespace Client
                 // UDP setup
                 ConnectionService.UdpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
                 ConnectionService.UdpEndpoint = new IPEndPoint(IPAddress.Loopback, port);
-                Korisnici k = Korisnici.PretragaKorisnika(UsernameTextBox.Text, PasswordTextBox.Password);
+                Korisnici k = new Korisnici().GetKorisnik(UsernameTextBox.Text,PasswordTextBox.Password);
 
                 // start loop
 
                 // 🔥 otvori dashboard
+                
                 Dashboard dashboardWindow = new Dashboard(k);
                 dashboardWindow.Closed += DashboardWindow_Closed;
                 dashboardWindow.Show();

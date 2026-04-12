@@ -10,7 +10,8 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
 using System.Text.Json;
-using UsersLibrary; // <-- dodaj
+using UsersLibrary;
+using System.Data.SqlClient; // <-- dodaj
 //using UDPServer;
 namespace TCPServer
 {
@@ -49,12 +50,21 @@ namespace TCPServer
 
             Korisnici k = new Korisnici();
             Uredjaj u = new Uredjaj();
+            //var con = new SqlConnection("Server=localhost\\SQLEXPRESS;Database=users_db;Trusted_Connection=True;");
+            //con.Open();
+            //string query = "select * from Users";
+            //SqlCommand comand=new SqlCommand(query, con);
+            //SqlDataReader reader = comand.ExecuteReader();
+            //while (reader.Read())
+            //{
+            //    int id = Convert.ToInt32(reader["id"]);
+            //    string name = reader["name"].ToString();
 
-            List<Korisnici> listaKorisnika = new List<Korisnici>
-            {
-                new Korisnici("Aleksa","Arsenic","user1","a",StatusKorisnika.NEAKTIVAN,0),
-                new Korisnici("Uros","Milosevic","user2","b",StatusKorisnika.NEAKTIVAN,0)
-            };
+            //    Console.WriteLine($"ID: {id}, Name: {name}");
+            //}
+
+
+            List<Korisnici> listaKorisnika = k.GetAllUsers().ToList();
             //inicijalizacija servera
             Socket serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
@@ -258,7 +268,7 @@ namespace TCPServer
                                     Console.WriteLine($"Poruka od klijenta: {poruka}");
 
                                     string[] djelovi = poruka.Split(':');
-                                    Korisnici prijavljenKorisnik = k.PretraziKorisnika(listaKorisnika, djelovi[0], djelovi[1]);
+                                    Korisnici prijavljenKorisnik = k.GetKorisnik(djelovi[0], djelovi[1]);
                                     if (djelovi.Length == 2 && prijavljenKorisnik != null)
                                     {
 

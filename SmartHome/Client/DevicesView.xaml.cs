@@ -41,7 +41,7 @@ namespace Client
             LogsDataGrid.ItemsSource = uredjaji[0].EvidencijaKomandi;
             NameTextBox.Text = uredjaji[0].Ime;
             PortTextBox.Text = uredjaji[0].Port.ToString();
-            StatusTextBox.Text = "Intensity";
+            StatusTextBox.Text = uredjaji[0].Funkcije["stanje"].ToString();
             ValueTextBox.Text = uredjaji[0].Funkcije["intenzitet"].ToString();
         }
 
@@ -52,8 +52,8 @@ namespace Client
             NameTextBox.Text = uredjaji[1].Ime;
             PortTextBox.Text = uredjaji[1].Port.ToString();
             // StatusTextBox.Text = uredjaji[1].Funkcije["stanje"].ToString();
-            StatusTextBox.Text = "State";
-            ValueTextBox.Text = uredjaji[1].Funkcije["stanje"].ToString();
+            StatusTextBox.Text = uredjaji[1].Funkcije["stanje"].ToString();
+            ValueTextBox.Text = uredjaji[1].Funkcije["temperatura"].ToString();
         }
 
         private void climate_tab_button_Click(object sender, RoutedEventArgs e)
@@ -62,7 +62,7 @@ namespace Client
             LogsDataGrid.ItemsSource = uredjaji[2].EvidencijaKomandi;
             NameTextBox.Text = uredjaji[2].Ime;
             PortTextBox.Text = uredjaji[2].Port.ToString();
-            StatusTextBox.Text = "Temperature";
+            StatusTextBox.Text = uredjaji[2].Funkcije["stanje"].ToString();
             ValueTextBox.Text = uredjaji[2].Funkcije["temperatura"].ToString();
         }
 
@@ -72,8 +72,8 @@ namespace Client
             LogsDataGrid.ItemsSource = uredjaji[3].EvidencijaKomandi;
             NameTextBox.Text = uredjaji[3].Ime;
             PortTextBox.Text = uredjaji[3].Port.ToString();
-            StatusTextBox.Text = "Status";
-            ValueTextBox.Text = uredjaji[3].Funkcije["stanje"].ToString();
+            StatusTextBox.Text = uredjaji[3].Funkcije["stanje"].ToString();
+            ValueTextBox.Text = "-";
         }
         public void SetBackground(int index)
         {

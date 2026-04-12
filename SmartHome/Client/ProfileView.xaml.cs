@@ -6,6 +6,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
+using UsersLibrary;
 
 namespace Client
 {
@@ -15,10 +16,12 @@ namespace Client
     public partial class ProfileView : UserControl
     {
         private Korisnici korisnik;
+        private string oldUsername;
         public ProfileView(Korisnici k)
         {
             InitializeComponent();
             korisnik = k;
+            oldUsername = k.KorisnickoIme;
             DataContext = k;
         }
 
@@ -44,7 +47,7 @@ namespace Client
         {
             if (FirstNameTextBox.Text.Length != 0 && LastNameTextBox.Text.Length != 0 && UsernameTextBox.Text.Length != 0 && PasswordTextBox.Text.Length != 0)
             {
-                korisnik.UpdateData(FirstNameTextBox.Text, LastNameTextBox.Text, UsernameTextBox.Text, PasswordTextBox.Text);
+                korisnik.UpdateData(FirstNameTextBox.Text, LastNameTextBox.Text,oldUsername,UsernameTextBox.Text, PasswordTextBox.Text);
                 Dashboard parentWindow = (Dashboard)Window.GetWindow(this);
                 parentWindow.ShowToastNotification(new ToastNotification("Success", "Profile data is update successfully", NotificationType.Success));
                 parentWindow.Title.Content = $"Hello,{korisnik.Ime}";
