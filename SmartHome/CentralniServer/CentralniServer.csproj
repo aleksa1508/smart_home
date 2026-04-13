@@ -58,10 +58,6 @@
       <Project>{EFC0CA4D-4335-40B7-ACD9-6A0C45010084}</Project>
       <Name>Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\KucniUredjaji\KucniUredjaji.csproj">
-      <Project>{a28102ba-0ac1-4936-b5de-fe54d45ac180}</Project>
-      <Name>KucniUredjaji</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.SqlClient">

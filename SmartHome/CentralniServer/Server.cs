@@ -1,5 +1,4 @@
-﻿using KucniUredjaji;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -13,16 +12,12 @@ using System.Text.Json;
 using System.Data.SqlClient;
 using Common;
 using Common.Repositories.UsersRepositories;
-using Common.Enums; // <-- dodaj
+using Common.Enums;
+using Common.DTOs;
+using Common.Models; // <-- dodaj
 //using UDPServer;
 namespace TCPServer
 {
-    public class CommandDTO
-    {
-        public Uredjaj IzabraniUredjaj {  get; set; }
-        public string Funkcija { get; set; }
-        public string Vrednost { get; set; }
-    }
     
     public class Server
     {
@@ -173,7 +168,7 @@ namespace TCPServer
                                         //    byte[] data = ms.ToArray();
                                         //    s.SendTo(data, clientEP);
                                         //}
-                                        var content = new ResponseDto
+                                        var content = new ResponseDTO
                                         {
                                             Message = "Devices List",
                                             Uredjaji = uredjaji
@@ -223,7 +218,7 @@ namespace TCPServer
                                         byte[] initialData = Encoding.UTF8.GetBytes(u1.Ime + ":" + funkcija + ":" + vrednost);
                                         s.SendTo(initialData, uredjajEP);
 
-                                        var content = new ResponseDto
+                                        var content = new ResponseDTO
                                         {
                                             Message = "Command",
                                             Uredjaj = u1,
@@ -296,7 +291,7 @@ namespace TCPServer
                                         //    byte[] data = ms.ToArray();
                                         //    udpSocket.SendTo(data, clientEP);
                                         //}
-                                        var content = new ResponseDto
+                                        var content = new ResponseDTO
                                         {
                                             Message = "Devices List", 
                                             Uredjaji = uredjaji

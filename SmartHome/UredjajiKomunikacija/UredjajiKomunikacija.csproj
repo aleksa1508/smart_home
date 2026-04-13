@@ -8,12 +8,13 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>UredjajiKomunikacija</RootNamespace>
     <AssemblyName>UredjajiKomunikacija</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -152,9 +153,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\KucniUredjaji\KucniUredjaji.csproj">
-      <Project>{a28102ba-0ac1-4936-b5de-fe54d45ac180}</Project>
-      <Name>KucniUredjaji</Name>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{efc0ca4d-4335-40b7-acd9-6a0c45010084}</Project>
+      <Name>Common</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
