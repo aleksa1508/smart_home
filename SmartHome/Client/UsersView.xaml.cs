@@ -1,7 +1,7 @@
 ﻿using Client.Helpers;
+using Common;
 using System.Collections.ObjectModel;
 using System.Windows.Controls;
-using UsersLibrary;
 
 namespace Client
 {
@@ -10,8 +10,8 @@ namespace Client
     /// </summary>
     public partial class UsersView : UserControl
     {
-        public ObservableCollection<Korisnici> Users { get; set; }
-        public UsersView(ObservableCollection<Korisnici> users)
+        public ObservableCollection<User> Users { get; set; }
+        public UsersView(ObservableCollection<User> users)
         {
             InitializeComponent();
             Users = users;

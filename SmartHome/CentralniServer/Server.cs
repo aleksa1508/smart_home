@@ -10,8 +10,10 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
 using System.Text.Json;
-using UsersLibrary;
-using System.Data.SqlClient; // <-- dodaj
+using System.Data.SqlClient;
+using Common;
+using Common.Repositories.UsersRepositories;
+using Common.Enums; // <-- dodaj
 //using UDPServer;
 namespace TCPServer
 {
@@ -48,7 +50,7 @@ namespace TCPServer
                  { "user2", "b" }
              };*/
 
-            Korisnici k = new Korisnici();
+            User k = new User();
             Uredjaj u = new Uredjaj();
             //var con = new SqlConnection("Server=localhost\\SQLEXPRESS;Database=users_db;Trusted_Connection=True;");
             //con.Open();
@@ -63,8 +65,8 @@ namespace TCPServer
             //    Console.WriteLine($"ID: {id}, Name: {name}");
             //}
 
-
-            List<Korisnici> listaKorisnika = k.GetAllUsers().ToList();
+            IUserReository userReository = new UserRepository();
+            List<User> listaKorisnika = userReository.GetAllUsers().ToList();
             //inicijalizacija servera
             Socket serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
@@ -150,10 +152,10 @@ namespace TCPServer
                                     string receivedMessage = Encoding.UTF8.GetString(buffer, 0, receivedBytes);
                                     if (receivedMessage == "ne")
                                     {
-                                        k.PretragaPorta(listaKorisnika, ((IPEndPoint)s.LocalEndPoint).Port);
-                                        k.IspisKorisnika(listaKorisnika);
+                                        userReository.PretragaPorta( ((IPEndPoint)s.LocalEndPoint).Port);
+                                        userReository.IspisKorisnika();
 
-                                        if (k.PretragaNeaktivnosti(listaKorisnika) == true)
+                                        if (userReository.PretragaNeaktivnosti() == true)
                                         {
 
                                             IPEndPoint udpServer5 = new IPEndPoint(IPAddress.Loopback, 60001);
@@ -268,8 +270,8 @@ namespace TCPServer
                                     Console.WriteLine($"Poruka od klijenta: {poruka}");
 
                                     string[] djelovi = poruka.Split(':');
-                                    Korisnici prijavljenKorisnik = k.GetKorisnik(djelovi[0], djelovi[1]);
-                                    if (djelovi.Length == 2 && prijavljenKorisnik != null)
+                                    User logInUser = userReository.GetKorisnik(djelovi[0], djelovi[1]);
+                                    if (djelovi.Length == 2 && logInUser != null)
                                     {
 
                                         // Клијент валидан, шаљемо одговор
@@ -279,8 +281,8 @@ namespace TCPServer
                                         // Креирамо UDP сокет за комуникацију
                                         udpPort1 = random.Next(50002, 60000);
 
-                                        prijavljenKorisnik.DodeljeniPort = udpPort1;
-
+                                        logInUser.Port = udpPort1;
+                                        userReository.UpdateStatus(logInUser.ID, ActiveStatus.ACTIVE,udpPort1);
                                         s.Send(Encoding.UTF8.GetBytes(udpPort1.ToString()));
                                         Socket udpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
                                         IPEndPoint udpServerEP = new IPEndPoint(IPAddress.Loopback, udpPort1);
@@ -297,7 +299,7 @@ namespace TCPServer
                                         udpSocket.Blocking = false;
                                         Console.WriteLine($"Poruka od UDP klijenta : {receivedMessage}");
 
-                                        k.IspisKorisnika(listaKorisnika);
+                                        userReository.IspisKorisnika();
 
                                         List<Uredjaj> uredjaji = u.SviUredjaji();
 
@@ -347,8 +349,8 @@ namespace TCPServer
                         if (udpNeaktivnost[udpSocket] >= MAX_NEAKTIVNIH_CIKLUSA)
                         {
                             Console.WriteLine($"UDP sesija na portu {((IPEndPoint)udpSocket.LocalEndPoint).Port} je zatvorena zbog neaktivnosti.");
-                            k.PretragaPorta(listaKorisnika, ((IPEndPoint)udpSocket.LocalEndPoint).Port);
-                            k.IspisKorisnika(listaKorisnika);
+                            userReository.PretragaPorta(((IPEndPoint)udpSocket.LocalEndPoint).Port);
+                            userReository.IspisKorisnika();
                             // Pronaći TCP socket povezan sa ovim UDP socketom
                             Socket tcpSocket = klijenti.FirstOrDefault(s => ((IPEndPoint)s.RemoteEndPoint).Port == ((IPEndPoint)udpSocket.LocalEndPoint).Port);
 

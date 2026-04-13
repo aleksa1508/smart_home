@@ -1,4 +1,7 @@
 ﻿using Client.Helpers;
+using Common;
+using Common.Enums;
+using Common.Repositories.UsersRepositories;
 using Notification.Wpf;
 using System;
 using System.Collections.ObjectModel;
@@ -9,7 +12,6 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using UsersLibrary;
 
 namespace Client
 {
@@ -19,26 +21,28 @@ namespace Client
     public partial class Dashboard : Window
     {
         private NotificationManager notificationManager;
-        private Korisnici korisnik;
+        private User user;
         private ObservableCollection<Uredjaj> uredjaji;
         private ObservableCollection<Komanda> EvidencijaKomandi;
-        public Dashboard(Korisnici k)
+        private IUserReository userReository;
+        public Dashboard(User userParameter)
         {
             InitializeComponent();
-            korisnik = k;
+            userReository = new UserRepository();
+            user = userParameter;
             uredjaji = new ObservableCollection<Uredjaj>();
             EvidencijaKomandi = new ObservableCollection<Komanda>();
             notificationManager = new NotificationManager();
             StartUdpListener();
             ConnectionService.OnServerMessage += ShowMessage;
-            Title.Content = $"Hello,{k.Ime}";
-            if (k.Role == UserRole.USER)
+            Title.Content = $"Hello,{user.FirstName}";
+            if (user.Role == UserRole.USER)
             {
                 users_menu_button.Visibility = Visibility.Collapsed;
                 Users.Visibility = Visibility.Collapsed;
             }
             MainContent.Content = new DashboardView();
-            DataContext = k;
+            DataContext = userParameter;
         }
         private void button_minimize_Click(object sender, RoutedEventArgs e)
         {
@@ -64,7 +68,7 @@ namespace Client
         private void Dashboard_Tab_Button_Click(object sender, RoutedEventArgs e)
         {
             MainContent.Content = new DashboardView();
-            Title.Content = $"Hello,{korisnik.Ime}";
+            Title.Content = $"Hello,{user.FirstName}";
         }
 
         private void StartUdpListener()
@@ -125,7 +129,7 @@ namespace Client
                     {
                         Dispatcher.Invoke(() =>
                         {
-                            MessageBox.Show($"Greška: {ex.Message}");
+                            MessageBox.Show($"Error: {ex.Message}");
                         });
                         break;
                     }
@@ -155,9 +159,9 @@ namespace Client
 
         private void users_menu_button_Click(object sender, RoutedEventArgs e)
         {
-            var users = new Korisnici().GetAllUsers();
+            var users = userReository.GetAllUsers();
             Title.Content = "Users";
-            MainContent.Content = new UsersView(new ObservableCollection<Korisnici>(users));
+            MainContent.Content = new UsersView(new ObservableCollection<User>(users));
         }
 
         private void exit_menu_button_Click(object sender, RoutedEventArgs e)
@@ -205,7 +209,7 @@ namespace Client
 
         private void button_profile_Click(object sender, RoutedEventArgs e)
         {
-            MainContent.Content = new ProfileView(korisnik);
+            MainContent.Content = new ProfileView(user,userReository);
         }
     }
 }

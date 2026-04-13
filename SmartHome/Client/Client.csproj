@@ -252,9 +252,9 @@
     <Folder Include="Images\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\UsersLibrary\UsersLibrary.csproj">
-      <Project>{1076516B-4013-491D-8002-D83654422AE7}</Project>
-      <Name>UsersLibrary</Name>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{EFC0CA4D-4335-40B7-ACD9-6A0C45010084}</Project>
+      <Name>Common</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -1,4 +1,6 @@
 ﻿using Client.Helpers;
+using Common;
+using Common.Repositories.UsersRepositories;
 using Notification.Wpf;
 using System;
 using System.Net;
@@ -7,7 +9,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using UsersLibrary;
 
 namespace Client
 {
@@ -17,12 +18,14 @@ namespace Client
     public partial class MainWindow : Window
     {
         private NotificationManager notificationManager;
+        private IUserReository userReository;
 
         public MainWindow()
         {
             InitializeComponent();
             notificationManager = new NotificationManager();
             Conncection();
+            userReository = new UserRepository();
         }
 
 
@@ -58,7 +61,7 @@ namespace Client
             MainWindow mainWindow = (MainWindow)Application.Current.MainWindow;
             if (string.IsNullOrWhiteSpace(UsernameTextBox.Text) || string.IsNullOrWhiteSpace(PasswordTextBox.Password))
             {
-                mainWindow.ShowToastNotification(new ToastNotification("Error", "Unesite username i password!", NotificationType.Error));
+                mainWindow.ShowToastNotification(new ToastNotification("Error", "Enter username and password!", NotificationType.Error));
                 return;
             }
 
@@ -76,23 +79,23 @@ namespace Client
                 string response = Encoding.UTF8.GetString(buffer, 0, bytes);
                 if (response != "USPESNO")
                 {
-                    mainWindow.ShowToastNotification(new ToastNotification("Success", "Pogresan username ili password.", NotificationType.Success));
+                    mainWindow.ShowToastNotification(new ToastNotification("Error", "Invalid username or password.", NotificationType.Error));
                     return;
                 }
                 buffer = new byte[1024];
                 bytes = ConnectionService.TcpSocket.Receive(buffer);
                 int port = int.Parse(Encoding.UTF8.GetString(buffer, 0, bytes));
-                mainWindow.ShowToastNotification(new ToastNotification("Success", $"Uspjesno povezan i prijavljen,a port je {port}", NotificationType.Success));
+                mainWindow.ShowToastNotification(new ToastNotification("Success", $"You are successfully log in and port is {port}", NotificationType.Success));
                 // UDP setup
                 ConnectionService.UdpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
                 ConnectionService.UdpEndpoint = new IPEndPoint(IPAddress.Loopback, port);
-                Korisnici k = new Korisnici().GetKorisnik(UsernameTextBox.Text,PasswordTextBox.Password);
+                User user = userReository.GetKorisnik(UsernameTextBox.Text,PasswordTextBox.Password);
 
                 // start loop
 
                 // 🔥 otvori dashboard
                 
-                Dashboard dashboardWindow = new Dashboard(k);
+                Dashboard dashboardWindow = new Dashboard(user);
                 dashboardWindow.Closed += DashboardWindow_Closed;
                 dashboardWindow.Show();
 
@@ -102,7 +105,7 @@ namespace Client
             }
             catch (Exception ex)
             {
-                mainWindow.ShowToastNotification(new ToastNotification("Warning", "Ne mogu da se povežem: " + ex.Message, NotificationType.Warning));
+                mainWindow.ShowToastNotification(new ToastNotification("Warning", "I can not connect: " + ex.Message, NotificationType.Warning));
             }
             //Dashboard d = new Dashboard();
             //d.Show();

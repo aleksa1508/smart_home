@@ -4,7 +4,6 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Client"
-             xmlns:helpers="clr-namespace:Client.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="370" d:DesignWidth="610">
     <Grid Background="#1D3557">
@@ -117,11 +116,11 @@
 
             <!-- COLUMNS -->
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Ime" Width="*" Binding="{Binding Ime}" />
-                <DataGridTextColumn Header="Prezime" Width="*" Binding="{Binding Prezime}" />
-                <DataGridTextColumn Header="Username" Width="*" Binding="{Binding KorisnickoIme}" />
-                <DataGridTextColumn Header="Status" Width="*" Binding="{Binding StatusPrijave}" />
-                <DataGridTextColumn Header="Port" Width="*" Binding="{Binding DodeljeniPort}" />
+                <DataGridTextColumn Header="First name" Width="*" Binding="{Binding FirstName}" />
+                <DataGridTextColumn Header="Last name" Width="*" Binding="{Binding LastName}" />
+                <DataGridTextColumn Header="Username" Width="*" Binding="{Binding Username}" />
+                <DataGridTextColumn Header="Status" Width="*" Binding="{Binding Status}" />
+                <DataGridTextColumn Header="Port" Width="*" Binding="{Binding Port}" />
                 <DataGridTextColumn Header="Role" Width="*" Binding="{Binding Role}" />
             </DataGrid.Columns>
 

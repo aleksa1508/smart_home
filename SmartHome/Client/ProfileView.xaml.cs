@@ -1,4 +1,6 @@
 ﻿using Client.Helpers;
+using Common;
+using Common.Repositories.UsersRepositories;
 using Microsoft.Win32;
 using Notification.Wpf;
 using System;
@@ -6,7 +8,6 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
-using UsersLibrary;
 
 namespace Client
 {
@@ -15,14 +16,15 @@ namespace Client
     /// </summary>
     public partial class ProfileView : UserControl
     {
-        private Korisnici korisnik;
-        private string oldUsername;
-        public ProfileView(Korisnici k)
+        private User user;
+        private IUserReository userReository;
+        public ProfileView(User u,IUserReository repo)
         {
             InitializeComponent();
-            korisnik = k;
-            oldUsername = k.KorisnickoIme;
-            DataContext = k;
+            userReository=repo;
+            user = u;
+            DataContext = u;
+
         }
 
         private void UserTextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -33,8 +35,8 @@ namespace Client
 
         private void ValidationOriginalData()
         {
-            if (!korisnik.Ime.Equals(FirstNameTextBox.Text) || !korisnik.Prezime.Equals(LastNameTextBox.Text) || !korisnik.KorisnickoIme.Equals(UsernameTextBox.Text)
-                || !korisnik.Lozinka.Equals(PasswordTextBox.Text))
+            if (!user.FirstName.Equals(FirstNameTextBox.Text) || !user.LastName.Equals(LastNameTextBox.Text) || !user.Username.Equals(UsernameTextBox.Text)
+                || !user.Password.Equals(PasswordTextBox.Text))
             {
                 button_save.IsEnabled = true;
             }
@@ -47,10 +49,10 @@ namespace Client
         {
             if (FirstNameTextBox.Text.Length != 0 && LastNameTextBox.Text.Length != 0 && UsernameTextBox.Text.Length != 0 && PasswordTextBox.Text.Length != 0)
             {
-                korisnik.UpdateData(FirstNameTextBox.Text, LastNameTextBox.Text,oldUsername,UsernameTextBox.Text, PasswordTextBox.Text);
+                userReository.UpdateData(user.ID,FirstNameTextBox.Text, LastNameTextBox.Text,UsernameTextBox.Text, PasswordTextBox.Text);
                 Dashboard parentWindow = (Dashboard)Window.GetWindow(this);
                 parentWindow.ShowToastNotification(new ToastNotification("Success", "Profile data is update successfully", NotificationType.Success));
-                parentWindow.Title.Content = $"Hello,{korisnik.Ime}";
+                parentWindow.Title.Content = $"Hello,{user.FirstName}";
                 button_save.IsEnabled = false;
             }
             else

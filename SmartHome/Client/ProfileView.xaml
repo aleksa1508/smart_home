@@ -21,11 +21,11 @@
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal">
             <Label Content="First Name:" Foreground="White" FontSize="17" Margin="10,12,5,0"/>
-            <TextBox x:Name="FirstNameTextBox" Style="{StaticResource txt_box}" Text="{Binding Ime}" TextChanged="UserTextBox_TextChanged" />
+            <TextBox x:Name="FirstNameTextBox" Style="{StaticResource txt_box}" Text="{Binding FirstName}" TextChanged="UserTextBox_TextChanged" />
         </StackPanel>
         <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal">
             <Label Content="Last Name:" Foreground="White" FontSize="17" Margin="10,12,5,0"/>
-            <TextBox x:Name="LastNameTextBox" Style="{StaticResource txt_box}" Text="{Binding Prezime}" TextChanged="UserTextBox_TextChanged" />
+            <TextBox x:Name="LastNameTextBox" Style="{StaticResource txt_box}" Text="{Binding LastName}" TextChanged="UserTextBox_TextChanged" />
         </StackPanel>
         <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal">
             <Label Content="Role:" Foreground="White" FontSize="17" Margin="10,12,50,0"/>
@@ -33,11 +33,11 @@
         </StackPanel>
         <StackPanel Grid.Row="3" Grid.Column="0" Orientation="Horizontal">
             <Label Content="Username:" Foreground="White" FontSize="17" Margin="10,12,8,0"/>
-            <TextBox x:Name="UsernameTextBox" Style="{StaticResource txt_box}" Text="{Binding KorisnickoIme}" TextChanged="UserTextBox_TextChanged"/>
+            <TextBox x:Name="UsernameTextBox" Style="{StaticResource txt_box}" Text="{Binding Username}" TextChanged="UserTextBox_TextChanged"/>
         </StackPanel>
         <StackPanel Grid.Row="4" Grid.Column="0" Orientation="Horizontal">
             <Label Content="Password:" Foreground="White" FontSize="17" Margin="10,12,13,0"/>
-            <TextBox x:Name="PasswordTextBox" Style="{StaticResource txt_box}" Text="{Binding Lozinka}" TextChanged="UserTextBox_TextChanged" />
+            <TextBox x:Name="PasswordTextBox" Style="{StaticResource txt_box}" Text="{Binding Password}" TextChanged="UserTextBox_TextChanged" />
         </StackPanel>
         <StackPanel Grid.Row="0" Grid.Column="1" Grid.RowSpan="4" Margin="0,10,0,0">
             <Image x:Name="ProfileImage" Source="/Images/profile.jpg" Width="200" Height="151"/>

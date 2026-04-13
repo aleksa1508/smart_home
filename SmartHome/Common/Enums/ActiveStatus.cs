@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UsersLibrary
+namespace Common.Enums
 {
-    public enum StatusKorisnika
+    public enum ActiveStatus
     {
-        AKTIVAN,NEAKTIVAN
+        ACTIVE,INACTIVE
     }
 }
