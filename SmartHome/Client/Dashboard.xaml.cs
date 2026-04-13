@@ -41,7 +41,7 @@ namespace Client
                 users_menu_button.Visibility = Visibility.Collapsed;
                 Users.Visibility = Visibility.Collapsed;
             }
-            MainContent.Content = new DashboardView();
+            MainContent.Content = new DashboardView(user);
             DataContext = userParameter;
         }
         private void button_minimize_Click(object sender, RoutedEventArgs e)
@@ -67,8 +67,9 @@ namespace Client
 
         private void Dashboard_Tab_Button_Click(object sender, RoutedEventArgs e)
         {
-            MainContent.Content = new DashboardView();
-            Title.Content = $"Hello,{user.FirstName}";
+            var u = userReository.GetUserById(user.ID);
+            MainContent.Content = new DashboardView(u);
+            Title.Content = $"Hello,{u.FirstName}";
         }
 
         private void StartUdpListener()

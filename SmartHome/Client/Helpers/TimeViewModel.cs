@@ -30,6 +30,8 @@ namespace Client.Helpers
 
         public TimeViewModel()
         {
+            CurrentTime = DateTime.Now.ToString("HH:mm");
+            CurrentDate = DateTime.Now.ToString("dd MMMM yyyy");
             timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromSeconds(1);
             timer.Tick += (s, e) => { CurrentTime = DateTime.Now.ToShortTimeString(); CurrentDate = DateTime.Now.ToString("dd MMMM yyyy"); };

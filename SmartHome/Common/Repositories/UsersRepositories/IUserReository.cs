@@ -9,13 +9,15 @@ namespace Common.Repositories.UsersRepositories
 {
     public interface IUserReository
     {
-        void PretragaPorta(int port);
-        bool PretragaNeaktivnosti();
+        void AddUser(string firstName, string lastName, string username, string password, string role);
+        void DeactivateByPort(int port);
+        bool DetectInactiveUsers();
         void UpdateData(int id, string firstName, string lastName, string username, string password);
         User GetKorisnik(string username, string password);
+        User GetUserById(int id);
         IEnumerable<User> GetAllUsers();
         void UpdateStatus(int id, ActiveStatus status,int port);
-        void IspisKorisnika();
+        void PrintAllUsers();
 
     }
 }

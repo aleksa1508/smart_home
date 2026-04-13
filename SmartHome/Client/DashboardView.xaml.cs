@@ -1,4 +1,5 @@
 ﻿using Client.Helpers;
+using Common;
 using System;
 using System.Collections.ObjectModel;
 using System.Windows.Controls;
@@ -15,12 +16,12 @@ namespace Client
         private ObservableCollection<string> pictures = new ObservableCollection<string> { "/Images/living_room.jpg", "/Images/bedroom.jpg" };
         private DispatcherTimer timer;
         private int currentIndex = 0;
-        public DashboardView()
+        public DashboardView(User u)
         {
             InitializeComponent();
             StartSlideshow();
-            NetworkTextBlock.Text = ConnectionService.UdpEndpoint.Port != 0 ? "Connected" : "Disconnected";
-            PortTextBlock.Text = ConnectionService.UdpEndpoint.Port.ToString();
+            NetworkTextBlock.Text =u.Port != 0 ? "Connected" : "Disconnected";
+            PortTextBlock.Text = u.Port.ToString();
         }
         private void StartSlideshow()
         {

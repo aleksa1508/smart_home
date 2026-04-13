@@ -23,6 +23,7 @@ namespace TCPServer
         public string Funkcija { get; set; }
         public string Vrednost { get; set; }
     }
+    
     public class Server
     {
         // private static UdpServer udpServer;
@@ -44,26 +45,8 @@ namespace TCPServer
         {
 
             Random random = new Random();
-            /* Dictionary<string, string> korisnici = new Dictionary<string, string>
-             {
-                 { "user1", "a" },
-                 { "user2", "b" }
-             };*/
-
             User k = new User();
             Uredjaj u = new Uredjaj();
-            //var con = new SqlConnection("Server=localhost\\SQLEXPRESS;Database=users_db;Trusted_Connection=True;");
-            //con.Open();
-            //string query = "select * from Users";
-            //SqlCommand comand=new SqlCommand(query, con);
-            //SqlDataReader reader = comand.ExecuteReader();
-            //while (reader.Read())
-            //{
-            //    int id = Convert.ToInt32(reader["id"]);
-            //    string name = reader["name"].ToString();
-
-            //    Console.WriteLine($"ID: {id}, Name: {name}");
-            //}
 
             IUserReository userReository = new UserRepository();
             List<User> listaKorisnika = userReository.GetAllUsers().ToList();
@@ -152,10 +135,10 @@ namespace TCPServer
                                     string receivedMessage = Encoding.UTF8.GetString(buffer, 0, receivedBytes);
                                     if (receivedMessage == "ne")
                                     {
-                                        userReository.PretragaPorta( ((IPEndPoint)s.LocalEndPoint).Port);
-                                        userReository.IspisKorisnika();
+                                        userReository.DeactivateByPort(((IPEndPoint)s.LocalEndPoint).Port);
+                                        userReository.PrintAllUsers();
 
-                                        if (userReository.PretragaNeaktivnosti() == true)
+                                        if (userReository.DetectInactiveUsers() == true)
                                         {
 
                                             IPEndPoint udpServer5 = new IPEndPoint(IPAddress.Loopback, 60001);
@@ -299,7 +282,7 @@ namespace TCPServer
                                         udpSocket.Blocking = false;
                                         Console.WriteLine($"Poruka od UDP klijenta : {receivedMessage}");
 
-                                        userReository.IspisKorisnika();
+                                        userReository.PrintAllUsers();
 
                                         List<Uredjaj> uredjaji = u.SviUredjaji();
 
@@ -349,8 +332,8 @@ namespace TCPServer
                         if (udpNeaktivnost[udpSocket] >= MAX_NEAKTIVNIH_CIKLUSA)
                         {
                             Console.WriteLine($"UDP sesija na portu {((IPEndPoint)udpSocket.LocalEndPoint).Port} je zatvorena zbog neaktivnosti.");
-                            userReository.PretragaPorta(((IPEndPoint)udpSocket.LocalEndPoint).Port);
-                            userReository.IspisKorisnika();
+                            userReository.DeactivateByPort(((IPEndPoint)udpSocket.LocalEndPoint).Port);
+                            userReository.PrintAllUsers();
                             // Pronaći TCP socket povezan sa ovim UDP socketom
                             Socket tcpSocket = klijenti.FirstOrDefault(s => ((IPEndPoint)s.RemoteEndPoint).Port == ((IPEndPoint)udpSocket.LocalEndPoint).Port);
 
