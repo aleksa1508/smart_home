@@ -24,17 +24,12 @@ namespace Common
             }
         }
         public string LastName { get; set; }
-        public string FullName => $"{FirstName} {LastName}";//samo za profile popup
+        public string FullName => $"{FirstName} {LastName}";  //for profile popup
         public string Username { get; set; }
         public string Password { get; set; }
         public ActiveStatus Status { get; set; }
         public int Port { get; set; }
         public UserRole Role { get; set; }
-        //public static List<Korisnici> listaKorisnika = new List<Korisnici>
-        //    {
-        //        new Korisnici("Aleksa","Arsenic","user1","a",StatusKorisnika.NEAKTIVAN,0,UserRole.OWNER),
-        //        new Korisnici("Uros","Milosevic","user2","b",StatusKorisnika.NEAKTIVAN,0, UserRole.USER)
-        //    };
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string propertyName) =>

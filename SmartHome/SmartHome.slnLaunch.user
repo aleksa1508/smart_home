@@ -7,7 +7,7 @@
         "Action": "Start"
       },
       {
-        "Path": "UredjajiKomunikacija\\UredjajiKomunikacija.csproj",
+        "Path": "UredjajiKomunikacija\\SmartHomeDevices.csproj",
         "Action": "Start"
       },
       {

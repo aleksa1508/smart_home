@@ -3,108 +3,109 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace Common.Models
 {
     [Serializable]
-    public class Uredjaj
+    public class Device
     {
-        public string Ime { get; set; }                // Ime uređaja
+        public string Name { get; set; }                // Ime uređaja
         public int Port { get; set; }                  // Port na kojem uređaj komunicira
-        public Dictionary<string, string> Funkcije { get; set; } // Funkcije uređaja i njihove vrednosti
-        public List<Command> EvidencijaKomandi { get; set; } // Evidencija komandi sa vremenskim oznakama
-        public DateTime PoslednjaPromena { get; private set; }      // Vremenska oznaka poslednje promene
+        public Dictionary<string, string> Functions { get; set; } // Funkcije uređaja i njihove vrednosti
+        public List<Command> CommandRegister { get; set; } // Evidencija komandi sa vremenskim oznakama
+        public DateTime LastChanged { get; private set; }      // Vremenska oznaka poslednje promene
 
-        public List<Uredjaj> uredjaji { get; set; }
+        public List<Device> devices { get; set; }
         // Konstruktor
-        public Uredjaj(string ime, int port)
+        public Device(string name, int port)
         {
-            Ime = ime;
+            Name = name;
             Port = port;
-            Funkcije = new Dictionary<string, string>();
-            EvidencijaKomandi = new List<Command>();
-            PoslednjaPromena = DateTime.Now;
+            Functions = new Dictionary<string, string>();
+            CommandRegister = new List<Command>();
+            LastChanged = DateTime.Now;
         }
-        public Uredjaj(string ime, int port, Dictionary<string, string> funkcije)
+        public Device(string name, int port, Dictionary<string, string> functions)
         {
-            Ime = ime;
+            Name = name;
             Port = port;
-            Funkcije = funkcije;
-            EvidencijaKomandi = new List<Command>();
-            PoslednjaPromena = DateTime.Now;
+            Functions = functions;
+            CommandRegister = new List<Command>();
+            LastChanged = DateTime.Now;
         }
 
-        public Uredjaj()
+        public Device()
         {
-            uredjaji = new List<Uredjaj> {
-                        new Uredjaj("Svetlo",60001,new Dictionary<string, string>{{ "intenzitet", "70" }, { "stanje", "OFF" }, { "boja crvena", "110" }}),
-                        new Uredjaj("TV",60002,new Dictionary<string, string>{{ "stanje", "OFF" },{ "temperatura", "15" }}),
-                        new Uredjaj("Klima",60003,new Dictionary<string, string>{{ "stanje", "OFF" },{ "temperatura", "15" }}),
-                        new Uredjaj("Door",60004,new Dictionary<string, string>{{ "stanje", "OFF" }})
+            devices = new List<Device> {
+                        new Device("Svetlo",60001,new Dictionary<string, string>{{ "intenzitet", "70" }, { "stanje", "OFF" }, { "boja crvena", "110" }}),
+                        new Device("TV",60002,new Dictionary<string, string>{{ "stanje", "OFF" },{ "temperatura", "15" }}),
+                        new Device("Klima",60003,new Dictionary<string, string>{{ "stanje", "OFF" },{ "temperatura", "15" }}),
+                        new Device("Door",60004,new Dictionary<string, string>{{ "stanje", "OFF" }})
             };
         }
 
         // Dodavanje ili ažuriranje funkcije uređaja
-        public void AzurirajFunkciju(string funkcija, string vrednost)
+        public void AzurirajFunkciju(string function, string value)
         {
-            if (Funkcije.ContainsKey(funkcija))
+            if (Functions.ContainsKey(function))
             {
-                Funkcije[funkcija] = vrednost;
+                Functions[function] = value;
             }
             else
             {
-                Funkcije.Add(funkcija, vrednost);
+                Functions.Add(function, value);
             }
 
             // Ažuriraj vremensku oznaku
-            PoslednjaPromena = DateTime.Now;
+            LastChanged = DateTime.Now;
 
             // Evidentiraj promenu
             //EvidencijaKomandi.Add($"[{PoslednjaPromena}] {Ime}: {funkcija} promenjena na {vrednost}");
-            EvidencijaKomandi.Add(new Command { ID = EvidencijaKomandi.Count + 1, CreationDate = PoslednjaPromena, Log = $"[{PoslednjaPromena}] {Ime}: {funkcija} promenjena na {vrednost}" });
+            CommandRegister.Add(new Command { ID = CommandRegister.Count + 1, CreationDate = LastChanged, Log = $"[{LastChanged}] {Name}: {function} promenjena na {value}" });
         }
 
-        public List<Uredjaj> SviUredjaji()
+        public List<Device> SviUredjaji()
         {
-            return uredjaji;
+            return devices;
         }
         /* public void AzurirajListu(List<Uredjaj> noviUredjaji)
          {
              uredjaji = noviUredjaji;
          }*/
 
-        public string IspisiSveUredjajeUTabeli(List<Uredjaj> lista)
+        public string IspisiSveUredjajeUTabeli(List<Device> list)
         {
             // Zaglavlje tabele
-            string tabela = string.Format("{0,-15} | {1,-10} | {2,-50}\n", "Ime Uređaja", "Port", "Funkcije");
-            tabela += new string('-', 80) + "\n";
+            string table = string.Format("{0,-15} | {1,-10} | {2,-50}\n", "Ime Uređaja", "Port", "Funkcije");
+            table += new string('-', 80) + "\n";
 
             // Ispis uređaja
-            foreach (var uredjaj in lista)
+            foreach (var device in list)
             {
                 // Pretvaranje funkcija u format ključ: vrednost
-                string funkcije = string.Join(", ", uredjaj.Funkcije.Select(f => $"{f.Key}: {f.Value}"));
+                string functions = string.Join(", ", device.Functions.Select(f => $"{f.Key}: {f.Value}"));
 
                 // Dodavanje uređaja u tabelu
-                tabela += string.Format("{0,-15} | {1,-10} | {2,-50}\n", uredjaj.Ime, uredjaj.Port, funkcije);
+                table += string.Format("{0,-15} | {1,-10} | {2,-50}\n", device.Name, device.Port, functions);
             }
 
-            return tabela;
+            return table;
         }
         public string IspisiSveFunkcijeUredjaja()
         {
             // Zaglavlje tabele
-            string tabela = string.Format("{0,-15} | {1,-10} | {2,-50}\n", "Ime Uređaja", "Port", "Funkcije");
-            tabela += new string('-', 80) + "\n";
+            string table = string.Format("{0,-15} | {1,-10} | {2,-50}\n", "Ime Uređaja", "Port", "Funkcije");
+            table += new string('-', 80) + "\n";
 
             // Pretvaranje funkcija u format ključ: vrednost
-            string funkcije = string.Join(", ", this.Funkcije.Select(f => $"{f.Key}: {f.Value}"));
+            string funkcije = string.Join(", ", this.Functions.Select(f => $"{f.Key}: {f.Value}"));
 
             // Dodavanje uređaja u tabelu
-            tabela += string.Format("{0,-15} | {1,-10} | {2,-50}\n", this.Ime, this.Port, funkcije);
+            table += string.Format("{0,-15} | {1,-10} | {2,-50}\n", this.Name, this.Port, funkcije);
 
 
-            return tabela;
+            return table;
         }
     }
 }

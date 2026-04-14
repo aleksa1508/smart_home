@@ -9,8 +9,8 @@ namespace Common.DTOs
 {
     public class CommandDTO
     {
-        public Uredjaj IzabraniUredjaj { get; set; }
-        public string Funkcija { get; set; }
-        public string Vrednost { get; set; }
+        public Device SelectedDevice { get; set; }
+        public string Function { get; set; } = string.Empty;
+        public string Value { get; set; }= string.Empty;
     }
 }

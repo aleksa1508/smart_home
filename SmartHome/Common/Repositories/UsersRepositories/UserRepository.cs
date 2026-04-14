@@ -159,15 +159,19 @@ namespace Common.Repositories.UsersRepositories
         public void PrintAllUsers()
         {
             List<User> list = GetAllUsers().ToList();
-            Console.WriteLine("--------------------------------------------------------------------------------");
-            Console.WriteLine("| FirstName       | LastName     | Username    | Status   | Port   | Role      |");
-            Console.WriteLine("--------------------------------------------------------------------------------");
+
+            Console.WriteLine("-------------------------------------------------------------------------------------------");
+            Console.WriteLine("| {0,-15} | {1,-12} | {2,-15} | {3,-8} | {4,-6} | {5,-10} |",
+                "FirstName", "LastName", "Username", "Status", "Port", "Role");
+            Console.WriteLine("-------------------------------------------------------------------------------------------");
 
             foreach (var user in list)
             {
-                Console.WriteLine($"| {user.FirstName.PadRight(10)} | {user.LastName.PadRight(10)} | {user.Username.PadRight(15)} | {(user.Status == ActiveStatus.ACTIVE ? "YES " : "NO ").PadRight(9)} | {user.Port.ToString().PadRight(5)} | {user.Role.ToString().PadRight(12)} |");
+                Console.WriteLine("| {0,-15} | {1,-12} | {2,-15} | {3,-8} | {4,-6} | {5,-10} |",
+                    user.FirstName,user.LastName,user.Username,user.Status == ActiveStatus.ACTIVE ? "YES" : "NO",user.Port,user.Role);
             }
-            Console.WriteLine("--------------------------------------------------------------------------------");
+
+            Console.WriteLine("-------------------------------------------------------------------------------------------");
         }
 
         public User GetUserById(int id)
