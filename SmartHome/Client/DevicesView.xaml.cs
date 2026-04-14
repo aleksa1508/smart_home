@@ -1,5 +1,6 @@
 ﻿using Common.Models;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -42,8 +43,8 @@ namespace Client
             LogsDataGrid.ItemsSource = devices[0].CommandRegister;
             NameTextBox.Text = devices[0].Name;
             PortTextBox.Text = devices[0].Port.ToString();
-            StatusTextBox.Text = devices[0].Functions["stanje"].ToString();
-            ValueTextBox.Text = devices[0].Functions["intenzitet"].ToString();
+            StatusTextBox.Text = devices[0].Functions.Values.FirstOrDefault(f => f.Name == "state")?.Value;
+            ValueTextBox.Text = devices[0].Functions.Values.FirstOrDefault(f => f.Name == "volume")?.Value;
         }
 
         private void tv_tab_button_Click(object sender, RoutedEventArgs e)
@@ -53,8 +54,8 @@ namespace Client
             NameTextBox.Text = devices[1].Name;
             PortTextBox.Text = devices[1].Port.ToString();
             // StatusTextBox.Text = uredjaji[1].Funkcije["stanje"].ToString();
-            StatusTextBox.Text = devices[1].Functions["stanje"].ToString();
-            ValueTextBox.Text = devices[1].Functions["temperatura"].ToString();
+            StatusTextBox.Text = devices[1].Functions.Values.FirstOrDefault(f => f.Name == "state")?.Value;
+            ValueTextBox.Text = devices[1].Functions.Values.FirstOrDefault(f => f.Name == "temperature")?.Value;
         }
 
         private void climate_tab_button_Click(object sender, RoutedEventArgs e)
@@ -63,8 +64,8 @@ namespace Client
             LogsDataGrid.ItemsSource = devices[2].CommandRegister;
             NameTextBox.Text = devices[2].Name;
             PortTextBox.Text = devices[2].Port.ToString();
-            StatusTextBox.Text = devices[2].Functions["stanje"].ToString();
-            ValueTextBox.Text = devices[2].Functions["temperatura"].ToString();
+            StatusTextBox.Text = devices[2].Functions.Values.FirstOrDefault(f => f.Name == "state")?.Value;
+            ValueTextBox.Text = devices[2].Functions.Values.FirstOrDefault(f => f.Name == "temperature")?.Value;
         }
 
         private void door_tab_button_Click(object sender, RoutedEventArgs e)
@@ -73,7 +74,7 @@ namespace Client
             LogsDataGrid.ItemsSource = devices[3].CommandRegister;
             NameTextBox.Text = devices[3].Name;
             PortTextBox.Text = devices[3].Port.ToString();
-            StatusTextBox.Text = devices[3].Functions["stanje"].ToString();
+            StatusTextBox.Text = devices[3].Functions.Values.FirstOrDefault(f => f.Name == "state")?.Value;
             ValueTextBox.Text = "-";
         }
         public void SetBackground(int index)

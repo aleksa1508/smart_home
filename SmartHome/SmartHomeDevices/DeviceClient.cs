@@ -1,6 +1,8 @@
 ﻿using Common.Models;
+using Common.Repositories.DevicesRepositories;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -23,8 +25,9 @@ namespace SmartHomeDevices
             IPEndPoint destinationEP = new IPEndPoint(IPAddress.Any, number);
             udpSocket.Bind(destinationEP);
             EndPoint senderEP = new IPEndPoint(IPAddress.Any, 0);
-            Device d = new Device();
-            List<Device> devices = d.SviUredjaji();
+            //Device d = new Device();
+            IDeviceRepository deviceRepository = new DeviceRepository();
+            List<Device> devices = deviceRepository.GetAllDevices().ToList();
             bool end = false;
             while (!end)
             {
@@ -50,8 +53,7 @@ namespace SmartHomeDevices
                     {
                         if (device.Name == parts[0])
                         {
-                            device.AzurirajFunkciju(parts[1], parts[2]);
-                            Console.WriteLine(device.IspisiSveFunkcijeUredjaja());
+                            Console.WriteLine(deviceRepository.PrintDeviceFunctions(device));
                             break;
                         }
                     }

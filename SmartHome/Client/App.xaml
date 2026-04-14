@@ -298,7 +298,7 @@
                                     <ContentPresenter 
                                 Margin="10,0,0,0"
                                 VerticalAlignment="Center"
-                                Content="{TemplateBinding SelectionBoxItem}"/>
+                                Content="{Binding SelectedItem.Value.Name, RelativeSource={RelativeSource TemplatedParent}}"/>
 
                                     <!-- ARROW -->
                                     <TextBlock Grid.Column="1"

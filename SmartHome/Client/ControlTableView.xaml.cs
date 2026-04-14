@@ -3,6 +3,7 @@ using Common.DTOs;
 using Common.Models;
 using Notification.Wpf;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text;
 using System.Text.Json;
@@ -34,7 +35,7 @@ namespace Client
             if (device != null)
             {
                 // Postavi funkcije u drugi ComboBox
-                FunctionComboBox.ItemsSource = device.Functions.Keys;
+                FunctionComboBox.ItemsSource = device.Functions;
                 FunctionComboBox.SelectedIndex = 0; // opcionalno, da automatski izabere prvi
                 ValueTextBox.IsEnabled = true;
             }
@@ -54,9 +55,10 @@ namespace Client
                 parentWindow?.ShowToastNotification(new ToastNotification("Error", "You can fill the data", NotificationType.Error));
                 return;
             }
-            string regexValue = "^(intenzitet|temperatura|boja plava|boja crvena)$";
+            string regexValue = "^(volume|temperature|blue color|red color)$";
             Regex regex = new Regex(regexValue);
-            if (regex.IsMatch(FunctionComboBox.SelectedItem.ToString()))
+            var selectedFunction = (KeyValuePair<int, Function>)FunctionComboBox.SelectedItem;
+            if (regex.IsMatch(selectedFunction.Value.Name))
             {
                 if (!Int32.TryParse(ValueTextBox.Text, out int value))
                 {
@@ -74,11 +76,12 @@ namespace Client
                 }
             }
 
-
+            var selected = (KeyValuePair<int, Function>)FunctionComboBox.SelectedItem;
             var content = new CommandDTO
             {
                 SelectedDevice = (DeviceComboBox.SelectedItem as Device),
-                Function = FunctionComboBox.SelectedItem.ToString(),
+                FunctionID=selected.Key,
+                Function = selected.Value.Name,
                 Value = ValueTextBox.Text
             };
 

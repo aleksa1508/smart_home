@@ -23,7 +23,7 @@
             <Label Grid.Row="1" Grid.Column="0" Content="Name:" Foreground="White" FontSize="17" Margin="10,12,0,0"/>
             <Label Grid.Row="2" Grid.Column="0" Content="Value:" Foreground="White" FontSize="17" Margin="10,12,0,0"/>
             <ComboBox x:Name="DeviceComboBox" Grid.Row="0" Grid.Column="1" Width="180" Height="30" Style="{StaticResource combo_box1}" ItemsSource="{Binding Devices}" DisplayMemberPath="Name"  SelectionChanged="DeviceComboBox_SelectionChanged"/>
-            <ComboBox x:Name="FunctionComboBox" Grid.Row="1" Grid.Column="1" Style="{StaticResource combo_box2}"/>
+            <ComboBox x:Name="FunctionComboBox" Grid.Row="1" Grid.Column="1" Style="{StaticResource combo_box2}"  DisplayMemberPath="Value.Name"/>
             <TextBox x:Name="ValueTextBox" Grid.Row="2" Grid.Column="1" Style="{StaticResource txt_box}" IsEnabled="False"/>
             <Button x:Name="submit_button" Grid.Row="3" Grid.Column="1" HorizontalAlignment="Center" Foreground="White" Background="#4C5FF2" FontSize="20" ToolTip="Submit" Click="submit_button_Click">
                 <Button.Template>

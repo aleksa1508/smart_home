@@ -14,7 +14,8 @@ using Common;
 using Common.Repositories.UsersRepositories;
 using Common.Enums;
 using Common.DTOs;
-using Common.Models; // <-- dodaj
+using Common.Models;
+using Common.Repositories.DevicesRepositories; // <-- dodaj
 //using UDPServer;
 namespace TCPServer
 {
@@ -38,6 +39,32 @@ namespace TCPServer
         }
         static void Main(string[] args)
         {
+
+            IDeviceRepository deviceRepository = new DeviceRepository();
+            //List<Device> devices = new List<Device> {
+            //            new Device(1,"Light",60001,new Dictionary<int, Function>{ { 1, new Function { Name = "value", Value = "40" } },{ 2, new Function { Name = "state", Value = "OFF" } }, { 3,new Function { Name = "red color", Value = "120"  } } },new List<Command>(),DateTime.Now),
+            //            new Device(2,"TV",60002,new Dictionary<int, Function>{ { 1, new Function { Name = "state", Value = "OFF" } },{ 2, new Function { Name = "temperature", Value = "23" } } },new List<Command>(),DateTime.Now),
+            //            new Device(3, "Climate", 60003, new Dictionary < int, Function > { { 1, new Function { Name = "state", Value = "OFF" } }, { 2, new Function { Name = "temperature", Value = "12" } } }, new List < Command >(), DateTime.Now),
+            //            new Device(4, "Door", 60004, new Dictionary < int, Function > { { 1, new Function { Name = "state", Value = "OFF" } } }, new List < Command >(), DateTime.Now),
+            //};
+            //foreach (var d in devices)
+            //{
+            //    deviceRepository.AddDevice(d.Name, d.Port, DateTime.Now);
+            //    if (d.Functions.Count > 0)
+            //    {
+            //        foreach (var f in d.Functions)
+            //        {
+            //            deviceRepository.AddDeviceFunctions(f.Value.Name, f.Value.Value, d.Id);
+            //        }
+            //    }
+            //    if (d.CommandRegister.Count > 0)
+            //    {
+            //        foreach (var f in d.CommandRegister)
+            //        {
+            //            deviceRepository.AddDeviceCommands(f.Log, DateTime.Now, d.Id);
+            //        }
+            //    }
+            //}
 
             Random random = new Random();
             User k = new User();
@@ -120,7 +147,7 @@ namespace TCPServer
                             {
 
                                 EndPoint clientEP = new IPEndPoint(IPAddress.Any, 0);
-                                List<Device> uredjaji = u.SviUredjaji();
+                                List<Device> uredjaji = deviceRepository.GetAllDevices().ToList();
 
                                 int receivedBytes = s.ReceiveFrom(buffer, ref clientEP);
                                 if (receivedBytes > 0)
@@ -157,9 +184,9 @@ namespace TCPServer
                                     }
                                     else if (receivedMessage == "da")
                                     {
-
-                                        Console.WriteLine(u.IspisiSveUredjajeUTabeli(uredjaji));
-
+                                        //deviceRepository.PrintAllDevices();
+                                        Console.WriteLine(deviceRepository.PrintAllDevices());
+                                        uredjaji=deviceRepository.GetAllDevices().ToList();
 
                                         //using (MemoryStream ms = new MemoryStream())
                                         //{
@@ -201,22 +228,29 @@ namespace TCPServer
                                         var komanda = JsonSerializer.Deserialize<CommandDTO>(json);
 
                                         var u1 = komanda.SelectedDevice;
+                                        var id = komanda.FunctionID;
                                         var funkcija = komanda.Function;
                                         var vrednost = komanda.Value;
 
-                                        foreach (var s1 in uredjaji)
-                                        {
-                                            if (s1.Name == u1.Name)
-                                            {
-                                                s1.AzurirajFunkciju(funkcija, vrednost);
-                                                break;
-                                            }
-                                        }
+                                        //foreach (var s1 in uredjaji)  device client do this uodate
+                                        //{
+                                        //    if (s1.Name == u1.Name)
+                                        //    {
+                                        //        s1.AzurirajFunkciju(funkcija, vrednost);
+                                        //        break;
+                                        //    }
+                                        //}
+
+                                        deviceRepository.UpdateDeviceFunction(u1.Id,id,funkcija, vrednost);
                                         //povezivanje uredjaja i servera
                                         IPEndPoint uredjajEP = new IPEndPoint(IPAddress.Loopback,u1.Port);
                                         // udpSocket.Bind(uredjajEP); ovo ja mislim ne treba!!!!!
                                         byte[] initialData = Encoding.UTF8.GetBytes(u1.Name + ":" + funkcija + ":" + vrednost);
                                         s.SendTo(initialData, uredjajEP);
+
+                                        DateTime timestamp= DateTime.Now;
+                                        string log = $"[{timestamp}] {u1.Name}: {funkcija} promenjena na {vrednost}";
+                                        deviceRepository.AddDeviceCommands(log,DateTime.Now,u1.Id);
 
                                         var content = new ResponseDTO
                                         {
@@ -224,13 +258,13 @@ namespace TCPServer
                                             Device = u1,
                                             Function = funkcija,
                                             Value = vrednost,
+                                            Timestamp = timestamp
                                         };
                                         json = JsonSerializer.Serialize(content);
                                         byte[] data = Encoding.UTF8.GetBytes(json);
                                         s.SendTo(data, clientEP);
-
-
-                                        Console.WriteLine(u.IspisiSveUredjajeUTabeli(uredjaji));
+                                        //deviceRepository.PrintAllDevices();
+                                        Console.WriteLine(deviceRepository.PrintAllDevices());
 
                                     }
 
@@ -279,9 +313,9 @@ namespace TCPServer
 
                                         userReository.PrintAllUsers();
 
-                                        List<Device> uredjaji = u.SviUredjaji();
+                                        List<Device> uredjaji = deviceRepository.GetAllDevices().ToList() ;
 
-                                        Console.WriteLine(u.IspisiSveUredjajeUTabeli(uredjaji));
+                                        Console.WriteLine(deviceRepository.PrintAllDevices());
 
 
                                         //using (MemoryStream ms = new MemoryStream())

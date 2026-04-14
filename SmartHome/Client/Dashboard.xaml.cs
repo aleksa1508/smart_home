@@ -3,10 +3,12 @@ using Common;
 using Common.DTOs;
 using Common.Enums;
 using Common.Models;
+using Common.Repositories.DevicesRepositories;
 using Common.Repositories.UsersRepositories;
 using Notification.Wpf;
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -27,13 +29,15 @@ namespace Client
         private ObservableCollection<Device> devices;
         private ObservableCollection<Command> CommandRegister;
         private IUserReository userReository;
+        private IDeviceRepository deviceRepository;
         public Dashboard(User userParameter)
         {
             InitializeComponent();
             userReository = new UserRepository();
+            deviceRepository = new DeviceRepository();
             user = userParameter;
             devices = new ObservableCollection<Device>();
-            CommandRegister = new ObservableCollection<Command>();
+            CommandRegister = new ObservableCollection<Command>(deviceRepository.GetAllCommands());
             notificationManager = new NotificationManager();
             StartUdpListener();
             ConnectionService.OnServerMessage += ShowMessage;
@@ -103,7 +107,7 @@ namespace Client
                             if (response.Message.Equals("Command"))
                             {
                                 MainWindow mainWindow = (MainWindow)Application.Current.MainWindow;
-                                CommandRegister.Add(new Command { ID = CommandRegister.Count + 1, CreationDate = DateTime.Now, Log = $"[{DateTime.Now}] {response.Device.Name}: {response.Function} promenjena na {response.Value}" });
+                                CommandRegister.Add(new Command { ID = CommandRegister.Count + 1, CreationDate = response.Timestamp, Log = $"[{response.Timestamp}] {response.Device.Name}: {response.Function} promenjena na {response.Value}" });
                                 mainWindow.ShowToastNotification(new ToastNotification("Success", $"You are successfully set new value for device {response.Device.Name}", NotificationType.Success));
                                 byte[] bytes = System.Text.Encoding.UTF8.GetBytes("da");
                                 ConnectionService.UdpSocket.SendTo(bytes, ConnectionService.UdpEndpoint);
@@ -174,8 +178,9 @@ namespace Client
 
         private void devices_menu_button_Click(object sender, RoutedEventArgs e)
         {
+            var d = deviceRepository.GetAllDevices().ToList();
             Title.Content = "Devices";
-            MainContent.Content = new DevicesView(devices);
+            MainContent.Content = new DevicesView(new ObservableCollection<Device>(d));
         }
 
         private void control_table_menu_button_Click(object sender, RoutedEventArgs e)
