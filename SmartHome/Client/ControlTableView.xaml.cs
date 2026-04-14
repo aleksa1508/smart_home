@@ -1,4 +1,6 @@
 ﻿using Client.Helpers;
+using Common.DTOs;
+using Common.Models;
 using Notification.Wpf;
 using System;
 using System.Collections.ObjectModel;
@@ -15,32 +17,24 @@ namespace Client
     /// </summary>
     public partial class ControlTableView : UserControl
     {
-        public ObservableCollection<Uredjaj> Uredjaji { get; set; }
-        public ObservableCollection<Komanda> EvidencijaKomandi { get; set; }
+        public ObservableCollection<Device> Devices { get; set; }
+        public ObservableCollection<Command> CommandRegister { get; set; }
 
-        public ControlTableView(ObservableCollection<Uredjaj> uredjaji, ObservableCollection<Komanda> komande, NotificationManager manager)
+        public ControlTableView(ObservableCollection<Device> devices, ObservableCollection<Command> commands, NotificationManager manager)
         {
             InitializeComponent();
-            EvidencijaKomandi = komande;
-            //Uredjaji = new ObservableCollection<Uredjaj>
-            //{
-            //            new Uredjaj("Svetlo",60001,new Dictionary<string, string>{{ "intezitet", "70" }, { "stanje", "iskljuceno" }, { "boja crvena", "110" }}),
-            //            new Uredjaj("TV",60003,new Dictionary<string, string>{{ "stanje", "iskljuceno" },{ "temperatura", "15" }}),
-            //            new Uredjaj("Klima",60002,new Dictionary<string, string>{{ "stanje", "iskljuceno" },{ "temperatura", "15" }}),
-            //            new Uredjaj("Door",60004,new Dictionary<string, string>{{ "stanje", "iskljuceno" }})
-            //};
-            Uredjaji = uredjaji;
+            CommandRegister = commands;
+            Devices = devices;
             this.DataContext = this;
-
         }
 
         private void DeviceComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var uredjaj = DeviceComboBox.SelectedItem as Uredjaj;
-            if (uredjaj != null)
+            var device = DeviceComboBox.SelectedItem as Device;
+            if (device != null)
             {
                 // Postavi funkcije u drugi ComboBox
-                FunctionComboBox.ItemsSource = uredjaj.Funkcije.Keys;
+                FunctionComboBox.ItemsSource = device.Functions.Keys;
                 FunctionComboBox.SelectedIndex = 0; // opcionalno, da automatski izabere prvi
                 ValueTextBox.IsEnabled = true;
             }
@@ -81,11 +75,11 @@ namespace Client
             }
 
 
-            var content = new
+            var content = new CommandDTO
             {
-                IzabraniUredjaj = (DeviceComboBox.SelectedItem as Uredjaj),
-                Funkcija = FunctionComboBox.SelectedItem.ToString(),
-                Vrednost = ValueTextBox.Text
+                SelectedDevice = (DeviceComboBox.SelectedItem as Device),
+                Function = FunctionComboBox.SelectedItem.ToString(),
+                Value = ValueTextBox.Text
             };
 
             string json = JsonSerializer.Serialize(content);

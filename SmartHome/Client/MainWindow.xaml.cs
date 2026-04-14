@@ -54,7 +54,7 @@ namespace Client
             MainWindow mainWindow = (MainWindow)Application.Current.MainWindow;
             ConnectionService.TcpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             await Task.Run(() => ConnectionService.TcpSocket.Connect(IPAddress.Loopback, 50001));
-            mainWindow.ShowToastNotification(new ToastNotification("Success", "Uspesno povezan", NotificationType.Success));
+            mainWindow.ShowToastNotification(new ToastNotification("Success", "Successfully connected on server", NotificationType.Success));
         }
         private async void button_signIn_Click(object sender, RoutedEventArgs e)
         {
@@ -77,7 +77,7 @@ namespace Client
                 byte[] buffer = new byte[1024];
                 int bytes = ConnectionService.TcpSocket.Receive(buffer);
                 string response = Encoding.UTF8.GetString(buffer, 0, bytes);
-                if (response != "USPESNO")
+                if (response != "SUCCESS")
                 {
                     mainWindow.ShowToastNotification(new ToastNotification("Error", "Invalid username or password.", NotificationType.Error));
                     return;

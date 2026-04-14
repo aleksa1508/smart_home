@@ -23,12 +23,12 @@ namespace TCPServer
     {
         // private static UdpServer udpServer;
 
-        static void PokreniKlijente(int brojKlijenata)
+        static void RunDevices(int brojKlijenata)
         {
             for (int i = 0; i < brojKlijenata; i++)
             {
                 // Putanja do izvršnog fajla klijenta (potrebno je kompajlirati ga)
-                string clientPath = @"C:\Users\Dell 3520\Desktop\AA\DIPLOMSKI\SmartHome\SmartHome\UredjajiKomunikacija\bin\Debug\UredjajiKomunikacija.exe";
+                string clientPath = @"C:\Users\Dell 3520\Desktop\AA\DIPLOMSKI\SmartHome\SmartHome\SmartHomeDevices\bin\Debug\DeviceClient.exe";
                 Process klijentProces = new Process(); // Stvaranje novog procesa
                 klijentProces.StartInfo.FileName = clientPath; //Zadavanje putanje za pokretanje
                 klijentProces.StartInfo.Arguments = $"{i + 60001}"; // Argument - broj klijenta
@@ -41,7 +41,7 @@ namespace TCPServer
 
             Random random = new Random();
             User k = new User();
-            Uredjaj u = new Uredjaj();
+            Device u = new Device();
 
             IUserReository userReository = new UserRepository();
             List<User> listaKorisnika = userReository.GetAllUsers().ToList();
@@ -65,7 +65,7 @@ namespace TCPServer
             const int MAX_NEAKTIVNIH_CIKLUSA = 20; // Maksimalan broj ciklusa neaktivnosti pre zatvaranja
 
 
-            PokreniKlijente(2);
+            RunDevices(2);
             bool kraj = false;
 
             byte[] buffer = new byte[4096];
@@ -120,7 +120,7 @@ namespace TCPServer
                             {
 
                                 EndPoint clientEP = new IPEndPoint(IPAddress.Any, 0);
-                                List<Uredjaj> uredjaji = u.SviUredjaji();
+                                List<Device> uredjaji = u.SviUredjaji();
 
                                 int receivedBytes = s.ReceiveFrom(buffer, ref clientEP);
                                 if (receivedBytes > 0)
@@ -171,7 +171,7 @@ namespace TCPServer
                                         var content = new ResponseDTO
                                         {
                                             Message = "Devices List",
-                                            Uredjaji = uredjaji
+                                            Devices = uredjaji
                                         };
                                         string json = JsonSerializer.Serialize(content);
                                         byte[] data = Encoding.UTF8.GetBytes(json);
@@ -200,13 +200,13 @@ namespace TCPServer
 
                                         var komanda = JsonSerializer.Deserialize<CommandDTO>(json);
 
-                                        var u1 = komanda.IzabraniUredjaj;
-                                        var funkcija = komanda.Funkcija;
-                                        var vrednost = komanda.Vrednost;
+                                        var u1 = komanda.SelectedDevice;
+                                        var funkcija = komanda.Function;
+                                        var vrednost = komanda.Value;
 
                                         foreach (var s1 in uredjaji)
                                         {
-                                            if (s1.Ime == u1.Ime)
+                                            if (s1.Name == u1.Name)
                                             {
                                                 s1.AzurirajFunkciju(funkcija, vrednost);
                                                 break;
@@ -215,13 +215,13 @@ namespace TCPServer
                                         //povezivanje uredjaja i servera
                                         IPEndPoint uredjajEP = new IPEndPoint(IPAddress.Loopback,u1.Port);
                                         // udpSocket.Bind(uredjajEP); ovo ja mislim ne treba!!!!!
-                                        byte[] initialData = Encoding.UTF8.GetBytes(u1.Ime + ":" + funkcija + ":" + vrednost);
+                                        byte[] initialData = Encoding.UTF8.GetBytes(u1.Name + ":" + funkcija + ":" + vrednost);
                                         s.SendTo(initialData, uredjajEP);
 
                                         var content = new ResponseDTO
                                         {
                                             Message = "Command",
-                                            Uredjaj = u1,
+                                            Device = u1,
                                             Function = funkcija,
                                             Value = vrednost,
                                         };
@@ -253,7 +253,7 @@ namespace TCPServer
                                     {
 
                                         // Клијент валидан, шаљемо одговор
-                                        string odgovor = "USPESNO";
+                                        string odgovor = "SUCCESS";
                                         s.Send(Encoding.UTF8.GetBytes(odgovor));
                                         Thread.Sleep(200);
                                         // Креирамо UDP сокет за комуникацију
@@ -279,7 +279,7 @@ namespace TCPServer
 
                                         userReository.PrintAllUsers();
 
-                                        List<Uredjaj> uredjaji = u.SviUredjaji();
+                                        List<Device> uredjaji = u.SviUredjaji();
 
                                         Console.WriteLine(u.IspisiSveUredjajeUTabeli(uredjaji));
 
@@ -294,7 +294,7 @@ namespace TCPServer
                                         var content = new ResponseDTO
                                         {
                                             Message = "Devices List", 
-                                            Uredjaji = uredjaji
+                                            Devices = uredjaji
                                         };
                                         string json = JsonSerializer.Serialize(content);
                                         byte[] data = Encoding.UTF8.GetBytes(json);
@@ -303,7 +303,7 @@ namespace TCPServer
                                     }
                                     else
                                     {
-                                        string odgovor = "NEUSPESNO";
+                                        string odgovor = "UNSUCCESS";
                                         s.Send(Encoding.UTF8.GetBytes(odgovor));
                                     }
                                 }
@@ -336,7 +336,7 @@ namespace TCPServer
                             {
                                 try
                                 {
-                                    string obavestenje = "Sesija je istekla zbog neaktivnosti. Prijavite se ponovo.";
+                                    string obavestenje = "Session is expire. Please log in again.";
                                     tcpSocket.Send(Encoding.UTF8.GetBytes(obavestenje));
                                 }
                                 catch (SocketException)

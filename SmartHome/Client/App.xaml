@@ -204,7 +204,7 @@
                                     <ContentPresenter 
                                 Margin="10,0,0,0"
                                 VerticalAlignment="Center"
-                                 Content="{Binding SelectedItem.Ime, RelativeSource={RelativeSource TemplatedParent}}"/>
+                                 Content="{Binding SelectedItem.Name, RelativeSource={RelativeSource TemplatedParent}}"/>
 
                                     <!-- ARROW -->
                                     <TextBlock Grid.Column="1"

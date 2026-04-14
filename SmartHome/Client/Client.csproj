@@ -165,7 +165,6 @@
     <Compile Include="Helpers\ConnectionService.cs" />
     <Compile Include="Helpers\TimeViewModel.cs" />
     <Compile Include="Helpers\ToastNotification.cs" />
-    <Compile Include="Helpers\Uredjaj.cs" />
     <Compile Include="UsersView.xaml.cs">
       <DependentUpon>UsersView.xaml</DependentUpon>
     </Compile>
