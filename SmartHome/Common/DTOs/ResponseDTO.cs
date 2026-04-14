@@ -13,6 +13,7 @@ namespace Common.DTOs
         public Device Device { get; set; }
         public string Function { get; set; } = string.Empty;
         public string Value { get; set; } = string.Empty;
+        public DateTime Timestamp { get; set; }
         public List<Device> Devices { get; set; }
     }
 }

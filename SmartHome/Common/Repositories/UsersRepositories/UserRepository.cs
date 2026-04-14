@@ -12,7 +12,7 @@ namespace Common.Repositories.UsersRepositories
 {
     public class UserRepository : IUserReository
     {
-        private string connectionString = "Server=localhost\\SQLEXPRESS;Database=users_db;Trusted_Connection=True;";
+        private readonly string connectionString = "Server=localhost\\SQLEXPRESS;Database=users_db;Trusted_Connection=True;";
         public void AddUser(string firstName, string lastName, string username, string password, string role)
         {
             using (SqlConnection connection = new SqlConnection("Server=localhost\\SQLEXPRESS;Database=users_db;Trusted_Connection=True;"))

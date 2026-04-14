@@ -62,9 +62,11 @@
     <Compile Include="Enums\ActiveStatus.cs" />
     <Compile Include="Enums\UserRole.cs" />
     <Compile Include="Models\Command.cs" />
-    <Compile Include="Models\Uredjaj.cs" />
+    <Compile Include="Models\Device.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Repositories\DevicesRepositories\DeviceRepository.cs" />
+    <Compile Include="Repositories\DevicesRepositories\IDeviceRepository.cs" />
     <Compile Include="Repositories\UsersRepositories\IUserReository.cs" />
     <Compile Include="Repositories\UsersRepositories\UserRepository.cs" />
   </ItemGroup>
