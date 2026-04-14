@@ -35,8 +35,7 @@ namespace Client
 
         private void ValidationOriginalData()
         {
-            if (!user.FirstName.Equals(FirstNameTextBox.Text) || !user.LastName.Equals(LastNameTextBox.Text) || !user.Username.Equals(UsernameTextBox.Text)
-                || !user.Password.Equals(PasswordTextBox.Text))
+            if (!user.FirstName.Equals(FirstNameTextBox.Text) || !user.LastName.Equals(LastNameTextBox.Text) || !user.Username.Equals(UsernameTextBox.Text))
             {
                 button_save.IsEnabled = true;
             }
@@ -47,9 +46,9 @@ namespace Client
         }
         private void button_save_Click(object sender, RoutedEventArgs e)
         {
-            if (FirstNameTextBox.Text.Length != 0 && LastNameTextBox.Text.Length != 0 && UsernameTextBox.Text.Length != 0 && PasswordTextBox.Text.Length != 0)
+            if (FirstNameTextBox.Text.Length != 0 && LastNameTextBox.Text.Length != 0 && UsernameTextBox.Text.Length != 0)
             {
-                userReository.UpdateData(user.ID,FirstNameTextBox.Text, LastNameTextBox.Text,UsernameTextBox.Text, PasswordTextBox.Text);
+                userReository.UpdateData(user.ID,FirstNameTextBox.Text, LastNameTextBox.Text,UsernameTextBox.Text);
                 Dashboard parentWindow = (Dashboard)Window.GetWindow(this);
                 parentWindow.ShowToastNotification(new ToastNotification("Success", "Profile data is update successfully", NotificationType.Success));
                 parentWindow.Title.Content = $"Hello,{user.FirstName}";

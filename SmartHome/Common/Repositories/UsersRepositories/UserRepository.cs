@@ -193,5 +193,36 @@ namespace Common.Repositories.UsersRepositories
             }
             return new User{ ID =0};
         }
+
+        public void UpdateData(int id, string firstName, string lastName, string username)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                string query = "UPDATE users SET firstName=@firstName,lastName=@lastName,username=@username WHERE id=@id";
+                SqlCommand sqlCommand = new SqlCommand(query, connection);
+                sqlCommand.Parameters.AddWithValue("@firstName", firstName);
+                sqlCommand.Parameters.AddWithValue("@lastName", lastName);
+                sqlCommand.Parameters.AddWithValue("@username", username);
+                sqlCommand.Parameters.AddWithValue("@id", id);
+
+                sqlCommand.ExecuteNonQuery();
+            }
+        }
+        public void UpdatePassword(int id, string password)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                string query = "UPDATE users SET password=@password where id = @id";
+                SqlCommand sqlCommand = new SqlCommand(query, connection);
+                string hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
+
+                sqlCommand.Parameters.AddWithValue("@password", hashedPassword);
+                sqlCommand.Parameters.AddWithValue("@id", id);
+
+                sqlCommand.ExecuteNonQuery();
+            }
+        }
     }
 }

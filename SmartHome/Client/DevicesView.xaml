@@ -24,10 +24,10 @@
                 <ColumnDefinition></ColumnDefinition>
                 <ColumnDefinition></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <Button x:Name="light_tab_button" Grid.Column="0" Content="Light" Style="{StaticResource device_button}" ToolTip="Light" Click="light_tab_button_Click"/>
-            <Button x:Name="tv_tab_button" Grid.Column="1" Content="TV" Style="{StaticResource device_button}" ToolTip="TV" Click="tv_tab_button_Click"/>
-            <Button x:Name="climate_tab_button" Grid.Column="2" Content="Climate" Style="{StaticResource device_button}" ToolTip="Climate" Click="climate_tab_button_Click"/>
-            <Button x:Name="door_tab_button" Grid.Column="3" Content="Door" Style="{StaticResource device_button}" ToolTip="Door" Click="door_tab_button_Click"/>
+            <Button x:Name="light_tab_button" Grid.Column="0" Content="Light" Style="{StaticResource device_tab}" ToolTip="Light" Click="light_tab_button_Click"/>
+            <Button x:Name="tv_tab_button" Grid.Column="1" Content="TV" Style="{StaticResource device_tab}" ToolTip="TV" Click="tv_tab_button_Click"/>
+            <Button x:Name="climate_tab_button" Grid.Column="2" Content="Climate" Style="{StaticResource device_tab}" ToolTip="Climate" Click="climate_tab_button_Click"/>
+            <Button x:Name="door_tab_button" Grid.Column="3" Content="Door" Style="{StaticResource device_tab}" ToolTip="Door" Click="door_tab_button_Click"/>
         </Grid>
         <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal">
             <Label Content="Name:" Foreground="White" FontSize="17" Margin="10,12,0,0"/>

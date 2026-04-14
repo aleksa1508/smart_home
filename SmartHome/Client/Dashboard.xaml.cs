@@ -217,7 +217,14 @@ namespace Client
 
         private void button_profile_Click(object sender, RoutedEventArgs e)
         {
+            Title.Content = "Edit profile";
             MainContent.Content = new ProfileView(user,userReository);
+        }
+
+        private void button_password_Click(object sender, RoutedEventArgs e)
+        {
+            Title.Content = "Change password";
+            MainContent.Content = new PasswordView(user, userReository);
         }
     }
 }

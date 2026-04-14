@@ -126,6 +126,36 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Height="30" CornerRadius="20" Width="180" Margin="0,0,10,0" Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+
+                            <!-- 🔵 AKTIVNO dugme -->
+                            <Trigger Property="Tag" Value="active">
+                                <Setter TargetName="border" Property="Background" Value="#4C5FF2"/>
+                            </Trigger>
+
+                            <!-- 🖱️ HOVER -->
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#3A5A80"/>
+                            </Trigger>
+
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Background" Value="#FF4773B2"></Setter>
+            
+        </Style>
+        <Style x:Key="device_tab" TargetType="Button">
+            <Setter Property="FontWeight" Value="Light"></Setter>
+            <Setter Property="Foreground" Value="White"></Setter>
+            <Setter Property="Cursor" Value="Hand"></Setter>
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
                         <Border x:Name="border" Height="30" CornerRadius="20" Width="120" Margin="0,0,10,0" Background="{TemplateBinding Background}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>

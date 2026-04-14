@@ -20,8 +20,8 @@
                     <ColumnDefinition Width="3*"></ColumnDefinition>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" HorizontalAlignment="Left" Width="156">
-                    <Label x:Name="Title" Foreground="White" FontSize="20">Hello,Jack</Label>
+                <StackPanel Grid.Column="0" HorizontalAlignment="Left" Width="225">
+                    <Label x:Name="Title" Foreground="White" FontSize="20" Width="232">Hello,Jack</Label>
                     <Label Foreground="White" FontSize="12" Margin="0,-10,0,0">Monitoring your home now</Label>
                 </StackPanel>
 
@@ -69,7 +69,8 @@
 
                                 <Separator Background="White"/>
 
-                                <Button x:Name="button_profile" Content="Profile"  FontSize="14" BorderThickness="0,0,0,1.2" BorderBrush="White" Foreground="White" Background="Transparent" Click="button_profile_Click"/>
+                                <Button x:Name="button_profile" Content="Edit profile"  FontSize="14" BorderThickness="0,0,0,1.2" BorderBrush="White" Foreground="White" Background="Transparent" Click="button_profile_Click"/>
+                                <Button x:Name="button_password" Content="Change password"  FontSize="14" BorderThickness="0,0,0,1.2" BorderBrush="White" Foreground="White" Background="Transparent" Click="button_password_Click"/>
                                 <Button x:Name="button_logout"  FontSize="14" Content="Logout" BorderThickness="0,0,0,1.2" BorderBrush="White" Foreground="White" Background="Transparent" Click="button_logout_Click"/>
                             </StackPanel>
                         </Border>
