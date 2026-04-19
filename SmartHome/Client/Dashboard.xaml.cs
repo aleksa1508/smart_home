@@ -37,7 +37,7 @@ namespace Client
             deviceRepository = new DeviceRepository();
             user = userParameter;
             devices = new ObservableCollection<Device>();
-            CommandRegister = new ObservableCollection<Command>(deviceRepository.GetAllCommands());
+            CommandRegister = new ObservableCollection<Command>();
             notificationManager = new NotificationManager();
             StartUdpListener();
             ConnectionService.OnServerMessage += ShowMessage;
@@ -118,6 +118,16 @@ namespace Client
                                 devices.Clear();
                                 foreach (var u in list)
                                     devices.Add(u);
+                                var listCommands = response.Commands;//all commands
+                                CommandRegister.Clear();
+                                foreach (var u in listCommands)
+                                    CommandRegister.Add(u);
+                            }
+                            else if (response.Message.Equals("Users"))
+                            {
+                                var users = response.Users;
+                                Title.Content = "Users";
+                                MainContent.Content = new UsersView(new ObservableCollection<User>(users));
                             }
                         });
                     }
@@ -158,7 +168,7 @@ namespace Client
             {
 
                 MainWindow mainWindow = (MainWindow)Application.Current.MainWindow;
-                mainWindow.ShowToastNotification(new ToastNotification("Information", $"Your seession is expire", NotificationType.Notification));
+                mainWindow.ShowToastNotification(new ToastNotification("Information", $"Your seession has expired", NotificationType.Notification));
                 ConnectionService.SessionExpired();
                 this.Close();
             });
@@ -166,14 +176,21 @@ namespace Client
 
         private void users_menu_button_Click(object sender, RoutedEventArgs e)
         {
-            var users = userReository.GetAllUsers();
-            Title.Content = "Users";
-            MainContent.Content = new UsersView(new ObservableCollection<User>(users));
+            byte[] bytes = System.Text.Encoding.UTF8.GetBytes("users");
+            ConnectionService.UdpSocket.SendTo(bytes, ConnectionService.UdpEndpoint);
+            //var users = userReository.GetAllUsers();
+            //Title.Content = "Users";
+            //MainContent.Content = new UsersView(new ObservableCollection<User>(users));
         }
 
         private void exit_menu_button_Click(object sender, RoutedEventArgs e)
         {
-            button_close_Click(sender, e);
+            //button_close_Click(sender, e);
+            var result = MessageBox.Show("Do you sure that you want to exit now?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result == MessageBoxResult.Yes)
+            {
+                button_close_Click(sender, e);
+            }
         }
 
         private void devices_menu_button_Click(object sender, RoutedEventArgs e)

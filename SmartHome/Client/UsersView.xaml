@@ -7,12 +7,23 @@
              mc:Ignorable="d" 
              d:DesignHeight="370" d:DesignWidth="610">
     <Grid Background="#1D3557">
+
+        <ComboBox x:Name="RolesComboBox" Style="{StaticResource combo_box3}" HorizontalAlignment="Center"  Margin="400,266,10,74" SelectionChanged="ComboBox_SelectionChanged" >
+            <ComboBoxItem Content="All users"/>
+            <ComboBoxItem Content="Owner"/>
+            <ComboBoxItem Content="User"/>
+        </ComboBox>
+        <ComboBox x:Name="StatusComboBox" Style="{StaticResource combo_box3}" HorizontalAlignment="Center"  Margin="100,266,10,74" SelectionChanged="ComboBox_SelectionChanged" >
+            <ComboBoxItem Content="All status"/>
+            <ComboBoxItem Content="Active"/>
+            <ComboBoxItem Content="Inactive"/>
+        </ComboBox>
         <DataGrid x:Name="UsersDataGrid" 
           Margin="10,20,10,109"
     ColumnWidth="*"
     HorizontalScrollBarVisibility="Disabled"
           Height="240"
-          ItemsSource="{Binding Users}"
+          ItemsSource="{Binding EntitiesView}"
           IsReadOnly="True"
           AutoGenerateColumns="False"
           Background="#1D3557"

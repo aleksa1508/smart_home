@@ -41,11 +41,11 @@
                 </Button.Template>
             </Button>
         </Grid>
-        <Label Content="Last Logs" Foreground="White" FontSize="17" Margin="10,0,0,0"/>
+        <Label Content="Logs" Foreground="White" FontSize="17" Margin="10,0,0,0"/>
         <DataGrid x:Name="LogsDataGrid" 
-      Margin="5,0,5,0"
+      Margin="10,0,5,0"
 ColumnWidth="*"
-HorizontalScrollBarVisibility="Disabled"
+HorizontalScrollBarVisibility="Disabled" CanUserSortColumns="True"
                   ItemsSource="{Binding CommandRegister}"
       Height="126"
       IsReadOnly="True"
@@ -151,7 +151,6 @@ HorizontalScrollBarVisibility="Disabled"
 
             <!-- COLUMNS -->
             <DataGrid.Columns>
-                <DataGridTextColumn Header="ID" Width="*" Binding="{Binding ID}" />
                 <DataGridTextColumn Header="Date and Time" Width="3*" Binding="{Binding CreationDate}" />
                 <DataGridTextColumn Header="Log" Width="7*" Binding="{Binding Log}" />
             </DataGrid.Columns>

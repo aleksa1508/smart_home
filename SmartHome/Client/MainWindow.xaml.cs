@@ -35,10 +35,20 @@ namespace Client
         }
 
         private void button_close_Click(object sender, RoutedEventArgs e)
-        {
-            ConnectionService.TcpSocket.Close();
-            ConnectionService.TcpSocket = null;
-            this.Close();
+        { 
+            byte[] loginData = Encoding.UTF8.GetBytes("shutdown");
+            ConnectionService.TcpSocket.Send(loginData);
+
+            // receive UDP port
+            byte[] buffer = new byte[1024];
+            int bytes = ConnectionService.TcpSocket.Receive(buffer);
+            string response = Encoding.UTF8.GetString(buffer, 0, bytes);
+            if (response == "DISCONNECT_OK")
+            {
+                ConnectionService.TcpSocket.Close();
+                ConnectionService.TcpSocket = null;
+                this.Close();
+            }
         }
 
         private void Window_MouseDown(object sender, MouseButtonEventArgs e)

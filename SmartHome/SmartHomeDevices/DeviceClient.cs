@@ -39,10 +39,10 @@ namespace SmartHomeDevices
 
                     string receivedMessage = Encoding.UTF8.GetString(buffer, 0, numberOfBytes);
                     Console.WriteLine("\nRecieved message " + receivedMessage);
-                    if (receivedMessage == "Server je zavrsio sa radom")
+                    if (receivedMessage == "Server has stopped working")
                     {
                         end = true;
-                        break;
+                        continue;
                     }
 
                     Console.WriteLine($"Response received from the server, length {numberOfBytes}->:{receivedMessage}"); // 4

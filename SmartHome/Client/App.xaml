@@ -390,5 +390,99 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style x:Key="combo_box3" TargetType="ComboBox">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="#324766"/>
+            <Setter Property="BorderBrush" Value="#324766"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="10,2"/>
+            <Setter Property="Cursor" Value="Hand"/>
+
+            
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+
+                            <!-- MAIN -->
+                            <Border x:Name="MainBorder"
+                            CornerRadius="20"
+                            Height="30" Width="120"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}">
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition Width="30"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- SELECTED ITEM -->
+                                    <ContentPresenter 
+                                Margin="10,0,0,0"
+                                VerticalAlignment="Center"
+                                Content="{TemplateBinding SelectionBoxItem}"/>
+
+                                    <!-- ARROW -->
+                                    <TextBlock Grid.Column="1"
+                                       Text="▼"
+                                       Foreground="White"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+
+                                    <!-- 🔥 KLIK PREKO CIJELOG -->
+                                    <ToggleButton
+    Grid.ColumnSpan="2"
+    Background="Transparent"
+    BorderThickness="0"
+    Cursor="Hand"
+    IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}">
+                                        <ToggleButton.Style>
+                                            <Style TargetType="ToggleButton">
+                                                <Setter Property="Background" Value="Transparent"/>
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="ToggleButton">
+                                                            <Border Background="Transparent">
+                                                                <ContentPresenter/>
+                                                            </Border>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </ToggleButton.Style>
+                                    </ToggleButton>
+                                </Grid>
+                            </Border>
+
+                            <!-- DROPDOWN -->
+                            <Popup 
+                        IsOpen="{TemplateBinding IsDropDownOpen}"
+                        Placement="Bottom"
+                        PlacementTarget="{Binding ElementName=MainBorder}"
+                        AllowsTransparency="True"
+                        Focusable="False"
+                        PopupAnimation="Fade">
+
+                                <Border 
+                            Background="#2F4769"
+                            CornerRadius="10"
+                            Margin="0,5,0,0"
+                            BorderBrush="#A8DADC"
+                            BorderThickness="1"
+                            Width="{Binding ActualWidth, ElementName=MainBorder}">
+
+                                    <ScrollViewer MaxHeight="200">
+                                        <ItemsPresenter/>
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Application.Resources>
 </Application>

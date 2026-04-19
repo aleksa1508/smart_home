@@ -65,13 +65,73 @@
                       Opacity="0.4"/>
                             </Border.Effect>
                             <StackPanel>
-                                <TextBlock Text="{Binding FullName}" FontSize="15" Foreground="White"/>
+                                <TextBlock Text="{Binding FullName}" FontSize="15" Foreground="White" HorizontalAlignment="Center"/>
 
                                 <Separator Background="White"/>
 
-                                <Button x:Name="button_profile" Content="Edit profile"  FontSize="14" BorderThickness="0,0,0,1.2" BorderBrush="White" Foreground="White" Background="Transparent" Click="button_profile_Click"/>
-                                <Button x:Name="button_password" Content="Change password"  FontSize="14" BorderThickness="0,0,0,1.2" BorderBrush="White" Foreground="White" Background="Transparent" Click="button_password_Click"/>
-                                <Button x:Name="button_logout"  FontSize="14" Content="Logout" BorderThickness="0,0,0,1.2" BorderBrush="White" Foreground="White" Background="Transparent" Click="button_logout_Click"/>
+                                <Button x:Name="button_profile" Content="Edit profile"  FontSize="14" Foreground="White" Background="Transparent" Click="button_profile_Click">
+                                    <Button.Template>
+
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="border" Height="30"  Width="Auto"  BorderThickness="0,0,0,1.2" BorderBrush="White" Background="{TemplateBinding Background}">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Cursor" Value="Hand"/>
+                                                    <Setter TargetName="border" Property="Background" Value="#FF486892"/>
+                                                </Trigger>
+
+                                                <Trigger Property="IsPressed" Value="True">
+                                                    <Setter TargetName="border" Property="Opacity" Value="0.7"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+
+                                    </Button.Template>
+                                </Button>
+                                <Button x:Name="button_password" Content="Change password"  FontSize="14"  Foreground="White" Background="Transparent" Click="button_password_Click">
+                                    <Button.Template>
+
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="border" Height="30"  Width="Auto" BorderThickness="0,0,0,1.2" BorderBrush="White" Background="{TemplateBinding Background}">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Cursor" Value="Hand"/>
+                                                    <Setter TargetName="border" Property="Background" Value="#FF486892"/>
+                                                </Trigger>
+
+                                                <Trigger Property="IsPressed" Value="True">
+                                                    <Setter TargetName="border" Property="Opacity" Value="0.7"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+
+                                    </Button.Template>
+                                </Button>
+                                <Button x:Name="button_logout"  FontSize="14" Content="Logout" BorderThickness="0,0,0,1.2" BorderBrush="White" Foreground="White" Background="Transparent" Click="button_logout_Click">
+                                    <Button.Template>
+
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="border" Height="30"  Width="Auto" BorderThickness="0,0,0,1.2" BorderBrush="White" Background="{TemplateBinding Background}">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Cursor" Value="Hand"/>
+                                                    <Setter TargetName="border" Property="Background" Value="#FF486892"/>
+                                                </Trigger>
+
+                                                <Trigger Property="IsPressed" Value="True">
+                                                    <Setter TargetName="border" Property="Opacity" Value="0.7"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+
+                                    </Button.Template>
+                                </Button>
                             </StackPanel>
                         </Border>
                     </Popup>
