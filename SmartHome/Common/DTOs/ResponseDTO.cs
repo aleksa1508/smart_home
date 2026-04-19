@@ -15,5 +15,7 @@ namespace Common.DTOs
         public string Value { get; set; } = string.Empty;
         public DateTime Timestamp { get; set; }
         public List<Device> Devices { get; set; }
+        public List<Command> Commands { get; set; }
+        public List<User> Users { get; set; }
     }
 }

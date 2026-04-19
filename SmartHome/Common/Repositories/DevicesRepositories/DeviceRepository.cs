@@ -1,6 +1,8 @@
-﻿using Common.Models;
+﻿using Common.Enums;
+using Common.Models;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
@@ -12,18 +14,19 @@ namespace Common.Repositories.DevicesRepositories
     public class DeviceRepository : IDeviceRepository
     {
         private readonly string connectionString = "Server=localhost\\SQLEXPRESS;Database=devices_db;Trusted_Connection=True;";
-        public void AddDevice(string name, int port,DateTime lastChange)
+        public void AddDevice(string name, int port,RoomType location,DateTime lastChange)
         {
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
 
-                string query = @"INSERT INTO device(name, port,lastChanged) VALUES(@name,@port,@date)";
+                string query = @"INSERT INTO device(name,port,location,lastChanged) VALUES(@name,@port,@location,@date)";
 
                 SqlCommand cmd = new SqlCommand(query, connection);
 
                 cmd.Parameters.AddWithValue("@name", name);
                 cmd.Parameters.AddWithValue("@port", port);
+                cmd.Parameters.AddWithValue("@location", location.ToString());
                 cmd.Parameters.AddWithValue("@date", lastChange);
 
                 cmd.ExecuteNonQuery();
@@ -77,7 +80,7 @@ namespace Common.Repositories.DevicesRepositories
                     int id = Int32.Parse(reader["id"].ToString());
                     Dictionary<int,Function>functions=GetDeviceFunctions(id);
                     List<Command>commands=GetDeviceCommands(id);
-                    devices.Add(new Device(id, reader["name"].ToString(), Int32.Parse(reader["port"].ToString()), functions, commands, DateTime.Parse(reader["lastChanged"].ToString())));
+                    devices.Add(new Device(id, reader["name"].ToString(), Int32.Parse(reader["port"].ToString()), (RoomType)Enum.Parse(typeof(RoomType), reader["location"].ToString()), functions, commands, DateTime.Parse(reader["lastChanged"].ToString())));
                 }
             }
             return devices;
@@ -109,7 +112,7 @@ namespace Common.Repositories.DevicesRepositories
                 SqlDataReader reader = sqlCommand.ExecuteReader();
                 while (reader.Read())
                 {
-                    return new Device(id,reader["name"].ToString(), Int32.Parse(reader["port"].ToString()));
+                    return new Device(id,reader["name"].ToString(), Int32.Parse(reader["port"].ToString()),(RoomType)Enum.Parse(typeof(RoomType), reader["location"].ToString()));
                 }
             }
             return null;
@@ -179,7 +182,7 @@ namespace Common.Repositories.DevicesRepositories
             string funkcije = string.Join(", ", device.Functions.Select(f => $"{f.Value.Name}: {f.Value.Value}"));
 
             // Dodavanje uređaja u tabelu
-            table += string.Format("{0,-15} | {1,-10} | {2,-50}\n", device.Name, device.Port, funkcije);
+            table += string.Format("{0,-15} | {1,-10} | {2,-50}\n", device.Name, device.Port, funkcije);    //maybe add room type in print
 
 
             return table;

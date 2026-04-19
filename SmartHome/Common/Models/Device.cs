@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Common.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,18 +18,20 @@ namespace Common.Models
     {
         public int Id { get; set; }
         public string Name { get; set; }                // Ime uređaja
-        public int Port { get; set; }                  // Port na kojem uređaj komunicira
+        public int Port { get; set; }
+        public RoomType Location { get; set; }                  // Port na kojem uređaj komunicira
         public Dictionary<int, Function> Functions { get; set; } // Funkcije uređaja i njihove vrednosti
         public List<Command> CommandRegister { get; set; } // Evidencija komandi sa vremenskim oznakama
         public DateTime LastChanged { get; private set; }      // Vremenska oznaka poslednje promene
 
         public List<Device> devices { get; set; }
         // Konstruktor
-        public Device(int id,string name, int port)
+        public Device(int id,string name, int port, RoomType location)
         {
             Id = id;
             Name = name;
             Port = port;
+            Location=location;
             Functions = new Dictionary<int, Function>();
             CommandRegister = new List<Command>();
             LastChanged = DateTime.Now;
@@ -41,11 +44,12 @@ namespace Common.Models
             CommandRegister = new List<Command>();
             LastChanged = DateTime.Now;
         }
-        public Device(int id,string name, int port, Dictionary<int, Function> functions,List<Command>commands,DateTime lastChange)
+        public Device(int id,string name, int port,RoomType location,Dictionary<int, Function> functions,List<Command>commands,DateTime lastChange)
         {
             Id = id;
             Name = name;
             Port = port;
+            Location = location;
             Functions = functions;
             CommandRegister = commands;
             LastChanged = lastChange;

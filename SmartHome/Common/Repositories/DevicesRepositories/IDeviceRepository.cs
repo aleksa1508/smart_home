@@ -13,7 +13,7 @@ namespace Common.Repositories.DevicesRepositories
         Device GetDeviceById(int id);
         Dictionary<int,Function> GetDeviceFunctions(int id);
         List<Command> GetDeviceCommands(int id);
-        void AddDevice(string name, int port, DateTime lastChange);
+        void AddDevice(string name, int port, RoomType location, DateTime lastChange);
         void AddDeviceFunctions(string function, string value, int deviceId);
         void AddDeviceCommands(string message, DateTime creation_date, int deviceId);
         void UpdateDeviceFunction(int deviceId, int id, string name, string value);

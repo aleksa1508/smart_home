@@ -60,6 +60,7 @@
     <Compile Include="DTOs\CommandDTO.cs" />
     <Compile Include="DTOs\ResponseDTO.cs" />
     <Compile Include="Enums\ActiveStatus.cs" />
+    <Compile Include="Enums\RoomType.cs" />
     <Compile Include="Enums\UserRole.cs" />
     <Compile Include="Models\Command.cs" />
     <Compile Include="Models\Device.cs" />
