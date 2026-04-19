@@ -42,14 +42,14 @@ namespace TCPServer
 
             IDeviceRepository deviceRepository = new DeviceRepository();
             //List<Device> devices = new List<Device> {
-            //            new Device(1,"Light",60001,new Dictionary<int, Function>{ { 1, new Function { Name = "value", Value = "40" } },{ 2, new Function { Name = "state", Value = "OFF" } }, { 3,new Function { Name = "red color", Value = "120"  } } },new List<Command>(),DateTime.Now),
-            //            new Device(2,"TV",60002,new Dictionary<int, Function>{ { 1, new Function { Name = "state", Value = "OFF" } },{ 2, new Function { Name = "temperature", Value = "23" } } },new List<Command>(),DateTime.Now),
-            //            new Device(3, "Climate", 60003, new Dictionary < int, Function > { { 1, new Function { Name = "state", Value = "OFF" } }, { 2, new Function { Name = "temperature", Value = "12" } } }, new List < Command >(), DateTime.Now),
-            //            new Device(4, "Door", 60004, new Dictionary < int, Function > { { 1, new Function { Name = "state", Value = "OFF" } } }, new List < Command >(), DateTime.Now),
+            //            new Device(1,"Light",60001,RoomType.KITCHEN,new Dictionary<int, Function>{ { 1, new Function { Name = "value", Value = "40" } },{ 2, new Function { Name = "state", Value = "OFF" } }, { 3,new Function { Name = "red color", Value = "120"  } } },new List<Command>(),DateTime.Now),
+            //            new Device(2,"TV",60002,RoomType.BEDROOM,new Dictionary<int, Function>{ { 1, new Function { Name = "state", Value = "OFF" } },{ 2, new Function { Name = "temperature", Value = "23" } } },new List<Command>(),DateTime.Now),
+            //            new Device(3, "Climate", 60003,RoomType.BATHROOM, new Dictionary < int, Function > { { 1, new Function { Name = "state", Value = "OFF" } }, { 2, new Function { Name = "temperature", Value = "12" } } }, new List < Command >(), DateTime.Now),
+            //            new Device(4, "Door",60004,RoomType.GARAGE, new Dictionary < int, Function > { { 1, new Function { Name = "state", Value = "OFF" } } }, new List < Command >(), DateTime.Now),
             //};
             //foreach (var d in devices)
             //{
-            //    deviceRepository.AddDevice(d.Name, d.Port, DateTime.Now);
+            //    deviceRepository.AddDevice(d.Name, d.Port, d.Location, DateTime.Now);
             //    if (d.Functions.Count > 0)
             //    {
             //        foreach (var f in d.Functions)
@@ -84,6 +84,7 @@ namespace TCPServer
             BinaryFormatter formatter = new BinaryFormatter();
 
             Console.WriteLine($"Server je stavljen u stanje osluskivanja i ocekuje komunikaciju na {serverEP}");
+            Dictionary<Socket, Socket> tcpUdpVeza = new Dictionary<Socket, Socket>();       //ako klijent crash-uje tj posalje shutdown prije ne (crashuje u dashboard i onda udp soket ostaje ziv a tcp konekcija pada)
 
             List<Socket> klijenti = new List<Socket>(); // Pravimo posebnu listu za klijentske sokete kako nam je ne bi obrisala Select funkcija
             List<Socket> udpSockets = new List<Socket>();
@@ -160,23 +161,6 @@ namespace TCPServer
                                         userReository.DeactivateByPort(((IPEndPoint)s.LocalEndPoint).Port);
                                         userReository.PrintAllUsers();
 
-                                        if (userReository.DetectInactiveUsers() == true)
-                                        {
-
-                                            IPEndPoint udpServer5 = new IPEndPoint(IPAddress.Loopback, 60001);
-                                            IPEndPoint udpServer6 = new IPEndPoint(IPAddress.Loopback, 60002);
-
-                                            s.SendTo(Encoding.UTF8.GetBytes("Server je zavrsio sa radom"), udpServer5);
-                                            s.SendTo(Encoding.UTF8.GetBytes("Server je zavrsio sa radom"), udpServer6);
-                                            Thread.Sleep(5000);
-                                            s.Close();
-                                            udpSockets.Remove(s);
-                                            udpNeaktivnost.Remove(s);
-
-                                            kraj = true;
-                                            break;
-                                        }
-
                                         s.Close();
                                         udpSockets.Remove(s);
                                         udpNeaktivnost.Remove(s);
@@ -186,7 +170,7 @@ namespace TCPServer
                                     {
                                         //deviceRepository.PrintAllDevices();
                                         Console.WriteLine(deviceRepository.PrintAllDevices());
-                                        uredjaji=deviceRepository.GetAllDevices().ToList();
+                                        uredjaji = deviceRepository.GetAllDevices().ToList();
 
                                         //using (MemoryStream ms = new MemoryStream())
                                         //{
@@ -195,10 +179,35 @@ namespace TCPServer
                                         //    byte[] data = ms.ToArray();
                                         //    s.SendTo(data, clientEP);
                                         //}
+                                        var commands = deviceRepository.GetAllCommands().ToList();
                                         var content = new ResponseDTO
                                         {
                                             Message = "Devices List",
-                                            Devices = uredjaji
+                                            Devices = uredjaji,
+                                            Commands = commands
+                                        };
+                                        string json = JsonSerializer.Serialize(content);
+                                        byte[] data = Encoding.UTF8.GetBytes(json);
+                                        s.SendTo(data, clientEP);
+                                    }
+                                    else if (receivedMessage == "users")
+                                    {
+                                        //deviceRepository.PrintAllDevices();
+                                        //Console.WriteLine(deviceRepository.PrintAllDevices());
+                                        var users = userReository.GetAllUsers().ToList();
+
+                                        //using (MemoryStream ms = new MemoryStream())
+                                        //{
+
+                                        //    formatter.Serialize(ms, uredjaji);
+                                        //    byte[] data = ms.ToArray();
+                                        //    s.SendTo(data, clientEP);
+                                        //}
+                                        //var commands = deviceRepository.GetAllCommands().ToList();
+                                        var content = new ResponseDTO
+                                        {
+                                            Message = "Users",
+                                            Users = users
                                         };
                                         string json = JsonSerializer.Serialize(content);
                                         byte[] data = Encoding.UTF8.GetBytes(json);
@@ -241,16 +250,16 @@ namespace TCPServer
                                         //    }
                                         //}
 
-                                        deviceRepository.UpdateDeviceFunction(u1.Id,id,funkcija, vrednost);
+                                        deviceRepository.UpdateDeviceFunction(u1.Id, id, funkcija, vrednost);
                                         //povezivanje uredjaja i servera
-                                        IPEndPoint uredjajEP = new IPEndPoint(IPAddress.Loopback,u1.Port);
+                                        IPEndPoint uredjajEP = new IPEndPoint(IPAddress.Loopback, u1.Port);
                                         // udpSocket.Bind(uredjajEP); ovo ja mislim ne treba!!!!!
                                         byte[] initialData = Encoding.UTF8.GetBytes(u1.Name + ":" + funkcija + ":" + vrednost);
                                         s.SendTo(initialData, uredjajEP);
 
-                                        DateTime timestamp= DateTime.Now;
+                                        DateTime timestamp = DateTime.Now;
                                         string log = $"[{timestamp}] {u1.Name}: {funkcija} promenjena na {vrednost}";
-                                        deviceRepository.AddDeviceCommands(log,DateTime.Now,u1.Id);
+                                        deviceRepository.AddDeviceCommands(log, DateTime.Now, u1.Id);
 
                                         var content = new ResponseDTO
                                         {
@@ -280,6 +289,35 @@ namespace TCPServer
                                 {
                                     string poruka = Encoding.UTF8.GetString(buffer, 0, receivedBytes1);
                                     Console.WriteLine($"Poruka od klijenta: {poruka}");
+                                    if (poruka == "shutdown")
+                                    {
+
+                                        try { 
+                                            s.Send(Encoding.UTF8.GetBytes("DISCONNECT_OK"));
+                                            Thread.Sleep(1000); 
+                                        } catch { }
+                                        s.Close();
+                                        klijenti.Remove(s);
+                                        Console.WriteLine($"Preostalo klijenata: {klijenti.Count}");
+
+                                        // Provjeri da li je ostao još neki klijent
+                                        if (klijenti.Count == 0)
+                                        {
+                                            IPEndPoint device1 = new IPEndPoint(IPAddress.Loopback, 60001);//za sad kasnije moze for 4 puta da samo posalje svim uredjajima ako ih je toliko
+                                            IPEndPoint device2 = new IPEndPoint(IPAddress.Loopback, 60002);
+                                            using (Socket tempUdp = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
+                                            {
+                                                byte[] initialData = Encoding.UTF8.GetBytes("Server has stopped working");
+                                                tempUdp.SendTo(initialData, device1);
+                                                tempUdp.SendTo(initialData, device2);
+                                                Thread.Sleep(2000);
+                                            }
+                                            Console.WriteLine("Nema više povezanih klijenata. Server se gasi.");
+                                            kraj = true;
+                                        }
+
+                                        continue;
+                                    }
 
                                     string[] djelovi = poruka.Split(':');
                                     User logInUser = userReository.GetKorisnik(djelovi[0], djelovi[1]);
@@ -301,7 +339,7 @@ namespace TCPServer
                                         udpSocket.Bind(udpServerEP);
                                         udpSockets.Add(udpSocket);
                                         udpNeaktivnost[udpSocket] = 0;
-
+                                        tcpUdpVeza[s] = udpSocket; //radi moguceg crash-a
                                         Console.WriteLine($"UDP soket kreiran na portu {udpPort1}");
                                         //for petlja i
                                         EndPoint clientEP = new IPEndPoint(IPAddress.Any, 0);
@@ -325,10 +363,12 @@ namespace TCPServer
                                         //    byte[] data = ms.ToArray();
                                         //    udpSocket.SendTo(data, clientEP);
                                         //}
+                                        var commands=deviceRepository.GetAllCommands().ToList();
                                         var content = new ResponseDTO
                                         {
                                             Message = "Devices List", 
-                                            Devices = uredjaji
+                                            Devices = uredjaji,
+                                            Commands=commands
                                         };
                                         string json = JsonSerializer.Serialize(content);
                                         byte[] data = Encoding.UTF8.GetBytes(json);
@@ -344,6 +384,21 @@ namespace TCPServer
                                 else
                                 {
                                     Console.WriteLine("Klijent je prekinuo vezu.");//ako tcp konekcija pukne
+                                                                                   // Cleanup UDP ako postoji veza
+                                    if (tcpUdpVeza.ContainsKey(s))
+                                    {
+                                        Socket udpZaOvogKorisnika = tcpUdpVeza[s];
+                                        if (udpSockets.Contains(udpZaOvogKorisnika))
+                                        {
+                                            userReository.DeactivateByPort(
+                                                ((IPEndPoint)udpZaOvogKorisnika.LocalEndPoint).Port
+                                            );
+                                            udpZaOvogKorisnika.Close();
+                                            udpSockets.Remove(udpZaOvogKorisnika);
+                                            udpNeaktivnost.Remove(udpZaOvogKorisnika);
+                                        }
+                                        tcpUdpVeza.Remove(s);
+                                    }
                                     s.Close();
                                     checkRead.Remove(s);
                                     klijenti.Remove(s); //  ukloniti odmah iz svih lista da ne bi ostala referenca na te sokete,nece u Select provjeravati nepostojece sokete
