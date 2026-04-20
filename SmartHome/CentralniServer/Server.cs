@@ -15,7 +15,8 @@ using Common.Repositories.UsersRepositories;
 using Common.Enums;
 using Common.DTOs;
 using Common.Models;
-using Common.Repositories.DevicesRepositories; // <-- dodaj
+using Common.Repositories.DevicesRepositories;
+using System.Security.Cryptography; // <-- dodaj
 //using UDPServer;
 namespace TCPServer
 {
@@ -23,6 +24,7 @@ namespace TCPServer
     public class Server
     {
         // private static UdpServer udpServer;
+        static List<Process> poknutiProcesi = new List<Process>();
 
         static void RunDevices(int brojKlijenata)
         {
@@ -32,11 +34,17 @@ namespace TCPServer
                 string clientPath = @"C:\Users\Dell 3520\Desktop\AA\DIPLOMSKI\SmartHome\SmartHome\SmartHomeDevices\bin\Debug\DeviceClient.exe";
                 Process klijentProces = new Process(); // Stvaranje novog procesa
                 klijentProces.StartInfo.FileName = clientPath; //Zadavanje putanje za pokretanje
-                klijentProces.StartInfo.Arguments = $"{i + 60001}"; // Argument - broj klijenta
+                klijentProces.StartInfo.Arguments = $"{i + 60001}"; // Argument - broj klijenta1
                 klijentProces.Start(); // Pokretanje klijenta
+                poknutiProcesi.Add(klijentProces); // ← sačuvaj referencu
+
                 Console.WriteLine($"Pokrenut uredjaj #{i + 1}");
             }
         }
+
+
+
+
         static void Main(string[] args)
         {
 
@@ -65,8 +73,23 @@ namespace TCPServer
             //        }
             //    }
             //}
-
             Random random = new Random();
+            //byte[] key=new byte [16];
+            //byte[] IV=new byte [16];
+            //using (RandomNumberGenerator randomNumber=RandomNumberGenerator.Create())
+            //{
+            //    randomNumber.GetBytes(key);
+            //    randomNumber.GetBytes(IV);
+            //}
+            //byte[] encryptMessage = EncryptMessage("Pera Peric",key,IV);
+
+            
+            //Console.WriteLine(Convert.ToBase64String(encryptMessage));
+            //string decryptMessage = DecryptMessage(encryptMessage, key, IV);
+            //Console.WriteLine(decryptMessage);
+
+            AesClass aesClass=new AesClass();
+            Dictionary<Socket, (byte[] Key, byte[] IV)> klijentKljucevi =new Dictionary<Socket, (byte[], byte[])>();
             User k = new User();
             Device u = new Device();
 
@@ -154,8 +177,10 @@ namespace TCPServer
                                 if (receivedBytes > 0)
                                 {
                                     udpNeaktivnost[s] = 0;
-
-                                    string receivedMessage = Encoding.UTF8.GetString(buffer, 0, receivedBytes);
+                                    byte[] primljeno = new byte[receivedBytes];
+                                    Array.Copy(buffer, primljeno, receivedBytes);
+                                    //string receivedMessage = Encoding.UTF8.GetString(primljeno, 0, receivedBytes);
+                                    string receivedMessage = aesClass.DecryptMessage(primljeno, klijentKljucevi[s].Key, klijentKljucevi[s].IV);
                                     if (receivedMessage == "ne")
                                     {
                                         userReository.DeactivateByPort(((IPEndPoint)s.LocalEndPoint).Port);
@@ -164,6 +189,7 @@ namespace TCPServer
                                         s.Close();
                                         udpSockets.Remove(s);
                                         udpNeaktivnost.Remove(s);
+                                        klijentKljucevi.Remove(s);
 
                                     }
                                     else if (receivedMessage == "da")
@@ -187,7 +213,8 @@ namespace TCPServer
                                             Commands = commands
                                         };
                                         string json = JsonSerializer.Serialize(content);
-                                        byte[] data = Encoding.UTF8.GetBytes(json);
+                                        //byte[] data = Encoding.UTF8.GetBytes(json);
+                                        byte[] data = aesClass.EncryptMessage(json, klijentKljucevi[s].Key, klijentKljucevi[s].IV);
                                         s.SendTo(data, clientEP);
                                     }
                                     else if (receivedMessage == "users")
@@ -210,7 +237,8 @@ namespace TCPServer
                                             Users = users
                                         };
                                         string json = JsonSerializer.Serialize(content);
-                                        byte[] data = Encoding.UTF8.GetBytes(json);
+                                        //byte[] data = Encoding.UTF8.GetBytes(json);
+                                        byte[] data = aesClass.EncryptMessage(json, klijentKljucevi[s].Key, klijentKljucevi[s].IV);
                                         s.SendTo(data, clientEP);
                                     }
 
@@ -232,9 +260,11 @@ namespace TCPServer
 
 
                                         //}
-                                        string json = Encoding.UTF8.GetString(buffer, 0, receivedBytes);
+                                        // primljeno = new byte[receivedBytes];
+                                        //Array.Copy(buffer, primljeno, receivedBytes);
+                                        //string json= aesClass.DecryptMessage(primljeno, klijentKljucevi[s].Key, klijentKljucevi[s].IV);
 
-                                        var komanda = JsonSerializer.Deserialize<CommandDTO>(json);
+                                        var komanda = JsonSerializer.Deserialize<CommandDTO>(receivedMessage);
 
                                         var u1 = komanda.SelectedDevice;
                                         var id = komanda.FunctionID;
@@ -269,8 +299,8 @@ namespace TCPServer
                                             Value = vrednost,
                                             Timestamp = timestamp
                                         };
-                                        json = JsonSerializer.Serialize(content);
-                                        byte[] data = Encoding.UTF8.GetBytes(json);
+                                        string json = JsonSerializer.Serialize(content);
+                                        byte[] data = aesClass.EncryptMessage(json, klijentKljucevi[s].Key, klijentKljucevi[s].IV);
                                         s.SendTo(data, clientEP);
                                         //deviceRepository.PrintAllDevices();
                                         Console.WriteLine(deviceRepository.PrintAllDevices());
@@ -324,16 +354,30 @@ namespace TCPServer
                                     if (djelovi.Length == 2 && logInUser != null)
                                     {
 
+                                        byte[] key = new byte[16];
+                                        byte[] iv = new byte[16];
+                                        using (RandomNumberGenerator randomNumber = RandomNumberGenerator.Create())
+                                        {
+                                            randomNumber.GetBytes(key);
+                                            randomNumber.GetBytes(iv);
+                                        }
                                         // Клијент валидан, шаљемо одговор
                                         string odgovor = "SUCCESS";
                                         s.Send(Encoding.UTF8.GetBytes(odgovor));
                                         Thread.Sleep(200);
                                         // Креирамо UDP сокет за комуникацију
+                                        byte[] keyData = new byte[32];
+                                        Array.Copy(key, 0, keyData, 0, 16);
+                                        Array.Copy(iv, 0, keyData,16, 16);
+                                        s.Send(keyData);
+                                        Thread.Sleep(200);
                                         udpPort1 = random.Next(50002, 60000);
 
                                         logInUser.Port = udpPort1;
                                         userReository.UpdateStatus(logInUser.ID, ActiveStatus.ACTIVE,udpPort1);
-                                        s.Send(Encoding.UTF8.GetBytes(udpPort1.ToString()));
+                                        ////////////////////////////////////////////////////////////////
+                                        s.Send(aesClass.EncryptMessage(udpPort1.ToString(),key,iv));
+                                        //s.Send(Encoding.UTF8.GetBytes(udpPort1.ToString()));
                                         Socket udpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
                                         IPEndPoint udpServerEP = new IPEndPoint(IPAddress.Loopback, udpPort1);
                                         udpSocket.Bind(udpServerEP);
@@ -344,12 +388,18 @@ namespace TCPServer
                                         //for petlja i
                                         EndPoint clientEP = new IPEndPoint(IPAddress.Any, 0);
                                         int receivedBytes = udpSocket.ReceiveFrom(buffer, ref clientEP);
-                                        string receivedMessage = Encoding.UTF8.GetString(buffer, 0, receivedBytes);
+                                        byte[] primljeno = new byte[receivedBytes];
+                                        Array.Copy(buffer, primljeno, receivedBytes);
+
+                                        string receivedMessage = aesClass.DecryptMessage(primljeno, key, iv);////////////////////
+                                        //string receivedMessage = Encoding.UTF8.GetString(buffer, 0, receivedBytes);
 
                                         udpSocket.Blocking = false;
                                         Console.WriteLine($"Poruka od UDP klijenta : {receivedMessage}");
 
                                         userReository.PrintAllUsers();
+
+                                        klijentKljucevi[udpSocket] = (key, iv); //dodati kljucevi u dict
 
                                         List<Device> uredjaji = deviceRepository.GetAllDevices().ToList() ;
 
@@ -371,7 +421,8 @@ namespace TCPServer
                                             Commands=commands
                                         };
                                         string json = JsonSerializer.Serialize(content);
-                                        byte[] data = Encoding.UTF8.GetBytes(json);
+                                        //byte[] data = Encoding.UTF8.GetBytes(json);
+                                        byte[] data = aesClass.EncryptMessage(json, key, iv);
                                         udpSocket.SendTo(data, clientEP);
 
                                     }
@@ -396,6 +447,7 @@ namespace TCPServer
                                             udpZaOvogKorisnika.Close();
                                             udpSockets.Remove(udpZaOvogKorisnika);
                                             udpNeaktivnost.Remove(udpZaOvogKorisnika);
+                                            klijentKljucevi.Remove(udpZaOvogKorisnika);
                                         }
                                         tcpUdpVeza.Remove(s);
                                     }
@@ -442,6 +494,7 @@ namespace TCPServer
                             udpSocket.Close();
                             udpSockets.Remove(udpSocket);
                             udpNeaktivnost.Remove(udpSocket);
+                            klijentKljucevi.Remove(udpSocket);
                         }
                     }
                     checkError.Clear();
@@ -462,7 +515,18 @@ namespace TCPServer
                 udpSocket.Close();
             }
 
-
+            foreach (Process p in poknutiProcesi)
+            {
+                try
+                {
+                    if (!p.HasExited)
+                    {
+                        p.Kill();
+                        Console.WriteLine($"Ugašen device proces {p.Id}");
+                    }
+                }
+                catch { }
+            }
             serverSocket.Close();
             Console.WriteLine("Server zavrsava sa radom");
             Console.ReadKey();

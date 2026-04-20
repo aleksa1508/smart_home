@@ -1,5 +1,6 @@
 ﻿using Client.Helpers;
 using Common;
+using Common.Models;
 using Common.Repositories.UsersRepositories;
 using Notification.Wpf;
 using System;
@@ -94,7 +95,24 @@ namespace Client
                 }
                 buffer = new byte[1024];
                 bytes = ConnectionService.TcpSocket.Receive(buffer);
-                int port = int.Parse(Encoding.UTF8.GetString(buffer, 0, bytes));
+                byte[] key = new byte[16];
+                byte[] iv = new byte[16];
+                Array.Copy(buffer, 0, key, 0, 16);
+                Array.Copy(buffer, 16, iv, 0, 16);
+
+                AesClass aes = new AesClass(key, iv);
+
+                // Prima enkriptovani port
+                buffer = new byte[1024];
+                bytes = ConnectionService.TcpSocket.Receive(buffer);
+
+                // Dekriptuj — šalješ samo primljene bajtove, ne cijeli buffer!
+                byte[] primljeno = new byte[bytes];
+                Array.Copy(buffer, primljeno, bytes);
+                string portString = aes.DecryptMessage(primljeno,aes.Key,aes.IV);
+
+                int port = int.Parse(portString);
+                //int port = int.Parse(Encoding.UTF8.GetString(buffer, 0, bytes));
                 mainWindow.ShowToastNotification(new ToastNotification("Success", $"You are successfully log in and port is {port}", NotificationType.Success));
                 // UDP setup
                 ConnectionService.UdpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
@@ -105,7 +123,7 @@ namespace Client
 
                 // 🔥 otvori dashboard
                 
-                Dashboard dashboardWindow = new Dashboard(user);
+                Dashboard dashboardWindow = new Dashboard(user,aes);
                 dashboardWindow.Closed += DashboardWindow_Closed;
                 dashboardWindow.Show();
 

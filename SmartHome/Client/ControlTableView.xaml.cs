@@ -20,12 +20,13 @@ namespace Client
     {
         public ObservableCollection<Device> Devices { get; set; }
         public ObservableCollection<Command> CommandRegister { get; set; }
-
-        public ControlTableView(ObservableCollection<Device> devices, ObservableCollection<Command> commands, NotificationManager manager)
+        public AesClass aesClass;
+        public ControlTableView(ObservableCollection<Device> devices, ObservableCollection<Command> commands, NotificationManager manager,AesClass aes)
         {
             InitializeComponent();
             CommandRegister = commands;
             Devices = devices;
+            aesClass=aes;
             this.DataContext = this;
         }
 
@@ -86,8 +87,9 @@ namespace Client
             };
 
             string json = JsonSerializer.Serialize(content);
-            byte[] data = Encoding.UTF8.GetBytes(json);
-            ConnectionService.UdpSocket.SendTo(data, ConnectionService.UdpEndpoint);
+            
+            //byte[] data = Encoding.UTF8.GetBytes(json);
+            ConnectionService.UdpSocket.SendTo(aesClass.EncryptMessage(json, aesClass.Key, aesClass.IV), ConnectionService.UdpEndpoint);
 
             ValueTextBox.Text=string.Empty;
             ValueTextBox.IsEnabled = false ;
