@@ -18,10 +18,10 @@ namespace Client
     {
         private User user;
         private IUserReository userReository;
-        public ProfileView(User u,IUserReository repo)
+        public ProfileView(User u, IUserReository repo)
         {
             InitializeComponent();
-            userReository=repo;
+            userReository = repo;
             user = u;
             DataContext = u;
 
@@ -48,7 +48,7 @@ namespace Client
         {
             if (FirstNameTextBox.Text.Length != 0 && LastNameTextBox.Text.Length != 0 && UsernameTextBox.Text.Length != 0)
             {
-                userReository.UpdateData(user.ID,FirstNameTextBox.Text, LastNameTextBox.Text,UsernameTextBox.Text);
+                userReository.UpdateData(user.ID, FirstNameTextBox.Text, LastNameTextBox.Text, UsernameTextBox.Text);
                 Dashboard parentWindow = (Dashboard)Window.GetWindow(this);
                 parentWindow.ShowToastNotification(new ToastNotification("Success", "Profile data is update successfully", NotificationType.Success));
                 parentWindow.Title.Content = $"Hello,{user.FirstName}";

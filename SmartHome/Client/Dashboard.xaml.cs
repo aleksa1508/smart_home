@@ -11,7 +11,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
@@ -31,7 +30,8 @@ namespace Client
         private IUserReository userReository;
         private IDeviceRepository deviceRepository;
         private AesClass aesClass;
-        public Dashboard(User userParameter,AesClass aes)
+        private DashboardView dashboardView;
+        public Dashboard(User userParameter, AesClass aes)
         {
             InitializeComponent();
             aesClass = aes;
@@ -49,7 +49,8 @@ namespace Client
                 users_menu_button.Visibility = Visibility.Collapsed;
                 Users.Visibility = Visibility.Collapsed;
             }
-            MainContent.Content = new DashboardView(user);
+            dashboardView = new DashboardView(user, devices);
+            MainContent.Content = dashboardView;
             DataContext = userParameter;
         }
         private void button_minimize_Click(object sender, RoutedEventArgs e)
@@ -76,7 +77,8 @@ namespace Client
         private void Dashboard_Tab_Button_Click(object sender, RoutedEventArgs e)
         {
             var u = userReository.GetUserById(user.ID);
-            MainContent.Content = new DashboardView(u);
+            dashboardView = new DashboardView(user, devices);
+            MainContent.Content = dashboardView;
             Title.Content = $"Hello,{u.FirstName}";
         }
 
@@ -99,7 +101,7 @@ namespace Client
                         // string msg = Encoding.UTF8.GetString(buffer, 0, bytesRead);
                         byte[] primljeno = new byte[bytesRead];
                         Array.Copy(buffer, primljeno, bytesRead);
-                        string msg=aesClass.DecryptMessage(primljeno, aesClass.Key,aesClass.IV);
+                        string msg = aesClass.DecryptMessage(primljeno, aesClass.Key, aesClass.IV);
 
 
                         if (msg.Contains("Session is expire"))
@@ -117,7 +119,7 @@ namespace Client
                                 CommandRegister.Add(new Command { ID = CommandRegister.Count + 1, CreationDate = response.Timestamp, Log = $"[{response.Timestamp}] {response.Device.Name}: {response.Function} promenjena na {response.Value}" });
                                 mainWindow.ShowToastNotification(new ToastNotification("Success", $"You are successfully set new value for device {response.Device.Name}", NotificationType.Success));
                                 byte[] bytes = System.Text.Encoding.UTF8.GetBytes("da");
-                                ConnectionService.UdpSocket.SendTo(aesClass.EncryptMessage("da",aesClass.Key,aesClass.IV), ConnectionService.UdpEndpoint);
+                                ConnectionService.UdpSocket.SendTo(aesClass.EncryptMessage("da", aesClass.Key, aesClass.IV), ConnectionService.UdpEndpoint);
                             }
                             else if (response.Message.Equals("Devices List"))
                             {
@@ -125,6 +127,10 @@ namespace Client
                                 devices.Clear();
                                 foreach (var u in list)
                                     devices.Add(u);
+
+                                dashboardView.UpdateDevices(devices);
+                                dashboardView.LoadingOverlay.Visibility = Visibility.Collapsed;
+                                dashboardView.DeviceScrollViewer.Visibility = Visibility.Visible;
                                 var listCommands = response.Commands;//all commands
                                 CommandRegister.Clear();
                                 foreach (var u in listCommands)
@@ -210,7 +216,7 @@ namespace Client
         private void control_table_menu_button_Click(object sender, RoutedEventArgs e)
         {
             Title.Content = "Control Table";
-            MainContent.Content = new ControlTableView(devices, CommandRegister, notificationManager,aesClass);
+            MainContent.Content = new ControlTableView(devices, CommandRegister, notificationManager, aesClass);
         }
 
         // metoda koja odjavljuje korisnika
@@ -242,7 +248,7 @@ namespace Client
         private void button_profile_Click(object sender, RoutedEventArgs e)
         {
             Title.Content = "Edit profile";
-            MainContent.Content = new ProfileView(user,userReository);
+            MainContent.Content = new ProfileView(user, userReository);
         }
 
         private void button_password_Click(object sender, RoutedEventArgs e)

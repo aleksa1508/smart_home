@@ -5,16 +5,13 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace Common.Repositories.DevicesRepositories
 {
     public class DeviceRepository : IDeviceRepository
     {
         private readonly string connectionString = "Server=localhost\\SQLEXPRESS;Database=devices_db;Trusted_Connection=True;";
-        public void AddDevice(string name, int port,RoomType location,DateTime lastChange)
+        public void AddDevice(string name, int port, RoomType location, DateTime lastChange)
         {
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
@@ -32,7 +29,7 @@ namespace Common.Repositories.DevicesRepositories
                 cmd.ExecuteNonQuery();
             }
         }
-        public void AddDeviceFunctions(string function, string value,int deviceId)
+        public void AddDeviceFunctions(string function, string value, int deviceId)
         {
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
@@ -69,17 +66,17 @@ namespace Common.Repositories.DevicesRepositories
         public IEnumerable<Device> GetAllDevices()
         {
             List<Device> devices = new List<Device>();
-            using(SqlConnection connection = new SqlConnection(connectionString))
+            using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
                 string query = "SELECT * FROM Device";
-                SqlCommand sqlCommand=new SqlCommand(query, connection);
+                SqlCommand sqlCommand = new SqlCommand(query, connection);
                 SqlDataReader reader = sqlCommand.ExecuteReader();
                 while (reader.Read())
                 {
                     int id = Int32.Parse(reader["id"].ToString());
-                    Dictionary<int,Function>functions=GetDeviceFunctions(id);
-                    List<Command>commands=GetDeviceCommands(id);
+                    Dictionary<int, Function> functions = GetDeviceFunctions(id);
+                    List<Command> commands = GetDeviceCommands(id);
                     devices.Add(new Device(id, reader["name"].ToString(), Int32.Parse(reader["port"].ToString()), (RoomType)Enum.Parse(typeof(RoomType), reader["location"].ToString()), functions, commands, DateTime.Parse(reader["lastChanged"].ToString())));
                 }
             }
@@ -88,11 +85,11 @@ namespace Common.Repositories.DevicesRepositories
         public IEnumerable<Command> GetAllCommands()
         {
             List<Command> commands = new List<Command>();
-            using(SqlConnection connection = new SqlConnection(connectionString))
+            using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
                 string query = "SELECT * FROM Commands";
-                SqlCommand sqlCommand=new SqlCommand(query, connection);
+                SqlCommand sqlCommand = new SqlCommand(query, connection);
                 SqlDataReader reader = sqlCommand.ExecuteReader();
                 while (reader.Read())
                 {
@@ -112,14 +109,14 @@ namespace Common.Repositories.DevicesRepositories
                 SqlDataReader reader = sqlCommand.ExecuteReader();
                 while (reader.Read())
                 {
-                    return new Device(id,reader["name"].ToString(), Int32.Parse(reader["port"].ToString()),(RoomType)Enum.Parse(typeof(RoomType), reader["location"].ToString()));
+                    return new Device(id, reader["name"].ToString(), Int32.Parse(reader["port"].ToString()), (RoomType)Enum.Parse(typeof(RoomType), reader["location"].ToString()));
                 }
             }
             return null;
         }
-        public Dictionary<int,Function> GetDeviceFunctions(int id)
+        public Dictionary<int, Function> GetDeviceFunctions(int id)
         {
-            Dictionary<int,Function> functions=new Dictionary<int,Function>();
+            Dictionary<int, Function> functions = new Dictionary<int, Function>();
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
@@ -129,14 +126,14 @@ namespace Common.Repositories.DevicesRepositories
                 SqlDataReader reader = sqlCommand.ExecuteReader();
                 while (reader.Read())
                 {
-                    functions.Add(Int32.Parse(reader["id"].ToString()),new Function { Name=reader["function_name"].ToString(),Value=reader["function_value"].ToString() });
+                    functions.Add(Int32.Parse(reader["id"].ToString()), new Function { Name = reader["function_name"].ToString(), Value = reader["function_value"].ToString() });
                 }
             }
             return functions;
         }
         public List<Command> GetDeviceCommands(int id)
         {
-            List<Command>commands=new List<Command>();
+            List<Command> commands = new List<Command>();
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
@@ -187,7 +184,7 @@ namespace Common.Repositories.DevicesRepositories
 
             return table;
         }
-        public void UpdateDeviceFunction(int deviceId,int id,string name,string value)
+        public void UpdateDeviceFunction(int deviceId, int id, string name, string value)
         {
             using (SqlConnection connection = new SqlConnection(connectionString))
             {

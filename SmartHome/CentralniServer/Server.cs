@@ -1,26 +1,24 @@
-﻿using System;
+﻿using Common;
+using Common.DTOs;
+using Common.Enums;
+using Common.Models;
+using Common.Repositories.DevicesRepositories;
+using Common.Repositories.UsersRepositories;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
-using System.Threading;
-using System.Text.Json;
-using System.Data.SqlClient;
-using Common;
-using Common.Repositories.UsersRepositories;
-using Common.Enums;
-using Common.DTOs;
-using Common.Models;
-using Common.Repositories.DevicesRepositories;
 using System.Security.Cryptography; // <-- dodaj
+using System.Text;
+using System.Text.Json;
+using System.Threading;
 //using UDPServer;
 namespace TCPServer
 {
-    
+
     public class Server
     {
         // private static UdpServer udpServer;
@@ -83,13 +81,13 @@ namespace TCPServer
             //}
             //byte[] encryptMessage = EncryptMessage("Pera Peric",key,IV);
 
-            
+
             //Console.WriteLine(Convert.ToBase64String(encryptMessage));
             //string decryptMessage = DecryptMessage(encryptMessage, key, IV);
             //Console.WriteLine(decryptMessage);
 
-            AesClass aesClass=new AesClass();
-            Dictionary<Socket, (byte[] Key, byte[] IV)> klijentKljucevi =new Dictionary<Socket, (byte[], byte[])>();
+            AesClass aesClass = new AesClass();
+            Dictionary<Socket, (byte[] Key, byte[] IV)> klijentKljucevi = new Dictionary<Socket, (byte[], byte[])>();
             User k = new User();
             Device u = new Device();
 
@@ -322,10 +320,12 @@ namespace TCPServer
                                     if (poruka == "shutdown")
                                     {
 
-                                        try { 
+                                        try
+                                        {
                                             s.Send(Encoding.UTF8.GetBytes("DISCONNECT_OK"));
-                                            Thread.Sleep(1000); 
-                                        } catch { }
+                                            Thread.Sleep(1000);
+                                        }
+                                        catch { }
                                         s.Close();
                                         klijenti.Remove(s);
                                         Console.WriteLine($"Preostalo klijenata: {klijenti.Count}");
@@ -368,15 +368,15 @@ namespace TCPServer
                                         // Креирамо UDP сокет за комуникацију
                                         byte[] keyData = new byte[32];
                                         Array.Copy(key, 0, keyData, 0, 16);
-                                        Array.Copy(iv, 0, keyData,16, 16);
+                                        Array.Copy(iv, 0, keyData, 16, 16);
                                         s.Send(keyData);
                                         Thread.Sleep(200);
                                         udpPort1 = random.Next(50002, 60000);
 
                                         logInUser.Port = udpPort1;
-                                        userReository.UpdateStatus(logInUser.ID, ActiveStatus.ACTIVE,udpPort1);
+                                        userReository.UpdateStatus(logInUser.ID, ActiveStatus.ACTIVE, udpPort1);
                                         ////////////////////////////////////////////////////////////////
-                                        s.Send(aesClass.EncryptMessage(udpPort1.ToString(),key,iv));
+                                        s.Send(aesClass.EncryptMessage(udpPort1.ToString(), key, iv));
                                         //s.Send(Encoding.UTF8.GetBytes(udpPort1.ToString()));
                                         Socket udpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
                                         IPEndPoint udpServerEP = new IPEndPoint(IPAddress.Loopback, udpPort1);
@@ -401,7 +401,7 @@ namespace TCPServer
 
                                         klijentKljucevi[udpSocket] = (key, iv); //dodati kljucevi u dict
 
-                                        List<Device> uredjaji = deviceRepository.GetAllDevices().ToList() ;
+                                        List<Device> uredjaji = deviceRepository.GetAllDevices().ToList();
 
                                         Console.WriteLine(deviceRepository.PrintAllDevices());
 
@@ -413,12 +413,12 @@ namespace TCPServer
                                         //    byte[] data = ms.ToArray();
                                         //    udpSocket.SendTo(data, clientEP);
                                         //}
-                                        var commands=deviceRepository.GetAllCommands().ToList();
+                                        var commands = deviceRepository.GetAllCommands().ToList();
                                         var content = new ResponseDTO
                                         {
-                                            Message = "Devices List", 
+                                            Message = "Devices List",
                                             Devices = uredjaji,
-                                            Commands=commands
+                                            Commands = commands
                                         };
                                         string json = JsonSerializer.Serialize(content);
                                         //byte[] data = Encoding.UTF8.GetBytes(json);

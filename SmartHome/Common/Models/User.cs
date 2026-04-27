@@ -1,11 +1,6 @@
 ﻿using Common.Enums;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Common
 {
@@ -13,7 +8,7 @@ namespace Common
     public class User : INotifyPropertyChanged     //ako budem nekad u ui menjao objekat onda dodati notify property changed
     {
         private string firstName;
-        public int ID {  get; set; }
+        public int ID { get; set; }
         public string FirstName
         {
             get { return firstName; }
@@ -35,9 +30,9 @@ namespace Common
         protected void OnPropertyChanged(string propertyName) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
-        public User(int id,string firstName, string lastName, string username, string password, ActiveStatus status, int port, UserRole role)
+        public User(int id, string firstName, string lastName, string username, string password, ActiveStatus status, int port, UserRole role)
         {
-            ID=id;
+            ID = id;
             FirstName = firstName;
             LastName = lastName;
             Username = username;
@@ -51,6 +46,6 @@ namespace Common
         {
         }
 
-        
+
     }
 }

@@ -1,9 +1,5 @@
 ﻿using Common.Enums;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Common.Repositories.UsersRepositories
 {
@@ -16,7 +12,7 @@ namespace Common.Repositories.UsersRepositories
         User GetKorisnik(string username, string password);
         User GetUserById(int id);
         IEnumerable<User> GetAllUsers();
-        void UpdateStatus(int id, ActiveStatus status,int port);
+        void UpdateStatus(int id, ActiveStatus status, int port);
         void UpdatePassword(int id, string password);
         void PrintAllUsers();
 

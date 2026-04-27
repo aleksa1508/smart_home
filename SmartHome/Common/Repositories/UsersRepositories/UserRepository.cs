@@ -1,12 +1,8 @@
-﻿using BCrypt.Net;
-using Common.Enums;
+﻿using Common.Enums;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Security.Policy;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Common.Repositories.UsersRepositories
 {
@@ -135,7 +131,7 @@ namespace Common.Repositories.UsersRepositories
                 sqlCommand.ExecuteNonQuery();
             }
         }
-        public void UpdateStatus(int id,ActiveStatus status,int port)
+        public void UpdateStatus(int id, ActiveStatus status, int port)
         {
             List<User> list = GetAllUsers().ToList();
             foreach (var user in list)
@@ -168,7 +164,7 @@ namespace Common.Repositories.UsersRepositories
             foreach (var user in list)
             {
                 Console.WriteLine("| {0,-15} | {1,-12} | {2,-15} | {3,-8} | {4,-6} | {5,-10} |",
-                    user.FirstName,user.LastName,user.Username,user.Status == ActiveStatus.ACTIVE ? "YES" : "NO",user.Port,user.Role);
+                    user.FirstName, user.LastName, user.Username, user.Status == ActiveStatus.ACTIVE ? "YES" : "NO", user.Port, user.Role);
             }
 
             Console.WriteLine("-------------------------------------------------------------------------------------------");
@@ -187,11 +183,11 @@ namespace Common.Repositories.UsersRepositories
 
                 while (reader.Read())
                 {
-                        return new User { ID = Int32.Parse(reader["id"].ToString()), FirstName = reader["firstName"].ToString(), LastName = reader["lastName"].ToString(), Username = reader["username"].ToString(), Password = reader["password"].ToString(), Role = (UserRole)Enum.Parse(typeof(UserRole), reader["role"].ToString()), Port = Int32.Parse(reader["port"].ToString()) };
+                    return new User { ID = Int32.Parse(reader["id"].ToString()), FirstName = reader["firstName"].ToString(), LastName = reader["lastName"].ToString(), Username = reader["username"].ToString(), Password = reader["password"].ToString(), Role = (UserRole)Enum.Parse(typeof(UserRole), reader["role"].ToString()), Port = Int32.Parse(reader["port"].ToString()) };
                 }
 
             }
-            return new User{ ID =0};
+            return new User { ID = 0 };
         }
 
         public void UpdateData(int id, string firstName, string lastName, string username)

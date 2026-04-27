@@ -5,7 +5,6 @@ using Notification.Wpf;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -21,12 +20,12 @@ namespace Client
         public ObservableCollection<Device> Devices { get; set; }
         public ObservableCollection<Command> CommandRegister { get; set; }
         public AesClass aesClass;
-        public ControlTableView(ObservableCollection<Device> devices, ObservableCollection<Command> commands, NotificationManager manager,AesClass aes)
+        public ControlTableView(ObservableCollection<Device> devices, ObservableCollection<Command> commands, NotificationManager manager, AesClass aes)
         {
             InitializeComponent();
             CommandRegister = commands;
             Devices = devices;
-            aesClass=aes;
+            aesClass = aes;
             this.DataContext = this;
         }
 
@@ -81,18 +80,18 @@ namespace Client
             var content = new CommandDTO
             {
                 SelectedDevice = (DeviceComboBox.SelectedItem as Device),
-                FunctionID=selected.Key,
+                FunctionID = selected.Key,
                 Function = selected.Value.Name,
                 Value = ValueTextBox.Text
             };
 
             string json = JsonSerializer.Serialize(content);
-            
+
             //byte[] data = Encoding.UTF8.GetBytes(json);
             ConnectionService.UdpSocket.SendTo(aesClass.EncryptMessage(json, aesClass.Key, aesClass.IV), ConnectionService.UdpEndpoint);
 
-            ValueTextBox.Text=string.Empty;
-            ValueTextBox.IsEnabled = false ;
+            ValueTextBox.Text = string.Empty;
+            ValueTextBox.IsEnabled = false;
 
         }
 

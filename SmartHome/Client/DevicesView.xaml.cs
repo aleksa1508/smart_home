@@ -42,7 +42,7 @@ namespace Client
         {
             DeviceStackPanel.Visibility = Visibility.Visible;
             SetBackground(0);
-            DevicesComboBox.ItemsSource =new ObservableCollection<Device>(devices.Where(d => d.Location == RoomType.KITCHEN).ToList());
+            DevicesComboBox.ItemsSource = new ObservableCollection<Device>(devices.Where(d => d.Location == RoomType.KITCHEN).ToList());
             DevicesComboBox.SelectedIndex = 0;
             //LogsDataGrid.ItemsSource = devices[0].CommandRegister;
             //NameTextBox.Text = devices[0].Name;

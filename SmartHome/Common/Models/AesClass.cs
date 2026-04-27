@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Common.Models
 {
     public class AesClass
     {
-        public byte[] Key {  get; set; }
-        public byte[] IV {  get; set; }
+        public byte[] Key { get; set; }
+        public byte[] IV { get; set; }
 
 
         public AesClass(byte[] key, byte[] iv)

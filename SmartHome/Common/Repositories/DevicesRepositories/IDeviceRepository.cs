@@ -2,16 +2,13 @@
 using Common.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Common.Repositories.DevicesRepositories
 {
     public interface IDeviceRepository
     {
         Device GetDeviceById(int id);
-        Dictionary<int,Function> GetDeviceFunctions(int id);
+        Dictionary<int, Function> GetDeviceFunctions(int id);
         List<Command> GetDeviceCommands(int id);
         void AddDevice(string name, int port, RoomType location, DateTime lastChange);
         void AddDeviceFunctions(string function, string value, int deviceId);

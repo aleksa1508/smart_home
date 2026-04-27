@@ -36,7 +36,7 @@ namespace Client
         }
 
         private void button_close_Click(object sender, RoutedEventArgs e)
-        { 
+        {
             byte[] loginData = Encoding.UTF8.GetBytes("shutdown");
             ConnectionService.TcpSocket.Send(loginData);
 
@@ -109,7 +109,7 @@ namespace Client
                 // Dekriptuj — šalješ samo primljene bajtove, ne cijeli buffer!
                 byte[] primljeno = new byte[bytes];
                 Array.Copy(buffer, primljeno, bytes);
-                string portString = aes.DecryptMessage(primljeno,aes.Key,aes.IV);
+                string portString = aes.DecryptMessage(primljeno, aes.Key, aes.IV);
 
                 int port = int.Parse(portString);
                 //int port = int.Parse(Encoding.UTF8.GetString(buffer, 0, bytes));
@@ -117,13 +117,13 @@ namespace Client
                 // UDP setup
                 ConnectionService.UdpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
                 ConnectionService.UdpEndpoint = new IPEndPoint(IPAddress.Loopback, port);
-                User user = userReository.GetKorisnik(UsernameTextBox.Text,PasswordTextBox.Password);
+                User user = userReository.GetKorisnik(UsernameTextBox.Text, PasswordTextBox.Password);
 
                 // start loop
 
                 // 🔥 otvori dashboard
-                
-                Dashboard dashboardWindow = new Dashboard(user,aes);
+
+                Dashboard dashboardWindow = new Dashboard(user, aes);
                 dashboardWindow.Closed += DashboardWindow_Closed;
                 dashboardWindow.Show();
 

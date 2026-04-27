@@ -5,12 +5,11 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Client"
              xmlns:helpers="clr-namespace:Client.Helpers"
-             mc:Ignorable="d" 
-             d:DesignHeight="370" d:DesignWidth="610">
+             mc:Ignorable="d" >
     <UserControl.DataContext>
         <helpers:TimeViewModel/>
     </UserControl.DataContext>
-    <Grid Background="#1D3557" Margin="0,20,0,0">
+    <Grid Background="#1D3557" Height="380">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"></ColumnDefinition>
             <ColumnDefinition Width="2*"></ColumnDefinition>
@@ -81,10 +80,147 @@
             </Grid>
         </Border>
 
-        <Rectangle Width="580" Fill="#FF4773B2" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" RadiusX="20" RadiusY="20" Margin="15,8,15,10"/>
-        <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" >
+        <Grid Grid.Row="2" Grid.ColumnSpan="2" Margin="0,8,11,0">
 
-        </StackPanel>
+            <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="40"/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="40"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- LEFT -->
+                <Button Grid.Column="0"
+                Content="◀"
+                Click="Left_Click"
+                Background="Transparent"
+                BorderThickness="0"
+                Foreground="White"
+                FontSize="15" VerticalAlignment="Center"
+                Cursor="Hand">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <ContentPresenter/>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+
+                <!-- CAROUSEL -->
+                    <ScrollViewer Grid.Column="1"
+                      x:Name="DeviceScrollViewer"
+                      HorizontalScrollBarVisibility="Hidden"
+                      VerticalScrollBarVisibility="Disabled"
+                      CanContentScroll="False">
+
+                        <ItemsControl x:Name="DeviceItems">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                <Border Background="#4773B2"
+                            CornerRadius="10"
+                            Margin="6"
+                            Padding="10"
+                            Width="150"
+                            Height="90">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                                            <Setter Property="RenderTransform">
+                                                <Setter.Value>
+                                                    <ScaleTransform ScaleX="1" ScaleY="1"/>
+                                                </Setter.Value>
+                                            </Setter>
+
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="RenderTransform">
+                                                        <Setter.Value>
+                                                            <ScaleTransform ScaleX="1.05" ScaleY="1.05"/>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+
+
+                                    <StackPanel>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Icon}" FontSize="18" Foreground="White"/>
+                                        <TextBlock Text="{Binding Name}"
+                                       Foreground="White"
+                                       FontSize="14"/>
+                                        </StackPanel>
+                                        <TextBlock Text="{Binding Status}"
+                                       Foreground="#A8DADC"
+                                       FontSize="17"
+                                       FontWeight="Bold"/>
+                                        <TextBlock Text="{Binding Room}"
+                                       Foreground="White"
+                                       FontSize="12"/>
+                                    </StackPanel>
+
+                                </Border>
+                            </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+
+                        </ItemsControl>
+
+                    </ScrollViewer>
+
+                    <!-- RIGHT -->
+                <Button Grid.Column="2"
+                Content="▶"
+                Click="Right_Click"
+                Background="Transparent"
+                BorderThickness="0"
+                Foreground="White" VerticalAlignment="Center" Margin="20,0,0,0"
+                FontSize="15"
+                Cursor="Hand">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <ContentPresenter/>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+
+                </Grid>
+
+            <Grid x:Name="LoadingOverlay"
+      Background="#801D3557"
+      Visibility="Visible">
+
+                <StackPanel HorizontalAlignment="Center"
+                VerticalAlignment="Center">
+
+                    <!-- SPINNER -->
+                    <Ellipse Width="40"
+                 Height="40"
+                 Stroke="White"
+                 StrokeThickness="4"
+                 StrokeDashArray="2 2">
+                        <Ellipse.RenderTransform>
+                            <RotateTransform x:Name="SpinnerRotate"
+                                 CenterX="20"
+                                 CenterY="20"/>
+                        </Ellipse.RenderTransform>
+                    </Ellipse>
+
+                    <TextBlock Text="Loading devices..."
+                   Foreground="White"
+                   Margin="10"
+                   HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+
+
+        </Grid>
+
         <StackPanel Grid.Column="1" Grid.RowSpan="2" Grid.Row="0" >
             <Image x:Name="HomeImage" Source="/Images/living_room.jpg"  Stretch="UniformToFill" Height="228" Width="390" Margin="0,5,10,0">
                 <Image.Clip>

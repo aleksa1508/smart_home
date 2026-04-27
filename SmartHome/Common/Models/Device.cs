@@ -1,10 +1,6 @@
 ﻿using Common.Enums;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace Common.Models
 {
@@ -26,12 +22,12 @@ namespace Common.Models
 
         public List<Device> devices { get; set; }
         // Konstruktor
-        public Device(int id,string name, int port, RoomType location)
+        public Device(int id, string name, int port, RoomType location)
         {
             Id = id;
             Name = name;
             Port = port;
-            Location=location;
+            Location = location;
             Functions = new Dictionary<int, Function>();
             CommandRegister = new List<Command>();
             LastChanged = DateTime.Now;
@@ -44,7 +40,7 @@ namespace Common.Models
             CommandRegister = new List<Command>();
             LastChanged = DateTime.Now;
         }
-        public Device(int id,string name, int port,RoomType location,Dictionary<int, Function> functions,List<Command>commands,DateTime lastChange)
+        public Device(int id, string name, int port, RoomType location, Dictionary<int, Function> functions, List<Command> commands, DateTime lastChange)
         {
             Id = id;
             Name = name;
@@ -54,7 +50,7 @@ namespace Common.Models
             CommandRegister = commands;
             LastChanged = lastChange;
         }
-        public Device(string name, int port,DateTime lastChange)
+        public Device(string name, int port, DateTime lastChange)
         {
             Name = name;
             Port = port;
