@@ -58,6 +58,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DTOs\CommandDTO.cs" />
+    <Compile Include="DTOs\OwnerCommandDTO.cs" />
     <Compile Include="DTOs\ResponseDTO.cs" />
     <Compile Include="Enums\ActiveStatus.cs" />
     <Compile Include="Enums\RoomType.cs" />
@@ -65,6 +66,7 @@
     <Compile Include="Models\AesClass.cs" />
     <Compile Include="Models\Command.cs" />
     <Compile Include="Models\Device.cs" />
+    <Compile Include="Models\RsaClass.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\DevicesRepositories\DeviceRepository.cs" />

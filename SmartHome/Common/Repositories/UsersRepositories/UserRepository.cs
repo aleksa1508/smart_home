@@ -220,5 +220,20 @@ namespace Common.Repositories.UsersRepositories
                 sqlCommand.ExecuteNonQuery();
             }
         }
+
+        public void UpdateUserRole(int id, UserRole role)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                string query = "UPDATE users SET role=@role where id = @id";
+                SqlCommand sqlCommand = new SqlCommand(query, connection);
+
+                sqlCommand.Parameters.AddWithValue("@role", role.ToString());
+                sqlCommand.Parameters.AddWithValue("@id", id);
+
+                sqlCommand.ExecuteNonQuery();
+            }
+        }
     }
 }

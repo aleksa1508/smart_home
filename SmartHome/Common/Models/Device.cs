@@ -62,12 +62,12 @@ namespace Common.Models
 
         public Device()
         {
-            devices = new List<Device> {
-                        new Device("Light",60001,new Dictionary<int, Function>{ { 1, new Function { Name = "value", Value = "40" } },{ 2, new Function { Name = "state", Value = "OFF" } }, { 3,new Function { Name = "red color", Value = "120"  } } }),
-                        new Device("TV",60002,new Dictionary<int, Function>{ { 1, new Function { Name = "state", Value = "OFF" } },{ 2, new Function { Name = "temperature", Value = "23" } }, { 3,new Function { Name = "red color", Value = "120"  } } }),
-                        new Device("Climate",60003,new Dictionary<int, Function>{ { 1, new Function { Name = "state", Value = "OFF" } },{ 2, new Function { Name = "temperature", Value = "12" } } }),
-                        new Device("Door",60004,new Dictionary<int, Function>{ { 1, new Function { Name = "state", Value = "OFF" } } }),
-            };
+            //devices = new List<Device> {
+            //            new Device("Light",60001,new Dictionary<int, Function>{ { 1, new Function { Name = "value", Value = "40" } },{ 2, new Function { Name = "state", Value = "OFF" } }, { 3,new Function { Name = "red color", Value = "120"  } } }),
+            //            new Device("TV",60002,new Dictionary<int, Function>{ { 1, new Function { Name = "state", Value = "OFF" } },{ 2, new Function { Name = "temperature", Value = "23" } }, { 3,new Function { Name = "red color", Value = "120"  } } }),
+            //            new Device("Climate",60003,new Dictionary<int, Function>{ { 1, new Function { Name = "state", Value = "OFF" } },{ 2, new Function { Name = "temperature", Value = "12" } } }),
+            //            new Device("Door",60004,new Dictionary<int, Function>{ { 1, new Function { Name = "state", Value = "OFF" } } }),
+            //};
         }
 
         //// Dodavanje ili ažuriranje funkcije uređaja

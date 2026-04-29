@@ -88,16 +88,20 @@ namespace Client
             Task.Run(() =>
             {
                 byte[] request = aesClass.EncryptMessage($"Klijent se povezao na UDP port: {ConnectionService.UdpEndpoint.Port}", aesClass.Key, aesClass.IV);
-                //byte[] request = System.Text.Encoding.UTF8.GetBytes($"Klijent se povezao na UDP port: {ConnectionService.UdpEndpoint.Port}");
                 ConnectionService.UdpSocket.SendTo(request, ConnectionService.UdpEndpoint);
-                byte[] buffer = new byte[4096];
+
+                Console.WriteLine("UDP: Poslana prva poruka, čekam odgovor...");
+
+                byte[] buffer = new byte[65507];
                 EndPoint remoteEP = new IPEndPoint(IPAddress.Any, 0);
 
                 while (true)
                 {
                     try
                     {
+                        Console.WriteLine("UDP: Čekam na ReceiveFrom...");
                         int bytesRead = ConnectionService.UdpSocket.ReceiveFrom(buffer, ref remoteEP);
+                        Console.WriteLine($"UDP: Primljeno {bytesRead} bajtova");
                         // string msg = Encoding.UTF8.GetString(buffer, 0, bytesRead);
                         byte[] primljeno = new byte[bytesRead];
                         Array.Copy(buffer, primljeno, bytesRead);
@@ -121,6 +125,13 @@ namespace Client
                                 byte[] bytes = System.Text.Encoding.UTF8.GetBytes("da");
                                 ConnectionService.UdpSocket.SendTo(aesClass.EncryptMessage("da", aesClass.Key, aesClass.IV), ConnectionService.UdpEndpoint);
                             }
+                            else if (response.Message.Equals("AdminCommand"))
+                            {
+                                MainWindow mainWindow = (MainWindow)Application.Current.MainWindow;
+                                mainWindow.ShowToastNotification(new ToastNotification("Information", response.Value, NotificationType.Information));
+                                byte[] bytes = System.Text.Encoding.UTF8.GetBytes("users");
+                                ConnectionService.UdpSocket.SendTo(aesClass.EncryptMessage("users", aesClass.Key, aesClass.IV), ConnectionService.UdpEndpoint);
+                            }
                             else if (response.Message.Equals("Devices List"))
                             {
                                 var list = response.Devices;
@@ -140,7 +151,7 @@ namespace Client
                             {
                                 var users = response.Users;
                                 Title.Content = "Users";
-                                MainContent.Content = new UsersView(new ObservableCollection<User>(users));
+                                MainContent.Content = new UsersView(user, new ObservableCollection<User>(users), aesClass);
                             }
                         });
                     }
@@ -149,9 +160,12 @@ namespace Client
                         // socket zatvoren, prekini loop
                         break;
                     }
-                    catch (SocketException)
+                    catch (SocketException ex)
                     {
-                        // Sesija ili konekcija je prekinuta
+                        Dispatcher.Invoke(() =>
+                        {
+                            //MessageBox.Show($"SocketException kod: {ex.SocketErrorCode}\nPoruka: {ex.Message}");
+                        });
                         Dispatcher.Invoke(SessionExpired);
                         break;
                     }
@@ -159,7 +173,7 @@ namespace Client
                     {
                         Dispatcher.Invoke(() =>
                         {
-                            MessageBox.Show($"Error: {ex.Message}");
+                            //MessageBox.Show($"Exception tip: {ex.GetType().Name}\nPoruka: {ex.Message}");
                         });
                         break;
                     }

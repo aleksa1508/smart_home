@@ -48,10 +48,9 @@ namespace TCPServer
 
             IDeviceRepository deviceRepository = new DeviceRepository();
             //List<Device> devices = new List<Device> {
-            //            new Device(1,"Light",60001,RoomType.KITCHEN,new Dictionary<int, Function>{ { 1, new Function { Name = "value", Value = "40" } },{ 2, new Function { Name = "state", Value = "OFF" } }, { 3,new Function { Name = "red color", Value = "120"  } } },new List<Command>(),DateTime.Now),
-            //            new Device(2,"TV",60002,RoomType.BEDROOM,new Dictionary<int, Function>{ { 1, new Function { Name = "state", Value = "OFF" } },{ 2, new Function { Name = "temperature", Value = "23" } } },new List<Command>(),DateTime.Now),
-            //            new Device(3, "Climate", 60003,RoomType.BATHROOM, new Dictionary < int, Function > { { 1, new Function { Name = "state", Value = "OFF" } }, { 2, new Function { Name = "temperature", Value = "12" } } }, new List < Command >(), DateTime.Now),
-            //            new Device(4, "Door",60004,RoomType.GARAGE, new Dictionary < int, Function > { { 1, new Function { Name = "state", Value = "OFF" } } }, new List < Command >(), DateTime.Now),
+            //            new Device(5,"TV",60005,RoomType.KITCHEN,new Dictionary<int, Function>{ { 1, new Function { Name = "state", Value = "OFF" } },{ 2, new Function { Name = "temperature", Value = "23" } } },new List<Command>(),DateTime.Now),
+            //            new Device(6, "Climate", 60006,RoomType.BEDROOM, new Dictionary < int, Function > { { 1, new Function { Name = "state", Value = "OFF" } }, { 2, new Function { Name = "temperature", Value = "12" } } }, new List < Command >(), DateTime.Now),
+            //            new Device(7, "Climate", 60007,RoomType.GARAGE, new Dictionary < int, Function > { { 1, new Function { Name = "state", Value = "OFF" } }, { 2, new Function { Name = "temperature", Value = "20" } } }, new List < Command >(), DateTime.Now),
             //};
             //foreach (var d in devices)
             //{
@@ -87,6 +86,9 @@ namespace TCPServer
             //Console.WriteLine(decryptMessage);
 
             AesClass aesClass = new AesClass();
+            RsaClass rsaClass = new RsaClass();
+            string publicKeyXml = rsaClass.ExportPublicKey();
+            byte[] publicKeyBytes = Encoding.UTF8.GetBytes(publicKeyXml);
             Dictionary<Socket, (byte[] Key, byte[] IV)> klijentKljucevi = new Dictionary<Socket, (byte[], byte[])>();
             User k = new User();
             Device u = new Device();
@@ -114,10 +116,10 @@ namespace TCPServer
             const int MAX_NEAKTIVNIH_CIKLUSA = 20; // Maksimalan broj ciklusa neaktivnosti pre zatvaranja
 
 
-            RunDevices(2);
+            RunDevices(7);
             bool kraj = false;
 
-            byte[] buffer = new byte[4096];
+            byte[] buffer = new byte[65507];
             try
             {
                 while (!kraj)
@@ -239,6 +241,43 @@ namespace TCPServer
                                         byte[] data = aesClass.EncryptMessage(json, klijentKljucevi[s].Key, klijentKljucevi[s].IV);
                                         s.SendTo(data, clientEP);
                                     }
+                                    else if (receivedMessage.Contains("\"Action\":\"userRole\""))
+                                    {
+                                        //deviceRepository.PrintAllDevices();
+                                        //Console.WriteLine(deviceRepository.PrintAllDevices());
+                                        var users = userReository.GetAllUsers().ToList();
+                                        var komanda = JsonSerializer.Deserialize<OwnerCommandDTO>(receivedMessage);
+
+                                        var owner = komanda.Owner;
+                                        var user = komanda.ChangedUser;
+                                        var newRole = komanda.Role;
+                                        var existUser = users.Find(x => x.ID == user.ID);
+
+                                        string json = string.Empty;
+                                        if (owner.Role != UserRole.OWNER || existUser == null)
+                                        {
+                                            var content = new ResponseDTO
+                                            {
+                                                Message = "AdminCommand",
+                                                Value = "Neuspjesna promjena role"
+                                            };
+                                            json = JsonSerializer.Serialize(content);
+                                        }
+                                        else
+                                        {
+                                            userReository.UpdateUserRole(user.ID, newRole);
+                                            var content = new ResponseDTO
+                                            {
+                                                Message = "AdminCommand",
+                                                Value = "Uspjesna promjena role"
+                                            };
+                                            json = JsonSerializer.Serialize(content);
+
+                                        }
+
+                                        byte[] data = aesClass.EncryptMessage(json, klijentKljucevi[s].Key, klijentKljucevi[s].IV);
+                                        s.SendTo(data, clientEP);
+                                    }
 
                                     else
                                     {
@@ -316,7 +355,7 @@ namespace TCPServer
                                 if (receivedBytes1 > 0)
                                 {
                                     string poruka = Encoding.UTF8.GetString(buffer, 0, receivedBytes1);
-                                    Console.WriteLine($"Poruka od klijenta: {poruka}");
+                                    //Console.WriteLine($"Poruka od klijenta: {poruka}");
                                     if (poruka == "shutdown")
                                     {
 
@@ -348,88 +387,116 @@ namespace TCPServer
 
                                         continue;
                                     }
-
-                                    string[] djelovi = poruka.Split(':');
-                                    User logInUser = userReository.GetKorisnik(djelovi[0], djelovi[1]);
-                                    if (djelovi.Length == 2 && logInUser != null)
+                                    else if (poruka == "GET_PUBLIC_KEY")
                                     {
-
-                                        byte[] key = new byte[16];
-                                        byte[] iv = new byte[16];
-                                        using (RandomNumberGenerator randomNumber = RandomNumberGenerator.Create())
-                                        {
-                                            randomNumber.GetBytes(key);
-                                            randomNumber.GetBytes(iv);
-                                        }
-                                        // Клијент валидан, шаљемо одговор
-                                        string odgovor = "SUCCESS";
-                                        s.Send(Encoding.UTF8.GetBytes(odgovor));
-                                        Thread.Sleep(200);
-                                        // Креирамо UDP сокет за комуникацију
-                                        byte[] keyData = new byte[32];
-                                        Array.Copy(key, 0, keyData, 0, 16);
-                                        Array.Copy(iv, 0, keyData, 16, 16);
-                                        s.Send(keyData);
-                                        Thread.Sleep(200);
-                                        udpPort1 = random.Next(50002, 60000);
-
-                                        logInUser.Port = udpPort1;
-                                        userReository.UpdateStatus(logInUser.ID, ActiveStatus.ACTIVE, udpPort1);
-                                        ////////////////////////////////////////////////////////////////
-                                        s.Send(aesClass.EncryptMessage(udpPort1.ToString(), key, iv));
-                                        //s.Send(Encoding.UTF8.GetBytes(udpPort1.ToString()));
-                                        Socket udpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-                                        IPEndPoint udpServerEP = new IPEndPoint(IPAddress.Loopback, udpPort1);
-                                        udpSocket.Bind(udpServerEP);
-                                        udpSockets.Add(udpSocket);
-                                        udpNeaktivnost[udpSocket] = 0;
-                                        tcpUdpVeza[s] = udpSocket; //radi moguceg crash-a
-                                        Console.WriteLine($"UDP soket kreiran na portu {udpPort1}");
-                                        //for petlja i
-                                        EndPoint clientEP = new IPEndPoint(IPAddress.Any, 0);
-                                        int receivedBytes = udpSocket.ReceiveFrom(buffer, ref clientEP);
-                                        byte[] primljeno = new byte[receivedBytes];
-                                        Array.Copy(buffer, primljeno, receivedBytes);
-
-                                        string receivedMessage = aesClass.DecryptMessage(primljeno, key, iv);////////////////////
-                                        //string receivedMessage = Encoding.UTF8.GetString(buffer, 0, receivedBytes);
-
-                                        udpSocket.Blocking = false;
-                                        Console.WriteLine($"Poruka od UDP klijenta : {receivedMessage}");
-
-                                        userReository.PrintAllUsers();
-
-                                        klijentKljucevi[udpSocket] = (key, iv); //dodati kljucevi u dict
-
-                                        List<Device> uredjaji = deviceRepository.GetAllDevices().ToList();
-
-                                        Console.WriteLine(deviceRepository.PrintAllDevices());
-
-
-                                        //using (MemoryStream ms = new MemoryStream())
-                                        //{
-
-                                        //    formatter.Serialize(ms, uredjaji);
-                                        //    byte[] data = ms.ToArray();
-                                        //    udpSocket.SendTo(data, clientEP);
-                                        //}
-                                        var commands = deviceRepository.GetAllCommands().ToList();
-                                        var content = new ResponseDTO
-                                        {
-                                            Message = "Devices List",
-                                            Devices = uredjaji,
-                                            Commands = commands
-                                        };
-                                        string json = JsonSerializer.Serialize(content);
-                                        //byte[] data = Encoding.UTF8.GetBytes(json);
-                                        byte[] data = aesClass.EncryptMessage(json, key, iv);
-                                        udpSocket.SendTo(data, clientEP);
-
+                                        // Klijent traži RSA javni ključ
+                                        byte[] keyLengthBytes = BitConverter.GetBytes(publicKeyBytes.Length);
+                                        s.Send(keyLengthBytes);
+                                        Thread.Sleep(50);
+                                        s.Send(publicKeyBytes);
+                                        Console.WriteLine("RSA javni ključ poslan klijentu.");
                                     }
                                     else
                                     {
-                                        string odgovor = "UNSUCCESS";
-                                        s.Send(Encoding.UTF8.GetBytes(odgovor));
+                                        // Enkriptovani login — dekriptuj RSA-om
+                                        byte[] encryptedLogin = new byte[receivedBytes1];
+                                        Array.Copy(buffer, encryptedLogin, receivedBytes1);
+
+                                        string loginData;
+                                        try
+                                        {
+                                            loginData = rsaClass.Decrypt(encryptedLogin);
+                                        }
+                                        catch
+                                        {
+                                            s.Send(Encoding.UTF8.GetBytes("UNSUCCESS"));
+                                            continue;
+                                        }
+
+                                        string[] djelovi = loginData.Split(':');
+                                        User logInUser = userReository.GetKorisnik(djelovi[0], djelovi[1]);
+
+
+                                        if (djelovi.Length == 2 && logInUser != null)
+                                        {
+
+                                            byte[] key = new byte[16];
+                                            byte[] iv = new byte[16];
+                                            using (RandomNumberGenerator randomNumber = RandomNumberGenerator.Create())
+                                            {
+                                                randomNumber.GetBytes(key);
+                                                randomNumber.GetBytes(iv);
+                                            }
+                                            // Клијент валидан, шаљемо одговор
+                                            string odgovor = "SUCCESS";
+                                            s.Send(Encoding.UTF8.GetBytes(odgovor));
+                                            Thread.Sleep(200);
+                                            // Креирамо UDP сокет за комуникацију
+                                            byte[] keyData = new byte[32];
+                                            Array.Copy(key, 0, keyData, 0, 16);
+                                            Array.Copy(iv, 0, keyData, 16, 16);
+                                            s.Send(keyData);
+                                            Thread.Sleep(200);
+                                            udpPort1 = random.Next(50002, 60000);
+
+                                            logInUser.Port = udpPort1;
+                                            userReository.UpdateStatus(logInUser.ID, ActiveStatus.ACTIVE, udpPort1);
+                                            ////////////////////////////////////////////////////////////////
+                                            s.Send(aesClass.EncryptMessage(udpPort1.ToString(), key, iv));
+                                            //s.Send(Encoding.UTF8.GetBytes(udpPort1.ToString()));
+                                            Socket udpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+                                            IPEndPoint udpServerEP = new IPEndPoint(IPAddress.Loopback, udpPort1);
+                                            udpSocket.Bind(udpServerEP);
+                                            udpSockets.Add(udpSocket);
+                                            udpNeaktivnost[udpSocket] = 0;
+                                            tcpUdpVeza[s] = udpSocket; //radi moguceg crash-a
+                                            Console.WriteLine($"UDP soket kreiran na portu {udpPort1}");
+                                            //for petlja i
+                                            EndPoint clientEP = new IPEndPoint(IPAddress.Any, 0);
+                                            int receivedBytes = udpSocket.ReceiveFrom(buffer, ref clientEP);
+                                            byte[] primljeno = new byte[receivedBytes];
+                                            Array.Copy(buffer, primljeno, receivedBytes);
+
+                                            string receivedMessage = aesClass.DecryptMessage(primljeno, key, iv);////////////////////
+                                                                                                                 //string receivedMessage = Encoding.UTF8.GetString(buffer, 0, receivedBytes);
+
+                                            udpSocket.Blocking = false;
+                                            Console.WriteLine($"Poruka od UDP klijenta : {receivedMessage}");
+
+                                            userReository.PrintAllUsers();
+
+                                            klijentKljucevi[udpSocket] = (key, iv); //dodati kljucevi u dict
+
+                                            List<Device> uredjaji = deviceRepository.GetAllDevices().ToList();
+
+                                            Console.WriteLine(deviceRepository.PrintAllDevices());
+
+
+                                            //using (MemoryStream ms = new MemoryStream())
+                                            //{
+
+                                            //    formatter.Serialize(ms, uredjaji);
+                                            //    byte[] data = ms.ToArray();
+                                            //    udpSocket.SendTo(data, clientEP);
+                                            //}
+                                            var commands = deviceRepository.GetAllCommands().ToList();
+                                            var content = new ResponseDTO
+                                            {
+                                                Message = "Devices List",
+                                                Devices = uredjaji,
+                                                Commands = commands
+                                            };
+                                            string json = JsonSerializer.Serialize(content);
+                                            //byte[] data = Encoding.UTF8.GetBytes(json);
+                                            byte[] data = aesClass.EncryptMessage(json, key, iv);
+                                            udpSocket.SendTo(data, clientEP);
+
+                                        }
+                                        else
+                                        {
+                                            string odgovor = "UNSUCCESS";
+                                            s.Send(Encoding.UTF8.GetBytes(odgovor));
+                                        }
                                     }
                                 }
                                 else

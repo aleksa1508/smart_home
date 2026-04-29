@@ -254,7 +254,9 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Images\profile.png" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj">
       <Project>{EFC0CA4D-4335-40B7-ACD9-6A0C45010084}</Project>
@@ -264,7 +266,9 @@
   <ItemGroup>
     <Resource Include="Images\bedroom.jpg" />
     <Resource Include="Images\living_room.jpg" />
-    <Resource Include="Images\profile.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\garage.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Microsoft.Data.SqlClient.SNI.6.0.2\build\net462\Microsoft.Data.SqlClient.SNI.targets" Condition="Exists('..\packages\Microsoft.Data.SqlClient.SNI.6.0.2\build\net462\Microsoft.Data.SqlClient.SNI.targets')" />

@@ -15,7 +15,7 @@ namespace Client
     /// </summary>
     public partial class DashboardView : UserControl
     {
-        private ObservableCollection<string> pictures = new ObservableCollection<string> { "/Images/living_room.jpg", "/Images/bedroom.jpg" };
+        private ObservableCollection<string> pictures = new ObservableCollection<string> { "/Images/living_room.jpg", "/Images/bedroom.jpg","/Images/garage.png" };
         private DispatcherTimer timer;
         private int currentIndex = 0;
         private ObservableCollection<Device> Devices;

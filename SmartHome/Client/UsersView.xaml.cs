@@ -1,8 +1,13 @@
-﻿using Common;
+﻿using Client.Helpers;
+using Common;
+using Common.DTOs;
 using Common.Enums;
+using Common.Models;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Text.Json;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 
@@ -15,16 +20,23 @@ namespace Client
     {
         public ObservableCollection<User> AllUsers { get; set; }
         public ICollectionView EntitiesView { get; set; }
-        public UsersView(ObservableCollection<User> users)
+        public User currentUser;
+        public AesClass aesClass;
+        public UsersView(User user, ObservableCollection<User> users,AesClass aes)
         {
             InitializeComponent();
+            currentUser = user;
             AllUsers = users;
+            aesClass=aes;
             EntitiesView = CollectionViewSource.GetDefaultView(AllUsers);
 
             RolesComboBox.SelectedIndex = 0;
             StatusComboBox.SelectedIndex = 0;
 
             DataContext = this;
+            // Sakrij action panel ako nije admin
+            if (currentUser.Role != UserRole.OWNER)
+                ActionPanel.Visibility = Visibility.Collapsed;
         }
 
         private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -64,5 +76,54 @@ namespace Client
 
 
         }
+
+        private void UsersDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (UsersDataGrid.SelectedItem is User selectedUser && currentUser.Role == UserRole.OWNER)
+            {
+                // Ne dozvoli adminu da mijenja samog sebe
+                if (selectedUser.ID == currentUser.ID)
+                {
+                    ActionPanel.Visibility = Visibility.Collapsed;
+                    return;
+                }
+
+                SelectedUserText.Text = $"{selectedUser.FirstName} {selectedUser.LastName}";
+                CurrentRoleText.Text = selectedUser.Role.ToString();
+                ActionPanel.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                ActionPanel.Visibility = Visibility.Collapsed;
+            }
+        }
+        private void ChangeRoleButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (UsersDataGrid.SelectedItem == null) return;
+            User selectedUser = UsersDataGrid.SelectedItem as User;
+            if (selectedUser == null) return;
+
+            if (NewRoleComboBox.SelectedItem == null) return;
+            ComboBoxItem selectedItem = NewRoleComboBox.SelectedItem as ComboBoxItem;
+            if (selectedItem == null) return;
+
+            UserRole newRole = selectedItem.Content.ToString() == "OWNER"
+                ? UserRole.OWNER
+                : UserRole.USER;
+
+            // Pošalji UDP komandu serveru
+            var adminCmd = new OwnerCommandDTO
+            {
+                Action = "userRole",
+                Owner = currentUser,
+                ChangedUser = selectedUser,
+                Role = newRole
+            };
+
+            string json = JsonSerializer.Serialize(adminCmd);
+            byte[] data = aesClass.EncryptMessage(json, aesClass.Key, aesClass.IV);
+            ConnectionService.UdpSocket.SendTo(data, ConnectionService.UdpEndpoint);
+        }
+
     }
 }

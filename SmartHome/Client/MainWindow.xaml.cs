@@ -78,10 +78,29 @@ namespace Client
 
             try
             {
+                ConnectionService.TcpSocket.Send(Encoding.UTF8.GetBytes("GET_PUBLIC_KEY"));
+                // Prima dužinu ključa (4 bajta)
+                byte[] lenBuffer = new byte[4];
+                ConnectionService.TcpSocket.Receive(lenBuffer);
+                int keyLength = BitConverter.ToInt32(lenBuffer, 0);
 
+                // Prima XML ključ
+                byte[] keyBytes = new byte[keyLength];
+                int totalReceived = 0;
+                while (totalReceived < keyLength)
+                {
+                    int received = ConnectionService.TcpSocket.Receive(
+                        keyBytes, totalReceived, keyLength - totalReceived, SocketFlags.None);
+                    totalReceived += received;
+                }
+                string publicKeyXml = Encoding.UTF8.GetString(keyBytes);
+
+                RsaClass rsa = new RsaClass(publicKeyXml);
+
+                // KORAK 2: Enkriptuj login i pošalji
                 string login = $"{UsernameTextBox.Text}:{PasswordTextBox.Password}";
-                byte[] loginData = Encoding.UTF8.GetBytes(login);
-                ConnectionService.TcpSocket.Send(loginData);
+                byte[] encryptedLogin = rsa.Encrypt(login);
+                ConnectionService.TcpSocket.Send(encryptedLogin);
 
 
                 // receive UDP port
@@ -117,6 +136,7 @@ namespace Client
                 // UDP setup
                 ConnectionService.UdpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
                 ConnectionService.UdpEndpoint = new IPEndPoint(IPAddress.Loopback, port);
+
                 User user = userReository.GetKorisnik(UsernameTextBox.Text, PasswordTextBox.Password);
 
                 // start loop

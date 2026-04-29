@@ -10,6 +10,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="2*"></RowDefinition>
             <RowDefinition Height="11*"></RowDefinition>
+            <RowDefinition Height="2*"></RowDefinition>
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right">
             
@@ -38,7 +39,7 @@
           GridLinesVisibility="None"
           HorizontalGridLinesBrush="#A8DADC"
           VerticalGridLinesBrush="#A8DADC"
-          HeadersVisibility="Column"
+          HeadersVisibility="Column" SelectionChanged="UsersDataGrid_SelectionChanged"
           Foreground="White">
 
             <!-- HEADER -->
@@ -143,6 +144,76 @@
             </DataGrid.Columns>
 
         </DataGrid>
+        <!-- ACTION PANEL — vidljiv samo kad je red selektovan i korisnik je ADMIN -->
+        <Border x:Name="ActionPanel"
+            Grid.Row="2"
+            Visibility="Collapsed"
+            Background="#2F4769"
+            CornerRadius="10"
+            Margin="10,0,10,10"
+            Padding="15,5">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
+                <!-- Info o selektovanom korisniku -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="Selected: " Foreground="#A8DADC" FontWeight="Bold"/>
+                    <TextBlock x:Name="SelectedUserText" Foreground="White"/>
+                    <TextBlock Text="  |  Current role: " Foreground="#A8DADC" FontWeight="Bold"/>
+                    <TextBlock x:Name="CurrentRoleText" Foreground="#FF60F360" FontWeight="Bold"/>
+                </StackPanel>
+
+                <!-- Odabir nove role -->
+                <ComboBox x:Name="NewRoleComboBox"
+                      Grid.Column="1"
+                      Width="120"
+                      Margin="10,-5"
+                      VerticalAlignment="Center"
+                      Style="{StaticResource combo_box3}">
+                    <ComboBoxItem Content="OWNER"/>
+                    <ComboBoxItem Content="USER"/>
+                </ComboBox>
+
+                <!-- Dugme za primjenu -->
+                <Button x:Name="ChangeRoleButton"
+                    Grid.Column="2"
+                    Content="Change Role"
+                    Width="110"
+                    Height="35"
+                    Cursor="Hand"
+                    Click="ChangeRoleButton_Click"
+                    VerticalAlignment="Center">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Background" Value="#457B9D"/>
+                            <Setter Property="Foreground" Value="White"/>
+                            <Setter Property="FontWeight" Value="Bold"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}"
+                                            CornerRadius="8"
+                                            Padding="10,5">
+                                            <ContentPresenter HorizontalAlignment="Center"
+                                                          VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#E63946"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </Grid>
+        </Border>
     </Grid>
 </UserControl>

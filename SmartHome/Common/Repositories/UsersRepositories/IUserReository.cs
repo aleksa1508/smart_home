@@ -14,6 +14,7 @@ namespace Common.Repositories.UsersRepositories
         IEnumerable<User> GetAllUsers();
         void UpdateStatus(int id, ActiveStatus status, int port);
         void UpdatePassword(int id, string password);
+        void UpdateUserRole(int id, UserRole role);
         void PrintAllUsers();
 
     }

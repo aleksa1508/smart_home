@@ -36,8 +36,7 @@
         </StackPanel>
        
         <StackPanel Grid.Row="0" Grid.Column="1" Grid.RowSpan="4" Margin="0,10,0,0">
-            <Image x:Name="ProfileImage" Source="/Images/profile.jpg" Width="200" Height="151"/>
-            <Button x:Name="button_picture" Style="{StaticResource device_button}" Content="Change picture" Margin="10,20,0,0"  Click="button_picture_Click"/>
+            <Image x:Name="ProfileImage" Source="/Images/profile.png" Width="200" Height="151"/>
         </StackPanel>
         <StackPanel Grid.Row="5" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Top" >
             <Button x:Name="button_save" Style="{StaticResource device_button}" Content="Save changes" Margin="107,10,0,0" IsEnabled="False" Click="button_save_Click"/>
