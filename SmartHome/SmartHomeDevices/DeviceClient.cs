@@ -27,7 +27,7 @@ namespace SmartHomeDevices
             EndPoint senderEP = new IPEndPoint(IPAddress.Any, 0);
             //Device d = new Device();
             IDeviceRepository deviceRepository = new DeviceRepository();
-            List<Device> devices = deviceRepository.GetAllDevices().ToList();
+            List<Device> devices = new List<Device>();
             bool end = false;
             while (!end)
             {
@@ -49,27 +49,16 @@ namespace SmartHomeDevices
 
                     string[] parts = receivedMessage.Split(':');
                     Console.WriteLine(parts.Length + " " + parts[0] + " " + parts[1] + " " + parts[2]);
+                    devices = deviceRepository.GetAllDevices().ToList();
                     foreach (var device in devices)
                     {
                         if (device.Name == parts[0])
                         {
                             Console.WriteLine(deviceRepository.PrintDeviceFunctions(device));
+                            Console.WriteLine("\n" + deviceRepository.PrintDeviceCommands(device));
                             break;
                         }
                     }
-
-
-                    foreach (var device in devices)
-                    {
-
-                        foreach (var dev in device.CommandRegister)
-                        {
-                            Console.WriteLine(dev.ToString());
-                        }
-                    }
-
-
-
                 }
 
                 catch (Exception ex)

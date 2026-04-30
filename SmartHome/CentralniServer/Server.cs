@@ -48,9 +48,14 @@ namespace TCPServer
 
             IDeviceRepository deviceRepository = new DeviceRepository();
             //List<Device> devices = new List<Device> {
-            //            new Device(5,"TV",60005,RoomType.KITCHEN,new Dictionary<int, Function>{ { 1, new Function { Name = "state", Value = "OFF" } },{ 2, new Function { Name = "temperature", Value = "23" } } },new List<Command>(),DateTime.Now),
-            //            new Device(6, "Climate", 60006,RoomType.BEDROOM, new Dictionary < int, Function > { { 1, new Function { Name = "state", Value = "OFF" } }, { 2, new Function { Name = "temperature", Value = "12" } } }, new List < Command >(), DateTime.Now),
-            //            new Device(7, "Climate", 60007,RoomType.GARAGE, new Dictionary < int, Function > { { 1, new Function { Name = "state", Value = "OFF" } }, { 2, new Function { Name = "temperature", Value = "20" } } }, new List < Command >(), DateTime.Now),
+            //            new Device(1,"Light Kitchen",60001,RoomType.KITCHEN,new Dictionary<int, Function>{ { 1, new Function { Name = "state", Value = "OFF" } },{ 2, new Function { Name = "brightness", Value = "23" } } },new List<Command>(),DateTime.Now),
+            //            new Device(2,"Light Garage",60002,RoomType.GARAGE,new Dictionary<int, Function>{ { 1, new Function { Name = "state", Value = "OFF" } },{ 2, new Function { Name = "brightness", Value = "23" } } },new List<Command>(),DateTime.Now),
+            //            new Device(3,"TV Living room",60003,RoomType.LIVING_ROOM,new Dictionary<int, Function>{ { 1, new Function { Name = "state", Value = "OFF" } },{ 2, new Function { Name = "channel", Value = "20" } } },new List<Command>(),DateTime.Now),
+            //            new Device(4,"TV Bedroom",60004,RoomType.BEDROOM,new Dictionary<int, Function>{ { 1, new Function { Name = "state", Value = "OFF" } },{ 2, new Function { Name = "channel", Value = "3" } } },new List<Command>(),DateTime.Now),
+            //            new Device(5, "Climate Living room", 60005,RoomType.LIVING_ROOM, new Dictionary < int, Function > { { 1, new Function { Name = "state", Value = "OFF" } }, { 2, new Function { Name = "temperature", Value = "12" } } }, new List < Command >(), DateTime.Now),
+            //            new Device(6, "Climate Bedroom", 60006,RoomType.BEDROOM, new Dictionary < int, Function > { { 1, new Function { Name = "state", Value = "OFF" } }, { 2, new Function { Name = "temperature", Value = "20" } } }, new List < Command >(), DateTime.Now),
+            //            new Device(7, "Door Garage", 60007,RoomType.GARAGE, new Dictionary < int, Function > { { 1, new Function { Name = "state", Value = "CLOSED" } } }, new List < Command >(), DateTime.Now),
+            //            new Device(8, "Vault Bedroom", 60008,RoomType.BEDROOM, new Dictionary < int, Function > { { 1, new Function { Name = "state", Value = "CLOSED" } } }, new List < Command >(), DateTime.Now),
             //};
             //foreach (var d in devices)
             //{
@@ -66,7 +71,7 @@ namespace TCPServer
             //    {
             //        foreach (var f in d.CommandRegister)
             //        {
-            //            deviceRepository.AddDeviceCommands(f.Log, DateTime.Now, d.Id);
+            //            deviceRepository.AddDeviceCommands(f.Log, DateTime.Now, d.Id,string.Empty);
             //        }
             //    }
             //}
@@ -116,7 +121,7 @@ namespace TCPServer
             const int MAX_NEAKTIVNIH_CIKLUSA = 20; // Maksimalan broj ciklusa neaktivnosti pre zatvaranja
 
 
-            RunDevices(7);
+            RunDevices(8);
             bool kraj = false;
 
             byte[] buffer = new byte[65507];
@@ -195,7 +200,8 @@ namespace TCPServer
                                     else if (receivedMessage == "da")
                                     {
                                         //deviceRepository.PrintAllDevices();
-                                        Console.WriteLine(deviceRepository.PrintAllDevices());
+                                        Console.WriteLine("All devices:");
+                                        deviceRepository.PrintAllDevices("");
                                         uredjaji = deviceRepository.GetAllDevices().ToList();
 
                                         //using (MemoryStream ms = new MemoryStream())
@@ -307,6 +313,7 @@ namespace TCPServer
                                         var id = komanda.FunctionID;
                                         var funkcija = komanda.Function;
                                         var vrednost = komanda.Value;
+                                        var username = komanda.Username;
 
                                         //foreach (var s1 in uredjaji)  device client do this uodate
                                         //{
@@ -325,8 +332,8 @@ namespace TCPServer
                                         s.SendTo(initialData, uredjajEP);
 
                                         DateTime timestamp = DateTime.Now;
-                                        string log = $"[{timestamp}] {u1.Name}: {funkcija} promenjena na {vrednost}";
-                                        deviceRepository.AddDeviceCommands(log, DateTime.Now, u1.Id);
+                                        string log = $"[{timestamp}] {u1.Name}: {funkcija} changed on {vrednost}";
+                                        deviceRepository.AddDeviceCommands(log, DateTime.Now, u1.Id,username);
 
                                         var content = new ResponseDTO
                                         {
@@ -334,13 +341,15 @@ namespace TCPServer
                                             Device = u1,
                                             Function = funkcija,
                                             Value = vrednost,
+                                            Username=username,
                                             Timestamp = timestamp
                                         };
                                         string json = JsonSerializer.Serialize(content);
                                         byte[] data = aesClass.EncryptMessage(json, klijentKljucevi[s].Key, klijentKljucevi[s].IV);
                                         s.SendTo(data, clientEP);
                                         //deviceRepository.PrintAllDevices();
-                                        Console.WriteLine(deviceRepository.PrintAllDevices());
+                                        Console.WriteLine("All devices (green device currenty changed):");
+                                        deviceRepository.PrintAllDevices(u1.Name);
 
                                     }
 
@@ -457,7 +466,7 @@ namespace TCPServer
                                             byte[] primljeno = new byte[receivedBytes];
                                             Array.Copy(buffer, primljeno, receivedBytes);
 
-                                            string receivedMessage = aesClass.DecryptMessage(primljeno, key, iv);////////////////////
+                                            string receivedMessage = aesClass.DecryptMessage(primljeno, key, iv);
                                                                                                                  //string receivedMessage = Encoding.UTF8.GetString(buffer, 0, receivedBytes);
 
                                             udpSocket.Blocking = false;
@@ -469,7 +478,8 @@ namespace TCPServer
 
                                             List<Device> uredjaji = deviceRepository.GetAllDevices().ToList();
 
-                                            Console.WriteLine(deviceRepository.PrintAllDevices());
+                                            Console.WriteLine("All devices:");
+                                            deviceRepository.PrintAllDevices("");
 
 
                                             //using (MemoryStream ms = new MemoryStream())
