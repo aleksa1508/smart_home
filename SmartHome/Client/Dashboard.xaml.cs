@@ -120,7 +120,7 @@ namespace Client
                             if (response.Message.Equals("Command"))
                             {
                                 MainWindow mainWindow = (MainWindow)Application.Current.MainWindow;
-                                CommandRegister.Add(new Command { ID = CommandRegister.Count + 1, CreationDate = response.Timestamp, Log = $"[{response.Timestamp}] {response.Device.Name}: {response.Function} promenjena na {response.Value}" });
+                                CommandRegister.Add(new Command { ID = CommandRegister.Count + 1, CreationDate = response.Timestamp, Log = $"[{response.Timestamp}] {response.Device.Name}: {response.Function} changed on {response.Value}",Username=response.Username });
                                 mainWindow.ShowToastNotification(new ToastNotification("Success", $"You are successfully set new value for device {response.Device.Name}", NotificationType.Success));
                                 byte[] bytes = System.Text.Encoding.UTF8.GetBytes("da");
                                 ConnectionService.UdpSocket.SendTo(aesClass.EncryptMessage("da", aesClass.Key, aesClass.IV), ConnectionService.UdpEndpoint);
@@ -224,13 +224,13 @@ namespace Client
         {
             var d = deviceRepository.GetAllDevices().ToList();
             Title.Content = "Devices";
-            MainContent.Content = new DevicesView(new ObservableCollection<Device>(d));
+            MainContent.Content = new DevicesView(new ObservableCollection<Device>(d),user);
         }
 
         private void control_table_menu_button_Click(object sender, RoutedEventArgs e)
         {
             Title.Content = "Control Table";
-            MainContent.Content = new ControlTableView(devices, CommandRegister, notificationManager, aesClass);
+            MainContent.Content = new ControlTableView(devices, CommandRegister, notificationManager, aesClass,user);
         }
 
         // metoda koja odjavljuje korisnika

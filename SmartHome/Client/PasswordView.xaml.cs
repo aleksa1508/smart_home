@@ -24,15 +24,15 @@ namespace Client
         private void button_save_Click(object sender, RoutedEventArgs e)
         {
             Dashboard parentWindow = (Dashboard)Window.GetWindow(this);
-            if (CurrentPasswordTextBox.Text.Length > 0 && NewPasswordTextBox.Text.Length > 0)
+            if (CurrentPasswordTextBox.Password.Length > 0 && NewPasswordTextBox.Password.Length > 0)
             {
-                if (userReository.GetKorisnik(user.Username, CurrentPasswordTextBox.Text) != null)
+                if (userReository.GetKorisnik(user.Username, CurrentPasswordTextBox.Password) != null)
                 {
-                    userReository.UpdatePassword(user.ID, NewPasswordTextBox.Text);
+                    userReository.UpdatePassword(user.ID, NewPasswordTextBox.Password);
                     parentWindow.ShowToastNotification(new ToastNotification("Success", "Password is update successfully", NotificationType.Success));
                     button_save.IsEnabled = false;
-                    CurrentPasswordTextBox.Text = string.Empty;
-                    NewPasswordTextBox.Text = string.Empty;
+                    CurrentPasswordTextBox.Password = string.Empty;
+                    NewPasswordTextBox.Password = string.Empty;
                 }
                 else
                 {
@@ -44,10 +44,9 @@ namespace Client
                 parentWindow.ShowToastNotification(new ToastNotification("Error", "Fill current and new password", NotificationType.Error));
             }
         }
-
-        private void CurrentPasswordTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        private void CurrentPasswordTextBox_PasswordChanged(object sender, RoutedEventArgs e)
         {
-            if (CurrentPasswordTextBox.Text.Length > 0 && NewPasswordTextBox.Text.Length > 0)
+            if (CurrentPasswordTextBox.Password.Length > 0 && NewPasswordTextBox.Password.Length > 0)
             {
                 button_save.IsEnabled = true;
             }

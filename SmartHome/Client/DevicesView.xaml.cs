@@ -1,4 +1,5 @@
-﻿using Common.Enums;
+﻿using Common;
+using Common.Enums;
 using Common.Models;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -14,13 +15,17 @@ namespace Client
     {
         public ObservableCollection<Device> devices;
         public ObservableCollection<Button> buttons;
-        public DevicesView(ObservableCollection<Device> oc_devices)
+        public DevicesView(ObservableCollection<Device> oc_devices,User user)
         {
             InitializeComponent();
             //preuzeti iz baze kad se ucita ovaj tab
 
             devices = oc_devices;
-            buttons = new ObservableCollection<Button> { light_tab_button, tv_tab_button, climate_tab_button, door_tab_button };
+            if (user.Role == UserRole.USER)
+            {
+                devices = new ObservableCollection<Device>(oc_devices.Where(x => !x.Name.Contains("Vault")).ToList());
+            }
+            buttons = new ObservableCollection<Button> { kitchen_tab_button, bedroom_tab_button, living_room_tab_button, garage_tab_button };
             //preuzeti komande iz baze i ubaciti ovako ili kroz konstruktor uredjaja
             //uredjaji[0].EvidencijaKomandi = new List<Komanda> {
             //    new Komanda { ID=1,CreationDate=DateTime.Now,Log= $"[{DateTime.Now}] {uredjaji[0].Ime}: intezitet promenjena na 20" },
@@ -38,7 +43,7 @@ namespace Client
             DataContext = this;
         }
 
-        private void light_tab_button_Click(object sender, RoutedEventArgs e)
+        private void kitchen_tab_button_Click(object sender, RoutedEventArgs e)
         {
             DeviceStackPanel.Visibility = Visibility.Visible;
             SetBackground(0);
@@ -51,7 +56,7 @@ namespace Client
             //ValueTextBox.Text = devices[0].Functions.Values.FirstOrDefault(f => f.Name == "volume")?.Value;
         }
 
-        private void tv_tab_button_Click(object sender, RoutedEventArgs e)
+        private void bedroom_tab_button_Click(object sender, RoutedEventArgs e)
         {
             DeviceStackPanel.Visibility = Visibility.Visible;
             SetBackground(1);
@@ -65,11 +70,11 @@ namespace Client
             //ValueTextBox.Text = devices[1].Functions.Values.FirstOrDefault(f => f.Name == "temperature")?.Value;
         }
 
-        private void climate_tab_button_Click(object sender, RoutedEventArgs e)
+        private void living_room_tab_button_Click(object sender, RoutedEventArgs e)
         {
             DeviceStackPanel.Visibility = Visibility.Visible;
             SetBackground(2);
-            DevicesComboBox.ItemsSource = new ObservableCollection<Device>(devices.Where(d => d.Location == RoomType.BATHROOM).ToList());
+            DevicesComboBox.ItemsSource = new ObservableCollection<Device>(devices.Where(d => d.Location == RoomType.LIVING_ROOM).ToList());
             DevicesComboBox.SelectedIndex = 0;
             //LogsDataGrid.ItemsSource = devices[2].CommandRegister;
             //NameTextBox.Text = devices[2].Name;
@@ -78,7 +83,7 @@ namespace Client
             //ValueTextBox.Text = devices[2].Functions.Values.FirstOrDefault(f => f.Name == "temperature")?.Value;
         }
 
-        private void door_tab_button_Click(object sender, RoutedEventArgs e)
+        private void garage_tab_button_Click(object sender, RoutedEventArgs e)
         {
             DeviceStackPanel.Visibility = Visibility.Visible;
             SetBackground(3);
@@ -115,19 +120,25 @@ namespace Client
             StatusTextBox.Text = device.Functions.Values.FirstOrDefault(f => f.Name == "state")?.Value;
             if (device.Name.Contains("Light"))
             {
-                ValueTextBox.Text = device.Functions.Values.FirstOrDefault(f => f.Name == "volume")?.Value;
+                ValueTextBox.Text = device.Functions.Values.FirstOrDefault(f => f.Name == "brightness")?.Value;
 
             }
-            else if (device.Name.Contains("Climate") || device.Name.Contains("TV"))
+            else if (device.Name.Contains("Climate"))
             {
                 ValueTextBox.Text = device.Functions.Values.FirstOrDefault(f => f.Name == "temperature")?.Value;
 
             }
-            else if (device.Name.Contains("Door"))
+            else if (device.Name.Contains("TV"))
+            {
+                ValueTextBox.Text = device.Functions.Values.FirstOrDefault(f => f.Name == "channel")?.Value;
+
+            }
+            else if (device.Name.Contains("Door") || device.Name.Contains("Vault"))
             {
                 ValueTextBox.Text = "-";
 
             }
         }
+
     }
 }

@@ -1,10 +1,13 @@
 ﻿using Client.Helpers;
+using Common;
 using Common.DTOs;
+using Common.Enums;
 using Common.Models;
 using Notification.Wpf;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -20,12 +23,18 @@ namespace Client
         public ObservableCollection<Device> Devices { get; set; }
         public ObservableCollection<Command> CommandRegister { get; set; }
         public AesClass aesClass;
-        public ControlTableView(ObservableCollection<Device> devices, ObservableCollection<Command> commands, NotificationManager manager, AesClass aes)
+        public User user;
+        public ControlTableView(ObservableCollection<Device> devices, ObservableCollection<Command> commands, NotificationManager manager, AesClass aes,User user)
         {
             InitializeComponent();
             CommandRegister = commands;
-            Devices = devices;
             aesClass = aes;
+            Devices=devices;
+            if (user.Role == UserRole.USER)
+            {
+                Devices = new ObservableCollection<Device>(devices.Where(x=>!x.Name.Contains("Vault")).ToList());
+            }
+            this.user = user;
             this.DataContext = this;
         }
 
@@ -49,31 +58,74 @@ namespace Client
 
         private void submit_button_Click(object sender, RoutedEventArgs e)
         {
+            var device = DeviceComboBox.SelectedItem as Device;
             Dashboard parentWindow = Window.GetWindow(this) as Dashboard;
             if (ValueTextBox.Text.Length == 0)
             {
                 parentWindow?.ShowToastNotification(new ToastNotification("Error", "You can fill the data", NotificationType.Error));
                 return;
             }
-            string regexValue = "^(volume|temperature|blue color|red color)$";
+            string regexValue = "^(channel|temperature|brightness)$";
             Regex regex = new Regex(regexValue);
             var selectedFunction = (KeyValuePair<int, Function>)FunctionComboBox.SelectedItem;
             if (regex.IsMatch(selectedFunction.Value.Name))
             {
                 if (!Int32.TryParse(ValueTextBox.Text, out int value))
                 {
-                    parentWindow?.ShowToastNotification(new ToastNotification("Error", "Value might be a number", NotificationType.Error));
+                    parentWindow?.ShowToastNotification(new ToastNotification("Error", "Value must be a number", NotificationType.Error));
+                    return;
+                }
+                if (device.Functions.FirstOrDefault(x => x.Value.Name.Equals("state")).Value.Value.Equals("OFF"))
+                {
+                    parentWindow?.ShowToastNotification(new ToastNotification("Error", "First,you can turn on a device", NotificationType.Error));
                     return;
                 }
 
             }
             else
             {
-                if (!ValueTextBox.Text.Equals("ON") && !ValueTextBox.Text.Equals("OFF"))
+                if(device.Name.Contains("Door") || device.Name.Contains("Vault"))
                 {
-                    parentWindow?.ShowToastNotification(new ToastNotification("Error", "Value of device state might be ON/OFF", NotificationType.Error));
-                    return;
+                    if (selectedFunction.Value.Value.Equals("OPEN"))
+                    {
+                        if (!ValueTextBox.Text.Equals("CLOSED"))
+                        {
+                            parentWindow?.ShowToastNotification(new ToastNotification("Error", "Value of device state has already OPEN", NotificationType.Error));
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        if (!ValueTextBox.Text.Equals("OPEN"))
+                        {
+                            parentWindow?.ShowToastNotification(new ToastNotification("Error", "Value of device state has already CLOSED", NotificationType.Error));
+                            return;
+                        }
+
+                    }
                 }
+                else
+                {
+                    if (selectedFunction.Value.Value.Equals("ON"))
+                    {
+                        if (!ValueTextBox.Text.Equals("OFF"))
+                        {
+                            parentWindow?.ShowToastNotification(new ToastNotification("Error", "Value of device state has already ON", NotificationType.Error));
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        if (!ValueTextBox.Text.Equals("ON"))
+                        {
+                            parentWindow?.ShowToastNotification(new ToastNotification("Error", "Value of device state has already OFF", NotificationType.Error));
+                            return;
+                        }
+
+                    }
+                }
+
+                
             }
 
             var selected = (KeyValuePair<int, Function>)FunctionComboBox.SelectedItem;
@@ -82,7 +134,8 @@ namespace Client
                 SelectedDevice = (DeviceComboBox.SelectedItem as Device),
                 FunctionID = selected.Key,
                 Function = selected.Value.Name,
-                Value = ValueTextBox.Text
+                Value = ValueTextBox.Text,
+                Username = user.Username    
             };
 
             string json = JsonSerializer.Serialize(content);

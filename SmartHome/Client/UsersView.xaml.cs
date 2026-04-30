@@ -22,12 +22,12 @@ namespace Client
         public ICollectionView EntitiesView { get; set; }
         public User currentUser;
         public AesClass aesClass;
-        public UsersView(User user, ObservableCollection<User> users,AesClass aes)
+        public UsersView(User user, ObservableCollection<User> users, AesClass aes)
         {
             InitializeComponent();
             currentUser = user;
             AllUsers = users;
-            aesClass=aes;
+            aesClass = aes;
             EntitiesView = CollectionViewSource.GetDefaultView(AllUsers);
 
             RolesComboBox.SelectedIndex = 0;
