@@ -8,5 +8,6 @@ namespace Common.DTOs
         public int FunctionID { get; set; }
         public string Function { get; set; } = string.Empty;
         public string Value { get; set; } = string.Empty;
+        public string Username { get; set; } = string.Empty;
     }
 }

@@ -2,6 +2,6 @@
 {
     public enum RoomType
     {
-        KITCHEN, BEDROOM, GARAGE, BATHROOM
+        KITCHEN, BEDROOM, GARAGE, LIVING_ROOM
     }
 }

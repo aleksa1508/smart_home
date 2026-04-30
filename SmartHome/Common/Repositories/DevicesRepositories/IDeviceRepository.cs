@@ -12,12 +12,13 @@ namespace Common.Repositories.DevicesRepositories
         List<Command> GetDeviceCommands(int id);
         void AddDevice(string name, int port, RoomType location, DateTime lastChange);
         void AddDeviceFunctions(string function, string value, int deviceId);
-        void AddDeviceCommands(string message, DateTime creation_date, int deviceId);
+        void AddDeviceCommands(string message, DateTime creation_date, int deviceId,string username);
         void UpdateDeviceFunction(int deviceId, int id, string name, string value);
         void UpdateDevice(int deviceId);
         IEnumerable<Device> GetAllDevices();
         IEnumerable<Command> GetAllCommands();
+        string PrintDeviceCommands(Device device);
         string PrintDeviceFunctions(Device device);
-        string PrintAllDevices();
+        void PrintAllDevices(string deviceName);
     }
 }

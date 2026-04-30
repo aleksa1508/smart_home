@@ -1,4 +1,5 @@
 ﻿using Common.Enums;
+using ConsoleTables;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
@@ -156,18 +157,21 @@ namespace Common.Repositories.UsersRepositories
         {
             List<User> list = GetAllUsers().ToList();
 
-            Console.WriteLine("-------------------------------------------------------------------------------------------");
-            Console.WriteLine("| {0,-15} | {1,-12} | {2,-15} | {3,-8} | {4,-6} | {5,-10} |",
-                "FirstName", "LastName", "Username", "Status", "Port", "Role");
-            Console.WriteLine("-------------------------------------------------------------------------------------------");
-
+            //Console.WriteLine("-------------------------------------------------------------------------------------------");
+            //Console.WriteLine("| {0,-15} | {1,-12} | {2,-15} | {3,-8} | {4,-6} | {5,-10} |",
+            //    "FirstName", "LastName", "Username", "Status", "Port", "Role");
+            //Console.WriteLine("-------------------------------------------------------------------------------------------");
+            var tablee = new ConsoleTable("FirstName", "LastName", "Username", "Online", "Port", "Role");
             foreach (var user in list)
             {
-                Console.WriteLine("| {0,-15} | {1,-12} | {2,-15} | {3,-8} | {4,-6} | {5,-10} |",
-                    user.FirstName, user.LastName, user.Username, user.Status == ActiveStatus.ACTIVE ? "YES" : "NO", user.Port, user.Role);
+                tablee.AddRow(user.FirstName, user.LastName, user.Username, user.Status == ActiveStatus.ACTIVE ? "YES" : "NO", user.Port, user.Role);
+                //Console.WriteLine("| {0,-15} | {1,-12} | {2,-15} | {3,-8} | {4,-6} | {5,-10} |",
+                //    user.FirstName, user.LastName, user.Username, user.Status == ActiveStatus.ACTIVE ? "YES" : "NO", user.Port, user.Role);
             }
+            tablee.Write(Format.Alternative);
+           
+           
 
-            Console.WriteLine("-------------------------------------------------------------------------------------------");
         }
 
         public User GetUserById(int id)
