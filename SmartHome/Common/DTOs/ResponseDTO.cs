@@ -15,5 +15,6 @@ namespace Common.DTOs
         public List<Device> Devices { get; set; }
         public List<Command> Commands { get; set; }
         public List<User> Users { get; set; }
+        public List<SmartRule> SmartRules { get; set; }
     }
 }

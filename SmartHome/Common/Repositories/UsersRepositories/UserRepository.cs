@@ -169,8 +169,8 @@ namespace Common.Repositories.UsersRepositories
                 //    user.FirstName, user.LastName, user.Username, user.Status == ActiveStatus.ACTIVE ? "YES" : "NO", user.Port, user.Role);
             }
             tablee.Write(Format.Alternative);
-           
-           
+
+
 
         }
 

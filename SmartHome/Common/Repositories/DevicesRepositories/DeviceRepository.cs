@@ -184,7 +184,7 @@ namespace Common.Repositories.DevicesRepositories
                 return;
             }
             table.Write(Format.Alternative);
-            
+
         }
 
         public string PrintDeviceFunctions(Device device)
@@ -192,19 +192,19 @@ namespace Common.Repositories.DevicesRepositories
             string funkcije = string.Join(", ", device.Functions.Select(f => $"{f.Value.Name}: {f.Value.Value}"));
 
             var tablee = new ConsoleTable("Device name", "Port", "Functions");
-          
-            tablee.AddRow(device.Name,device.Port,funkcije);
-                
+
+            tablee.AddRow(device.Name, device.Port, funkcije);
+
             return tablee.ToStringAlternative();
         }
         public string PrintDeviceCommands(Device device)
         {
             var tablee = new ConsoleTable("Date and Time", "Log", "Username");
-            foreach(var c in device.CommandRegister.OrderByDescending(x=>x.CreationDate).ToList())
+            foreach (var c in device.CommandRegister.OrderByDescending(x => x.CreationDate).ToList())
             {
                 tablee.AddRow(c.CreationDate, c.Log, c.Username);
             }
-                
+
             return tablee.ToStringAlternative();
         }
         public void UpdateDeviceFunction(int deviceId, int id, string name, string value)

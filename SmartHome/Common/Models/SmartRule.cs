@@ -1,0 +1,26 @@
+﻿using System.ComponentModel;
+
+namespace Common.Models
+{
+    public class SmartRule : INotifyPropertyChanged
+    {
+        public string Name { get; set; }
+        public string Description { get; set; }
+
+        private bool isEnabled;
+        public bool IsEnabled
+        {
+            get => isEnabled;
+            set
+            {
+                if (isEnabled != value)
+                {
+                    isEnabled = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsEnabled)));
+                }
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+    }
+}
