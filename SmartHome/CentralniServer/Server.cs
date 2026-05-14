@@ -3,6 +3,7 @@ using Common.DTOs;
 using Common.Enums;
 using Common.Models;
 using Common.Repositories.DevicesRepositories;
+using Common.Repositories.SmartRulesRepositories;
 using Common.Repositories.UsersRepositories;
 using System;
 using System.Collections.Generic;
@@ -89,7 +90,19 @@ namespace TCPServer
             //Console.WriteLine(Convert.ToBase64String(encryptMessage));
             //string decryptMessage = DecryptMessage(encryptMessage, key, IV);
             //Console.WriteLine(decryptMessage);
+            //List<SmartRule>rules=new List<SmartRule>
+            //{
+            //    new SmartRule{ IsEnabled=false, Name="NightMode",Description="Limits temperature to 20°C, restricts lights and locks garage during night hours."},
+            //    new SmartRule{ IsEnabled=false, Name="SecurityMode",Description="Limits temperature to 20°C, restricts lights and locks garage during night hours."},
+            //    new SmartRule{ IsEnabled=false, Name="EnergySaving",Description="Limits temperature to 20°C, restricts lights and locks garage during night hours."},
+            //};
+            ISmartRulesRepository smartRulesRepository = new SmartRulesRepository();
+            //foreach(var r in rules)
+            //{
+            //    smartRulesRepository.AddSmartRule(r.Name, r.Description, r.IsEnabled);
+            //}
 
+            RuleEngine ruleEngine = new RuleEngine();
             AesClass aesClass = new AesClass();
             RsaClass rsaClass = new RsaClass();
             string publicKeyXml = rsaClass.ExportPublicKey();
@@ -216,7 +229,8 @@ namespace TCPServer
                                         {
                                             Message = "Devices List",
                                             Devices = uredjaji,
-                                            Commands = commands
+                                            Commands = commands,
+                                            SmartRules = smartRulesRepository.GetAllSmartRules().ToList(),
                                         };
                                         string json = JsonSerializer.Serialize(content);
                                         //byte[] data = Encoding.UTF8.GetBytes(json);
@@ -246,6 +260,34 @@ namespace TCPServer
                                         //byte[] data = Encoding.UTF8.GetBytes(json);
                                         byte[] data = aesClass.EncryptMessage(json, klijentKljucevi[s].Key, klijentKljucevi[s].IV);
                                         s.SendTo(data, clientEP);
+                                    }
+                                    else if (receivedMessage.Contains("\"Action\":\"smartRule\""))
+                                    {
+                                        //deviceRepository.PrintAllDevices();
+                                        //Console.WriteLine(deviceRepository.PrintAllDevices());
+                                        var rule = JsonSerializer.Deserialize<SmartRuleDTO>(receivedMessage);
+                                        smartRulesRepository.UpdateSmartRule(rule.SmartRule);
+
+                                        //using (MemoryStream ms = new MemoryStream())
+                                        //{
+
+                                        //    formatter.Serialize(ms, uredjaji);
+                                        //    byte[] data = ms.ToArray();
+                                        //    s.SendTo(data, clientEP);
+                                        //}
+                                        //var commands = deviceRepository.GetAllCommands().ToList();
+                                        var content = new ResponseDTO
+                                        {
+                                            Message = "Smart Rules",
+                                            Value = "Smart rule Night Mode is ON",
+                                            SmartRules = smartRulesRepository.GetAllSmartRules().ToList()
+
+                                        };
+                                        string json = JsonSerializer.Serialize(content);
+                                        //byte[] data = Encoding.UTF8.GetBytes(json);
+                                        byte[] data = aesClass.EncryptMessage(json, klijentKljucevi[s].Key, klijentKljucevi[s].IV);
+                                        s.SendTo(data, clientEP);
+
                                     }
                                     else if (receivedMessage.Contains("\"Action\":\"userRole\""))
                                     {
@@ -308,13 +350,14 @@ namespace TCPServer
                                         //string json= aesClass.DecryptMessage(primljeno, klijentKljucevi[s].Key, klijentKljucevi[s].IV);
 
                                         var komanda = JsonSerializer.Deserialize<CommandDTO>(receivedMessage);
-
+                                        var users = userReository.GetAllUsers().ToList();
+                                        var rules = smartRulesRepository.GetAllSmartRules().ToList();
                                         var u1 = komanda.SelectedDevice;
                                         var id = komanda.FunctionID;
                                         var funkcija = komanda.Function;
                                         var vrednost = komanda.Value;
                                         var username = komanda.Username;
-
+                                        var existUser = users.Find(x => x.Username == username);
                                         //foreach (var s1 in uredjaji)  device client do this uodate
                                         //{
                                         //    if (s1.Name == u1.Name)
@@ -323,7 +366,26 @@ namespace TCPServer
                                         //        break;
                                         //    }
                                         //}
+                                        string blockMessage;
+                                        if (ruleEngine.BlockCommand(rules, komanda, existUser, out blockMessage))
+                                        {
+                                            var blockedResponse = new ResponseDTO
+                                            {
+                                                Message = "AdminCommand",
+                                                Value = blockMessage
+                                            };
 
+                                            string blockedJson = JsonSerializer.Serialize(blockedResponse);
+
+                                            byte[] blockedData = aesClass.EncryptMessage(
+                                                blockedJson,
+                                                klijentKljucevi[s].Key,
+                                                klijentKljucevi[s].IV);
+
+                                            s.SendTo(blockedData, clientEP);
+
+                                            continue;
+                                        }
                                         deviceRepository.UpdateDeviceFunction(u1.Id, id, funkcija, vrednost);
                                         //povezivanje uredjaja i servera
                                         IPEndPoint uredjajEP = new IPEndPoint(IPAddress.Loopback, u1.Port);
@@ -333,7 +395,7 @@ namespace TCPServer
 
                                         DateTime timestamp = DateTime.Now;
                                         string log = $"[{timestamp}] {u1.Name}: {funkcija} changed on {vrednost}";
-                                        deviceRepository.AddDeviceCommands(log, DateTime.Now, u1.Id,username);
+                                        deviceRepository.AddDeviceCommands(log, DateTime.Now, u1.Id, username);
 
                                         var content = new ResponseDTO
                                         {
@@ -341,7 +403,7 @@ namespace TCPServer
                                             Device = u1,
                                             Function = funkcija,
                                             Value = vrednost,
-                                            Username=username,
+                                            Username = username,
                                             Timestamp = timestamp
                                         };
                                         string json = JsonSerializer.Serialize(content);
@@ -467,7 +529,7 @@ namespace TCPServer
                                             Array.Copy(buffer, primljeno, receivedBytes);
 
                                             string receivedMessage = aesClass.DecryptMessage(primljeno, key, iv);
-                                                                                                                 //string receivedMessage = Encoding.UTF8.GetString(buffer, 0, receivedBytes);
+                                            //string receivedMessage = Encoding.UTF8.GetString(buffer, 0, receivedBytes);
 
                                             udpSocket.Blocking = false;
                                             Console.WriteLine($"Poruka od UDP klijenta : {receivedMessage}");
@@ -477,7 +539,7 @@ namespace TCPServer
                                             klijentKljucevi[udpSocket] = (key, iv); //dodati kljucevi u dict
 
                                             List<Device> uredjaji = deviceRepository.GetAllDevices().ToList();
-
+                                            List<SmartRule> smartRules = smartRulesRepository.GetAllSmartRules().ToList();
                                             Console.WriteLine("All devices:");
                                             deviceRepository.PrintAllDevices("");
 
@@ -494,7 +556,8 @@ namespace TCPServer
                                             {
                                                 Message = "Devices List",
                                                 Devices = uredjaji,
-                                                Commands = commands
+                                                Commands = commands,
+                                                SmartRules = smartRules
                                             };
                                             string json = JsonSerializer.Serialize(content);
                                             //byte[] data = Encoding.UTF8.GetBytes(json);

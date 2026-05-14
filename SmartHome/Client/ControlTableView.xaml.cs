@@ -24,18 +24,21 @@ namespace Client
         public ObservableCollection<Command> CommandRegister { get; set; }
         public AesClass aesClass;
         public User user;
-        public ControlTableView(ObservableCollection<Device> devices, ObservableCollection<Command> commands, NotificationManager manager, AesClass aes,User user)
+        public ControlTableView(ObservableCollection<Device> devices, ObservableCollection<Command> commands, NotificationManager manager, AesClass aes, User user)
         {
             InitializeComponent();
             CommandRegister = commands;
             aesClass = aes;
-            Devices=devices;
-            if (user.Role == UserRole.USER)
-            {
-                Devices = new ObservableCollection<Device>(devices.Where(x=>!x.Name.Contains("Vault")).ToList());
-            }
+            SetDevices(devices, user);
             this.user = user;
             this.DataContext = this;
+        }
+
+        public void SetDevices(ObservableCollection<Device> devices, User user)
+        {
+            Devices = user.Role == UserRole.USER ? new ObservableCollection<Device>(devices.Where(x => !x.Name.Contains("Vault")).ToList())
+                                                    : new ObservableCollection<Device>(devices);
+            DeviceComboBox.ItemsSource = Devices;
         }
 
         private void DeviceComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -84,21 +87,38 @@ namespace Client
             }
             else
             {
-                if(device.Name.Contains("Door") || device.Name.Contains("Vault"))
+                if (device.Name.Contains("Door") || device.Name.Contains("Vault"))
                 {
                     if (selectedFunction.Value.Value.Equals("OPEN"))
                     {
-                        if (!ValueTextBox.Text.Equals("CLOSED"))
+                        if (ValueTextBox.Text.Equals("OPEN") || ValueTextBox.Text.Equals("CLOSED"))
                         {
-                            parentWindow?.ShowToastNotification(new ToastNotification("Error", "Value of device state has already OPEN", NotificationType.Error));
+                            if (!ValueTextBox.Text.Equals("CLOSED"))
+                            {
+                                parentWindow?.ShowToastNotification(new ToastNotification("Error", "Value of device state has already OPEN", NotificationType.Error));
+                                return;
+                            }
+                        }
+                        else
+                        {
+                            parentWindow?.ShowToastNotification(new ToastNotification("Error", "Value of device must be OPEN/CLOSED", NotificationType.Error));
                             return;
                         }
                     }
                     else
                     {
-                        if (!ValueTextBox.Text.Equals("OPEN"))
+                        if (ValueTextBox.Text.Equals("OPEN") || ValueTextBox.Text.Equals("CLOSED"))
                         {
-                            parentWindow?.ShowToastNotification(new ToastNotification("Error", "Value of device state has already CLOSED", NotificationType.Error));
+
+                            if (!ValueTextBox.Text.Equals("OPEN"))
+                            {
+                                parentWindow?.ShowToastNotification(new ToastNotification("Error", "Value of device state has already CLOSED", NotificationType.Error));
+                                return;
+                            }
+                        }
+                        else
+                        {
+                            parentWindow?.ShowToastNotification(new ToastNotification("Error", "Value of device must be OPEN/CLOSED", NotificationType.Error));
                             return;
                         }
 
@@ -108,24 +128,39 @@ namespace Client
                 {
                     if (selectedFunction.Value.Value.Equals("ON"))
                     {
-                        if (!ValueTextBox.Text.Equals("OFF"))
+                        if (ValueTextBox.Text.Equals("ON") || ValueTextBox.Text.Equals("OFF"))
                         {
-                            parentWindow?.ShowToastNotification(new ToastNotification("Error", "Value of device state has already ON", NotificationType.Error));
+                            if (!ValueTextBox.Text.Equals("OFF"))
+                            {
+                                parentWindow?.ShowToastNotification(new ToastNotification("Error", "Value of device state has already ON", NotificationType.Error));
+                                return;
+                            }
+                        }
+                        else
+                        {
+                            parentWindow?.ShowToastNotification(new ToastNotification("Error", "Value of device must be ON/OFF", NotificationType.Error));
                             return;
                         }
                     }
                     else
                     {
-                        if (!ValueTextBox.Text.Equals("ON"))
+                        if (ValueTextBox.Text.Equals("ON") || ValueTextBox.Text.Equals("OFF"))
                         {
-                            parentWindow?.ShowToastNotification(new ToastNotification("Error", "Value of device state has already OFF", NotificationType.Error));
+                            if (!ValueTextBox.Text.Equals("ON"))
+                            {
+                                parentWindow?.ShowToastNotification(new ToastNotification("Error", "Value of device state has already OFF", NotificationType.Error));
+                                return;
+                            }
+                        }
+                        else
+                        {
+                            parentWindow?.ShowToastNotification(new ToastNotification("Error", "Value of device must be ON/OFF", NotificationType.Error));
                             return;
                         }
-
                     }
                 }
 
-                
+
             }
 
             var selected = (KeyValuePair<int, Function>)FunctionComboBox.SelectedItem;
@@ -135,7 +170,7 @@ namespace Client
                 FunctionID = selected.Key,
                 Function = selected.Value.Name,
                 Value = ValueTextBox.Text,
-                Username = user.Username    
+                Username = user.Username
             };
 
             string json = JsonSerializer.Serialize(content);
@@ -144,7 +179,7 @@ namespace Client
             ConnectionService.UdpSocket.SendTo(aesClass.EncryptMessage(json, aesClass.Key, aesClass.IV), ConnectionService.UdpEndpoint);
 
             ValueTextBox.Text = string.Empty;
-            ValueTextBox.IsEnabled = false;
+            ValueTextBox.IsEnabled = true;
 
         }
 

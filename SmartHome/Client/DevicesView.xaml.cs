@@ -15,7 +15,7 @@ namespace Client
     {
         public ObservableCollection<Device> devices;
         public ObservableCollection<Button> buttons;
-        public DevicesView(ObservableCollection<Device> oc_devices,User user)
+        public DevicesView(ObservableCollection<Device> oc_devices, User user)
         {
             InitializeComponent();
             //preuzeti iz baze kad se ucita ovaj tab

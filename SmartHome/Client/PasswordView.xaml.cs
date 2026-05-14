@@ -19,6 +19,7 @@ namespace Client
             InitializeComponent();
             userReository = repo;
             user = u;
+            DataContext = this;
         }
 
         private void button_save_Click(object sender, RoutedEventArgs e)

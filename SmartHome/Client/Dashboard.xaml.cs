@@ -27,6 +27,7 @@ namespace Client
         private User user;
         private ObservableCollection<Device> devices;
         private ObservableCollection<Command> CommandRegister;
+        private ObservableCollection<SmartRule> SmartRules;
         private IUserReository userReository;
         private IDeviceRepository deviceRepository;
         private AesClass aesClass;
@@ -40,6 +41,7 @@ namespace Client
             user = userParameter;
             devices = new ObservableCollection<Device>();
             CommandRegister = new ObservableCollection<Command>();
+            SmartRules = new ObservableCollection<SmartRule>();
             notificationManager = new NotificationManager();
             StartUdpListener();
             ConnectionService.OnServerMessage += ShowMessage;
@@ -120,7 +122,7 @@ namespace Client
                             if (response.Message.Equals("Command"))
                             {
                                 MainWindow mainWindow = (MainWindow)Application.Current.MainWindow;
-                                CommandRegister.Add(new Command { ID = CommandRegister.Count + 1, CreationDate = response.Timestamp, Log = $"[{response.Timestamp}] {response.Device.Name}: {response.Function} changed on {response.Value}",Username=response.Username });
+                                CommandRegister.Add(new Command { ID = CommandRegister.Count + 1, CreationDate = response.Timestamp, Log = $"[{response.Timestamp}] {response.Device.Name}: {response.Function} changed on {response.Value}", Username = response.Username });
                                 mainWindow.ShowToastNotification(new ToastNotification("Success", $"You are successfully set new value for device {response.Device.Name}", NotificationType.Success));
                                 byte[] bytes = System.Text.Encoding.UTF8.GetBytes("da");
                                 ConnectionService.UdpSocket.SendTo(aesClass.EncryptMessage("da", aesClass.Key, aesClass.IV), ConnectionService.UdpEndpoint);
@@ -132,6 +134,16 @@ namespace Client
                                 byte[] bytes = System.Text.Encoding.UTF8.GetBytes("users");
                                 ConnectionService.UdpSocket.SendTo(aesClass.EncryptMessage("users", aesClass.Key, aesClass.IV), ConnectionService.UdpEndpoint);
                             }
+                            else if (response.Message.Equals("Smart Rules"))
+                            {
+                                MainWindow mainWindow = (MainWindow)Application.Current.MainWindow;
+                                mainWindow.ShowToastNotification(new ToastNotification("Information", response.Value, NotificationType.Information));
+                                var list = response.SmartRules;
+                                SmartRules.Clear();
+                                foreach (var s in list)
+                                    SmartRules.Add(s);
+
+                            }
                             else if (response.Message.Equals("Devices List"))
                             {
                                 var list = response.Devices;
@@ -139,6 +151,16 @@ namespace Client
                                 foreach (var u in list)
                                     devices.Add(u);
 
+                                var rules = response.SmartRules;
+                                SmartRules.Clear();
+                                foreach (var s in rules)
+                                    SmartRules.Add(s);
+
+                                if (MainContent.Content is ControlTableView controlView)
+                                {
+                                    controlView.DeviceComboBox.ItemsSource = null;
+                                    controlView.SetDevices(devices, user);
+                                }
                                 dashboardView.UpdateDevices(devices);
                                 dashboardView.LoadingOverlay.Visibility = Visibility.Collapsed;
                                 dashboardView.DeviceScrollViewer.Visibility = Visibility.Visible;
@@ -224,13 +246,13 @@ namespace Client
         {
             var d = deviceRepository.GetAllDevices().ToList();
             Title.Content = "Devices";
-            MainContent.Content = new DevicesView(new ObservableCollection<Device>(d),user);
+            MainContent.Content = new DevicesView(new ObservableCollection<Device>(d), user);
         }
 
         private void control_table_menu_button_Click(object sender, RoutedEventArgs e)
         {
             Title.Content = "Control Table";
-            MainContent.Content = new ControlTableView(devices, CommandRegister, notificationManager, aesClass,user);
+            MainContent.Content = new ControlTableView(devices, CommandRegister, notificationManager, aesClass, user);
         }
 
         // metoda koja odjavljuje korisnika
@@ -269,6 +291,12 @@ namespace Client
         {
             Title.Content = "Change password";
             MainContent.Content = new PasswordView(user, userReository);
+        }
+
+        private void SmartRules_Tab_Button_Click(object sender, RoutedEventArgs e)
+        {
+            Title.Content = "Smart rules";
+            MainContent.Content = new SmartRulesView(SmartRules, aesClass);
         }
     }
 }
