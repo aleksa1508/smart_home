@@ -45,8 +45,6 @@ namespace Client
                 };
 
                 string json = JsonSerializer.Serialize(content);
-
-                //byte[] data = Encoding.UTF8.GetBytes(json);
                 ConnectionService.UdpSocket.SendTo(aesClass.EncryptMessage(json, aesClass.Key, aesClass.IV), ConnectionService.UdpEndpoint);
             }
         }

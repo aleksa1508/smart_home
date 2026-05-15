@@ -89,7 +89,7 @@ namespace Client
 
             Task.Run(() =>
             {
-                byte[] request = aesClass.EncryptMessage($"Klijent se povezao na UDP port: {ConnectionService.UdpEndpoint.Port}", aesClass.Key, aesClass.IV);
+                byte[] request = aesClass.EncryptMessage($"Client is connected on UDP port: {ConnectionService.UdpEndpoint.Port}", aesClass.Key, aesClass.IV);
                 ConnectionService.UdpSocket.SendTo(request, ConnectionService.UdpEndpoint);
 
                 Console.WriteLine("UDP: Poslana prva poruka, čekam odgovor...");
@@ -133,6 +133,11 @@ namespace Client
                                 mainWindow.ShowToastNotification(new ToastNotification("Information", response.Value, NotificationType.Information));
                                 byte[] bytes = System.Text.Encoding.UTF8.GetBytes("users");
                                 ConnectionService.UdpSocket.SendTo(aesClass.EncryptMessage("users", aesClass.Key, aesClass.IV), ConnectionService.UdpEndpoint);
+                            }
+                            else if (response.Message.Equals("SmartRuleCommand"))
+                            {
+                                MainWindow mainWindow = (MainWindow)Application.Current.MainWindow;
+                                mainWindow.ShowToastNotification(new ToastNotification("Error", response.Value, NotificationType.Error));
                             }
                             else if (response.Message.Equals("Smart Rules"))
                             {

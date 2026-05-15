@@ -90,17 +90,17 @@ namespace TCPServer
             //Console.WriteLine(Convert.ToBase64String(encryptMessage));
             //string decryptMessage = DecryptMessage(encryptMessage, key, IV);
             //Console.WriteLine(decryptMessage);
-            //List<SmartRule>rules=new List<SmartRule>
-            //{
-            //    new SmartRule{ IsEnabled=false, Name="NightMode",Description="Limits temperature to 20°C, restricts lights and locks garage during night hours."},
-            //    new SmartRule{ IsEnabled=false, Name="SecurityMode",Description="Limits temperature to 20°C, restricts lights and locks garage during night hours."},
-            //    new SmartRule{ IsEnabled=false, Name="EnergySaving",Description="Limits temperature to 20°C, restricts lights and locks garage during night hours."},
-            //};
+            List<SmartRule> rules1 = new List<SmartRule>
+            {
+                new SmartRule{ IsEnabled=false, Name="NightMode",Description="Limits temperature to 20°C, restricts lights and locks garage during night hours."},
+                new SmartRule{ IsEnabled=false, Name="SecurityMode",Description="Lock all doors and vaults."},
+                new SmartRule{ IsEnabled=false, Name="EnergySaving",Description="Limits brightness and reduces energy usage."},
+            };
             ISmartRulesRepository smartRulesRepository = new SmartRulesRepository();
-            //foreach(var r in rules)
-            //{
-            //    smartRulesRepository.AddSmartRule(r.Name, r.Description, r.IsEnabled);
-            //}
+            foreach (var r in rules1)
+            {
+                smartRulesRepository.AddSmartRule(r.Name, r.Description, r.IsEnabled);
+            }
 
             RuleEngine ruleEngine = new RuleEngine();
             AesClass aesClass = new AesClass();
@@ -124,7 +124,7 @@ namespace TCPServer
 
             BinaryFormatter formatter = new BinaryFormatter();
 
-            Console.WriteLine($"Server je stavljen u stanje osluskivanja i ocekuje komunikaciju na {serverEP}");
+            Console.WriteLine($"Server is listening and expecting communitcation on {serverEP}");
             Dictionary<Socket, Socket> tcpUdpVeza = new Dictionary<Socket, Socket>();       //ako klijent crash-uje tj posalje shutdown prije ne (crashuje u dashboard i onda udp soket ostaje ziv a tcp konekcija pada)
 
             List<Socket> klijenti = new List<Socket>(); // Pravimo posebnu listu za klijentske sokete kako nam je ne bi obrisala Select funkcija
@@ -179,7 +179,7 @@ namespace TCPServer
                                 Socket client = serverSocket.Accept();
                                 client.Blocking = false;
                                 klijenti.Add(client);
-                                Console.WriteLine($"Klijent se povezao sa {client.RemoteEndPoint}");
+                                Console.WriteLine($"Client connected: {client.RemoteEndPoint}");
 
                             }
                             /*
@@ -268,6 +268,7 @@ namespace TCPServer
                                         var rule = JsonSerializer.Deserialize<SmartRuleDTO>(receivedMessage);
                                         smartRulesRepository.UpdateSmartRule(rule.SmartRule);
 
+                                        ruleEngine.ApplyRuleEffects(rule.SmartRule,deviceRepository);
                                         //using (MemoryStream ms = new MemoryStream())
                                         //{
 
@@ -279,7 +280,7 @@ namespace TCPServer
                                         var content = new ResponseDTO
                                         {
                                             Message = "Smart Rules",
-                                            Value = "Smart rule Night Mode is ON",
+                                            Value = $"Smart rule {rule.SmartRule.Name} is {(rule.SmartRule.IsEnabled == true ? "ON" : "OFF") }",
                                             SmartRules = smartRulesRepository.GetAllSmartRules().ToList()
 
                                         };
@@ -307,7 +308,7 @@ namespace TCPServer
                                             var content = new ResponseDTO
                                             {
                                                 Message = "AdminCommand",
-                                                Value = "Neuspjesna promjena role"
+                                                Value = "Role change unsuccessful"
                                             };
                                             json = JsonSerializer.Serialize(content);
                                         }
@@ -317,7 +318,7 @@ namespace TCPServer
                                             var content = new ResponseDTO
                                             {
                                                 Message = "AdminCommand",
-                                                Value = "Uspjesna promjena role"
+                                                Value = "Role change successful"
                                             };
                                             json = JsonSerializer.Serialize(content);
 
@@ -371,7 +372,7 @@ namespace TCPServer
                                         {
                                             var blockedResponse = new ResponseDTO
                                             {
-                                                Message = "AdminCommand",
+                                                Message = "SmartRuleCommand",
                                                 Value = blockMessage
                                             };
 
@@ -438,7 +439,7 @@ namespace TCPServer
                                         catch { }
                                         s.Close();
                                         klijenti.Remove(s);
-                                        Console.WriteLine($"Preostalo klijenata: {klijenti.Count}");
+                                        Console.WriteLine($"Number of active clients: {klijenti.Count}");
 
                                         // Provjeri da li je ostao još neki klijent
                                         if (klijenti.Count == 0)
@@ -452,7 +453,7 @@ namespace TCPServer
                                                 tempUdp.SendTo(initialData, device2);
                                                 Thread.Sleep(2000);
                                             }
-                                            Console.WriteLine("Nema više povezanih klijenata. Server se gasi.");
+                                            Console.WriteLine("No more connected clients.Server is shutting down");
                                             kraj = true;
                                         }
 
@@ -465,7 +466,7 @@ namespace TCPServer
                                         s.Send(keyLengthBytes);
                                         Thread.Sleep(50);
                                         s.Send(publicKeyBytes);
-                                        Console.WriteLine("RSA javni ključ poslan klijentu.");
+                                        Console.WriteLine("RSA public key successfully sent to client.");
                                     }
                                     else
                                     {
@@ -521,7 +522,7 @@ namespace TCPServer
                                             udpSockets.Add(udpSocket);
                                             udpNeaktivnost[udpSocket] = 0;
                                             tcpUdpVeza[s] = udpSocket; //radi moguceg crash-a
-                                            Console.WriteLine($"UDP soket kreiran na portu {udpPort1}");
+                                            Console.WriteLine($"UDP socket created on port {udpPort1}");
                                             //for petlja i
                                             EndPoint clientEP = new IPEndPoint(IPAddress.Any, 0);
                                             int receivedBytes = udpSocket.ReceiveFrom(buffer, ref clientEP);
@@ -532,7 +533,7 @@ namespace TCPServer
                                             //string receivedMessage = Encoding.UTF8.GetString(buffer, 0, receivedBytes);
 
                                             udpSocket.Blocking = false;
-                                            Console.WriteLine($"Poruka od UDP klijenta : {receivedMessage}");
+                                            Console.WriteLine($"Message from UDP client : {receivedMessage}");
 
                                             userReository.PrintAllUsers();
 
@@ -574,7 +575,7 @@ namespace TCPServer
                                 }
                                 else
                                 {
-                                    Console.WriteLine("Klijent je prekinuo vezu.");//ako tcp konekcija pukne
+                                    Console.WriteLine("Client connection lost.");//ako tcp konekcija pukne
                                                                                    // Cleanup UDP ako postoji veza
                                     if (tcpUdpVeza.ContainsKey(s))
                                     {
@@ -607,7 +608,7 @@ namespace TCPServer
 
                         if (udpNeaktivnost[udpSocket] >= MAX_NEAKTIVNIH_CIKLUSA)
                         {
-                            Console.WriteLine($"UDP sesija na portu {((IPEndPoint)udpSocket.LocalEndPoint).Port} je zatvorena zbog neaktivnosti.");
+                            Console.WriteLine($"UDP session on port {((IPEndPoint)udpSocket.LocalEndPoint).Port}  has been closed due the client inactivity.");
                             userReository.DeactivateByPort(((IPEndPoint)udpSocket.LocalEndPoint).Port);
                             userReository.PrintAllUsers();
                             // Pronaći TCP socket povezan sa ovim UDP socketom
@@ -622,7 +623,7 @@ namespace TCPServer
                                 }
                                 catch (SocketException)
                                 {
-                                    Console.WriteLine("Greška prilikom slanja obaveštenja korisniku.");
+                                    Console.WriteLine("Error while sending notification to user");
                                 }
 
                                 // Zatvoriti TCP konekciju i ukloniti korisnika iz liste
@@ -643,7 +644,7 @@ namespace TCPServer
             }
             catch (SocketException ex)
             {
-                Console.WriteLine($"Doslo je do greske {ex}");
+                Console.WriteLine($"Error: {ex}");
             }
 
             foreach (Socket s in klijenti)
@@ -662,13 +663,13 @@ namespace TCPServer
                     if (!p.HasExited)
                     {
                         p.Kill();
-                        Console.WriteLine($"Ugašen device proces {p.Id}");
+                        Console.WriteLine($"Device process with ID: {p.Id} has closed");
                     }
                 }
                 catch { }
             }
             serverSocket.Close();
-            Console.WriteLine("Server zavrsava sa radom");
+            Console.WriteLine("Server is shutting down");
             Console.ReadKey();
         }
 
