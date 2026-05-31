@@ -165,6 +165,7 @@
     <Compile Include="Helpers\ConnectionService.cs" />
     <Compile Include="Helpers\TimeViewModel.cs" />
     <Compile Include="Helpers\ToastNotification.cs" />
+    <Compile Include="Helpers\ValidateCommand.cs" />
     <Compile Include="PasswordView.xaml.cs">
       <DependentUpon>PasswordView.xaml</DependentUpon>
     </Compile>

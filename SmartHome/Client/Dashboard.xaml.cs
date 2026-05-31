@@ -49,6 +49,7 @@ namespace Client
             if (user.Role == UserRole.USER)
             {
                 users_menu_button.Visibility = Visibility.Collapsed;
+                SmartRules_Tab_Button.Visibility = Visibility.Collapsed;
                 Users.Visibility = Visibility.Collapsed;
             }
             dashboardView = new DashboardView(user, devices);
@@ -62,7 +63,6 @@ namespace Client
 
         private void button_close_Click(object sender, RoutedEventArgs e)
         {
-            //byte[] buffer = Encoding.UTF8.GetBytes("ne");
             ConnectionService.UdpSocket.SendTo(aesClass.EncryptMessage("ne", aesClass.Key, aesClass.IV), ConnectionService.UdpEndpoint);
             OdjavaKlijenta();
         }
@@ -92,7 +92,7 @@ namespace Client
                 byte[] request = aesClass.EncryptMessage($"Client is connected on UDP port: {ConnectionService.UdpEndpoint.Port}", aesClass.Key, aesClass.IV);
                 ConnectionService.UdpSocket.SendTo(request, ConnectionService.UdpEndpoint);
 
-                Console.WriteLine("UDP: Poslana prva poruka, čekam odgovor...");
+                Console.WriteLine("UDP: Sent first message, wait response...");
 
                 byte[] buffer = new byte[65507];
                 EndPoint remoteEP = new IPEndPoint(IPAddress.Any, 0);
@@ -101,10 +101,9 @@ namespace Client
                 {
                     try
                     {
-                        Console.WriteLine("UDP: Čekam na ReceiveFrom...");
+                        Console.WriteLine("UDP: Wait on ReceiveFrom...");
                         int bytesRead = ConnectionService.UdpSocket.ReceiveFrom(buffer, ref remoteEP);
-                        Console.WriteLine($"UDP: Primljeno {bytesRead} bajtova");
-                        // string msg = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                        Console.WriteLine($"UDP: Recieved {bytesRead} bytes");
                         byte[] primljeno = new byte[bytesRead];
                         Array.Copy(buffer, primljeno, bytesRead);
                         string msg = aesClass.DecryptMessage(primljeno, aesClass.Key, aesClass.IV);
@@ -119,79 +118,19 @@ namespace Client
                         Dispatcher.Invoke(() =>
                         {
                             var response = JsonSerializer.Deserialize<ResponseDTO>(msg);
-                            if (response.Message.Equals("Command"))
-                            {
-                                MainWindow mainWindow = (MainWindow)Application.Current.MainWindow;
-                                CommandRegister.Add(new Command { ID = CommandRegister.Count + 1, CreationDate = response.Timestamp, Log = $"[{response.Timestamp}] {response.Device.Name}: {response.Function} changed on {response.Value}", Username = response.Username });
-                                mainWindow.ShowToastNotification(new ToastNotification("Success", $"You are successfully set new value for device {response.Device.Name}", NotificationType.Success));
-                                byte[] bytes = System.Text.Encoding.UTF8.GetBytes("da");
-                                ConnectionService.UdpSocket.SendTo(aesClass.EncryptMessage("da", aesClass.Key, aesClass.IV), ConnectionService.UdpEndpoint);
-                            }
-                            else if (response.Message.Equals("AdminCommand"))
-                            {
-                                MainWindow mainWindow = (MainWindow)Application.Current.MainWindow;
-                                mainWindow.ShowToastNotification(new ToastNotification("Information", response.Value, NotificationType.Information));
-                                byte[] bytes = System.Text.Encoding.UTF8.GetBytes("users");
-                                ConnectionService.UdpSocket.SendTo(aesClass.EncryptMessage("users", aesClass.Key, aesClass.IV), ConnectionService.UdpEndpoint);
-                            }
-                            else if (response.Message.Equals("SmartRuleCommand"))
-                            {
-                                MainWindow mainWindow = (MainWindow)Application.Current.MainWindow;
-                                mainWindow.ShowToastNotification(new ToastNotification("Error", response.Value, NotificationType.Error));
-                            }
-                            else if (response.Message.Equals("Smart Rules"))
-                            {
-                                MainWindow mainWindow = (MainWindow)Application.Current.MainWindow;
-                                mainWindow.ShowToastNotification(new ToastNotification("Information", response.Value, NotificationType.Information));
-                                var list = response.SmartRules;
-                                SmartRules.Clear();
-                                foreach (var s in list)
-                                    SmartRules.Add(s);
-
-                            }
-                            else if (response.Message.Equals("Devices List"))
-                            {
-                                var list = response.Devices;
-                                devices.Clear();
-                                foreach (var u in list)
-                                    devices.Add(u);
-
-                                var rules = response.SmartRules;
-                                SmartRules.Clear();
-                                foreach (var s in rules)
-                                    SmartRules.Add(s);
-
-                                if (MainContent.Content is ControlTableView controlView)
-                                {
-                                    controlView.DeviceComboBox.ItemsSource = null;
-                                    controlView.SetDevices(devices, user);
-                                }
-                                dashboardView.UpdateDevices(devices);
-                                dashboardView.LoadingOverlay.Visibility = Visibility.Collapsed;
-                                dashboardView.DeviceScrollViewer.Visibility = Visibility.Visible;
-                                var listCommands = response.Commands;//all commands
-                                CommandRegister.Clear();
-                                foreach (var u in listCommands)
-                                    CommandRegister.Add(u);
-                            }
-                            else if (response.Message.Equals("Users"))
-                            {
-                                var users = response.Users;
-                                Title.Content = "Users";
-                                MainContent.Content = new UsersView(user, new ObservableCollection<User>(users), aesClass);
-                            }
+                            HandleResponse(response);
                         });
                     }
                     catch (ObjectDisposedException)
                     {
-                        // socket zatvoren, prekini loop
+                        // socket closed
                         break;
                     }
                     catch (SocketException ex)
                     {
                         Dispatcher.Invoke(() =>
                         {
-                            //MessageBox.Show($"SocketException kod: {ex.SocketErrorCode}\nPoruka: {ex.Message}");
+                            Console.WriteLine($"SocketException kod: {ex.SocketErrorCode}\nPoruka: {ex.Message}");
                         });
                         Dispatcher.Invoke(SessionExpired);
                         break;
@@ -200,7 +139,7 @@ namespace Client
                     {
                         Dispatcher.Invoke(() =>
                         {
-                            //MessageBox.Show($"Exception tip: {ex.GetType().Name}\nPoruka: {ex.Message}");
+                            Console.WriteLine($"Exception tip: {ex.GetType().Name}\nPoruka: {ex.Message}");
                         });
                         break;
                     }
@@ -230,11 +169,7 @@ namespace Client
 
         private void users_menu_button_Click(object sender, RoutedEventArgs e)
         {
-            //byte[] bytes = System.Text.Encoding.UTF8.GetBytes("users");
             ConnectionService.UdpSocket.SendTo(aesClass.EncryptMessage("users", aesClass.Key, aesClass.IV), ConnectionService.UdpEndpoint);
-            //var users = userReository.GetAllUsers();
-            //Title.Content = "Users";
-            //MainContent.Content = new UsersView(new ObservableCollection<User>(users));
         }
 
         private void exit_menu_button_Click(object sender, RoutedEventArgs e)
@@ -259,13 +194,11 @@ namespace Client
             Title.Content = "Control Table";
             MainContent.Content = new ControlTableView(devices, CommandRegister, notificationManager, aesClass, user);
         }
-
-        // metoda koja odjavljuje korisnika
         private void OdjavaKlijenta()
         {
             try
             {
-                ConnectionService.SessionExpired(); // zatvaranje TCP i UDP soketa
+                ConnectionService.SessionExpired(); // closing TCP and UDP socekt
             }
             catch { }
 
@@ -302,6 +235,100 @@ namespace Client
         {
             Title.Content = "Smart rules";
             MainContent.Content = new SmartRulesView(SmartRules, aesClass);
+        }
+
+        private void HandleResponse(ResponseDTO response)
+        {
+            MainWindow mainWindow = (MainWindow)Application.Current.MainWindow;
+            switch (response.Message)
+            {
+                case "Command":
+                    {
+                        AddCommand(response, mainWindow);
+                        break;
+                    }
+                case "AdminCommand":
+                    {
+                        UpdateAdminCommand(response, mainWindow);
+                        break;
+                    }
+                case "SmartRuleCommand":
+                    {
+                        UpdateSmartRule(response, mainWindow);
+                        break;
+                    }
+                case "Smart Rules":
+                    {
+                        AddSmartRules(response, mainWindow);
+                        break;
+                    }
+                case "Devices List":
+                    {
+                        UpdateDevices(response);
+                        break;
+                    }
+                case "Users":
+                    {
+                        UpdateUser(response);
+                        break;
+                    }
+            }
+        }
+        private void AddCommand(ResponseDTO response, MainWindow mainWindow)
+        {
+            CommandRegister.Add(new Command { ID = CommandRegister.Count + 1, CreationDate = response.Timestamp, Log = $"[{response.Timestamp}] {response.Device.Name}: {response.Function} changed on {response.Value}", Username = response.Username });
+            mainWindow.ShowToastNotification(new ToastNotification("Success", $"You are successfully set new value for device {response.Device.Name}", NotificationType.Success));
+            byte[] bytes = System.Text.Encoding.UTF8.GetBytes("da");
+            ConnectionService.UdpSocket.SendTo(aesClass.EncryptMessage("da", aesClass.Key, aesClass.IV), ConnectionService.UdpEndpoint);
+        }
+        private void UpdateAdminCommand(ResponseDTO response, MainWindow mainWindow)
+        {
+            mainWindow.ShowToastNotification(new ToastNotification("Information", response.Value, NotificationType.Information));
+            byte[] bytes = System.Text.Encoding.UTF8.GetBytes("users");
+            ConnectionService.UdpSocket.SendTo(aesClass.EncryptMessage("users", aesClass.Key, aesClass.IV), ConnectionService.UdpEndpoint);
+        }
+        private void UpdateSmartRule(ResponseDTO response, MainWindow mainWindow)
+        {
+            mainWindow.ShowToastNotification(new ToastNotification("Error", response.Value, NotificationType.Error));
+        }
+        private void AddSmartRules(ResponseDTO response, MainWindow mainWindow)
+        {
+            mainWindow.ShowToastNotification(new ToastNotification("Information", response.Value, NotificationType.Information));
+            var list = response.SmartRules;
+            SmartRules.Clear();
+            foreach (var s in list)
+                SmartRules.Add(s);
+        }
+        private void UpdateUser(ResponseDTO response)
+        {
+            var users = response.Users;
+            Title.Content = "Users";
+            MainContent.Content = new UsersView(user, new ObservableCollection<User>(users), aesClass);
+        }
+        private void UpdateDevices(ResponseDTO response)
+        {
+            var list = response.Devices;
+            devices.Clear();
+            foreach (var u in list)
+                devices.Add(u);
+
+            var rules = response.SmartRules;
+            SmartRules.Clear();
+            foreach (var s in rules)
+                SmartRules.Add(s);
+
+            if (MainContent.Content is ControlTableView controlView)
+            {
+                controlView.DeviceComboBox.ItemsSource = null;
+                controlView.SetDevices(devices, user);
+            }
+            dashboardView.UpdateDevices(devices);
+            dashboardView.LoadingOverlay.Visibility = Visibility.Collapsed;
+            dashboardView.DeviceScrollViewer.Visibility = Visibility.Visible;
+            var listCommands = response.Commands;//all commands
+            CommandRegister.Clear();
+            foreach (var u in listCommands)
+                CommandRegister.Add(u);
         }
     }
 }

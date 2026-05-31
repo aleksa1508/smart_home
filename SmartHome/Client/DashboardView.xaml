@@ -125,7 +125,7 @@
                             CornerRadius="10"
                             Margin="6"
                             Padding="10"
-                            Width="150"
+                            Width="170"
                             Height="90">
                                     <Border.Style>
                                         <Style TargetType="Border">

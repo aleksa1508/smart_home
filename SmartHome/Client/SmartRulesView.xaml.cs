@@ -19,12 +19,6 @@ namespace Client
         public SmartRulesView(ObservableCollection<SmartRule> rules, AesClass aesClass)
         {
             InitializeComponent();
-            //SmartRules = new ObservableCollection<SmartRule>(new List<SmartRule>
-            //{
-            //    new SmartRule{ IsEnabled=false, Name="NightMode",Description="Limits temperature to 20°C, restricts lights and locks garage during night hours."},
-            //    new SmartRule{ IsEnabled=false, Name="SecurityMode",Description="Limits temperature to 20°C, restricts lights and locks garage during night hours."},
-            //    new SmartRule{ IsEnabled=false, Name="EnergySaving",Description="Limits temperature to 20°C, restricts lights and locks garage during night hours."},
-            //});
             SmartRules = rules;
             DataContext = this;
             this.aesClass = aesClass;
@@ -65,7 +59,6 @@ namespace Client
 
                 string json = JsonSerializer.Serialize(content);
 
-                //byte[] data = Encoding.UTF8.GetBytes(json);
                 ConnectionService.UdpSocket.SendTo(aesClass.EncryptMessage(json, aesClass.Key, aesClass.IV), ConnectionService.UdpEndpoint);
             }
         }

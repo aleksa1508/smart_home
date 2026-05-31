@@ -62,7 +62,7 @@
         <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Orientation="Vertical">
             <Label Content="Logs" Foreground="White" FontSize="17" Margin="10,0,0,0" />
             <DataGrid x:Name="LogsDataGrid" 
-      Margin="5,5,5,0"
+      Margin="0,5,0,0"
 ColumnWidth="*"
 HorizontalScrollBarVisibility="Disabled"
       Height="140"
@@ -148,6 +148,7 @@ HorizontalScrollBarVisibility="Disabled"
                         <Setter Property="BorderThickness" Value="0,0,0,0"/>
                         <Setter Property="BorderBrush" Value="#A8DADC"/>
                         <Setter Property="Padding" Value="8,4"/>
+                        <Setter Property="FontSize" Value="11.5"/>
 
                         <Setter Property="Template">
                             <Setter.Value>
@@ -171,7 +172,7 @@ HorizontalScrollBarVisibility="Disabled"
                 <!-- COLUMNS -->
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Date and Time" Width="3*" Binding="{Binding CreationDate}" />
-                        <DataGridTextColumn Header="Log" Width="9*" Binding="{Binding Log}" />
+                        <DataGridTextColumn Header="Log" Width="10*" Binding="{Binding Log}" />
                         <DataGridTextColumn Header="Username" Width="2*" Binding="{Binding Username}" />
                     </DataGrid.Columns>
 

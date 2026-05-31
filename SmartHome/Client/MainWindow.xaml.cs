@@ -62,10 +62,36 @@ namespace Client
         }
         private async void Conncection()
         {
-            MainWindow mainWindow = (MainWindow)Application.Current.MainWindow;
-            ConnectionService.TcpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            await Task.Run(() => ConnectionService.TcpSocket.Connect(IPAddress.Loopback, 50001));
-            mainWindow.ShowToastNotification(new ToastNotification("Success", "Successfully connected on server", NotificationType.Success));
+            int maxRetries = 5;
+            int delaySeconds = 3;
+
+            for (int i = 1; i <= maxRetries; i++)
+            {
+                try
+                {
+                    ConnectionService.TcpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                    await Task.Run(() => ConnectionService.TcpSocket.Connect(IPAddress.Loopback, 50001));
+
+                    ShowToastNotification(new ToastNotification("Success", "Successfully connected on server", NotificationType.Success));
+                    return;
+                }
+                catch (SocketException)
+                {
+                    ConnectionService.TcpSocket?.Close();
+                    ConnectionService.TcpSocket = null;
+
+                    if (i < maxRetries)
+                    {
+                        ShowToastNotification(new ToastNotification("Warning", $"Server unavailable, retrying in {delaySeconds}s... ({i}/{maxRetries})", NotificationType.Warning));
+
+                        await Task.Delay(delaySeconds * 1000);
+                    }
+                    else
+                    {
+                        ShowToastNotification(new ToastNotification("Error", "Could not connect to server.", NotificationType.Error));
+                    }
+                }
+            }
         }
         private async void button_signIn_Click(object sender, RoutedEventArgs e)
         {
@@ -76,15 +102,16 @@ namespace Client
                 return;
             }
 
+            button_signIn.IsEnabled = false;
             try
             {
                 ConnectionService.TcpSocket.Send(Encoding.UTF8.GetBytes("GET_PUBLIC_KEY"));
-                // Prima dužinu ključa (4 bajta)
+                //4 bytes length of key
                 byte[] lenBuffer = new byte[4];
                 ConnectionService.TcpSocket.Receive(lenBuffer);
                 int keyLength = BitConverter.ToInt32(lenBuffer, 0);
 
-                // Prima XML ključ
+                // XML key
                 byte[] keyBytes = new byte[keyLength];
                 int totalReceived = 0;
                 while (totalReceived < keyLength)
@@ -97,7 +124,6 @@ namespace Client
 
                 RsaClass rsa = new RsaClass(publicKeyXml);
 
-                // KORAK 2: Enkriptuj login i pošalji
                 string login = $"{UsernameTextBox.Text}:{PasswordTextBox.Password}";
                 byte[] encryptedLogin = rsa.Encrypt(login);
                 ConnectionService.TcpSocket.Send(encryptedLogin);
@@ -121,27 +147,22 @@ namespace Client
 
                 AesClass aes = new AesClass(key, iv);
 
-                // Prima enkriptovani port
+                // recieve encripted port
                 buffer = new byte[1024];
                 bytes = ConnectionService.TcpSocket.Receive(buffer);
 
-                // Dekriptuj — šalješ samo primljene bajtove, ne cijeli buffer!
+                // decription 
                 byte[] primljeno = new byte[bytes];
                 Array.Copy(buffer, primljeno, bytes);
                 string portString = aes.DecryptMessage(primljeno, aes.Key, aes.IV);
 
                 int port = int.Parse(portString);
-                //int port = int.Parse(Encoding.UTF8.GetString(buffer, 0, bytes));
                 mainWindow.ShowToastNotification(new ToastNotification("Success", $"You are successfully log in and port is {port}", NotificationType.Success));
                 // UDP setup
                 ConnectionService.UdpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
                 ConnectionService.UdpEndpoint = new IPEndPoint(IPAddress.Loopback, port);
 
                 User user = userReository.GetKorisnik(UsernameTextBox.Text, PasswordTextBox.Password);
-
-                // start loop
-
-                // 🔥 otvori dashboard
 
                 Dashboard dashboardWindow = new Dashboard(user, aes);
                 dashboardWindow.Closed += DashboardWindow_Closed;
@@ -155,20 +176,17 @@ namespace Client
             {
                 mainWindow.ShowToastNotification(new ToastNotification("Warning", "I can not connect: " + ex.Message, NotificationType.Warning));
             }
-            //Dashboard d = new Dashboard();
-            //d.Show();
-
-            //this.Hide();
+            finally
+            {
+                button_signIn.IsEnabled = true;
+            }
 
         }
 
         private void DashboardWindow_Closed(object sender, EventArgs e)
         {
-            this.Show(); // Kad se novi prozor zatvori, ovaj se ponovo prikazuje
+            this.Show(); // show previouse window when new window closed
         }
-
-
-
 
     }
 }

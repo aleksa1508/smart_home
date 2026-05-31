@@ -1,4 +1,5 @@
 ﻿using Common;
+using Common.DTOs;
 using Common.Models;
 using System;
 using System.Collections.ObjectModel;
@@ -19,14 +20,8 @@ namespace Client
         private DispatcherTimer timer;
         private int currentIndex = 0;
         private ObservableCollection<Device> Devices;
-        private ObservableCollection<DeviceCardViewModel> LoopDevices;
-        public class DeviceCardViewModel
-        {
-            public string Icon { get; set; }
-            public string Name { get; set; }
-            public string Status { get; set; }
-            public string Room { get; set; }
-        }
+        private ObservableCollection<DeviceCardViewDTO> LoopDevices;
+
         private DispatcherTimer spinnerTimer;
         private double angle = 0;
 
@@ -49,7 +44,7 @@ namespace Client
                 LoadingOverlay.Visibility = Visibility.Collapsed;
                 DeviceScrollViewer.Visibility = Visibility.Visible;
             }
-            var uiDevices = Devices.Select(d => new DeviceCardViewModel
+            var uiDevices = Devices.Select(d => new DeviceCardViewDTO
             {
                 Name = d.Name,
                 Icon = GetIcon(d.Name),
@@ -57,7 +52,7 @@ namespace Client
                 Room = d.Location.ToString()
             }).ToList();
 
-            LoopDevices = new ObservableCollection<DeviceCardViewModel>();
+            LoopDevices = new ObservableCollection<DeviceCardViewDTO>();
 
             for (int i = 0; i < 3; i++)
             {
@@ -72,17 +67,15 @@ namespace Client
         private void StartSlideshow()
         {
             timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromSeconds(10); // 10 sekundi
+            timer.Interval = TimeSpan.FromSeconds(10); // 10 seconds
             timer.Tick += Timer_Tick;
             timer.Start();
         }
 
         private void Timer_Tick(object sender, EventArgs e)
         {
-            // Promjena slike
             HomeImage.Source = new BitmapImage(new Uri(pictures[currentIndex], UriKind.Relative));
 
-            // Sljedeća slika
             currentIndex++;
             if (currentIndex >= pictures.Count)
                 currentIndex = 0;
@@ -158,7 +151,7 @@ namespace Client
         {
             Devices = devices;
 
-            var uiDevices = Devices.Select(d => new DeviceCardViewModel
+            var uiDevices = Devices.Select(d => new DeviceCardViewDTO
             {
                 Name = d.Name,
                 Icon = GetIcon(d.Name),

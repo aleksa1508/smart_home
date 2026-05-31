@@ -26,12 +26,10 @@ namespace Client
             DataContext = u;
 
         }
-
         private void UserTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             ValidationOriginalData();
         }
-
 
         private void ValidationOriginalData()
         {
@@ -86,7 +84,7 @@ namespace Client
 
                 string pathPicture = System.IO.Path.Combine(projectFolder, destinationPath);
 
-                // Prikaz slike u UI
+                // show pictures at UI
                 string absolutePath = System.IO.Path.Combine(projectFolder, pathPicture);
                 BitmapImage bitmap = new BitmapImage();
                 bitmap.BeginInit();

@@ -128,6 +128,7 @@ HorizontalScrollBarVisibility="Disabled" CanUserSortColumns="True"
                     <Setter Property="BorderThickness" Value="0,0,0,0"/>
                     <Setter Property="BorderBrush" Value="#A8DADC"/>
                     <Setter Property="Padding" Value="8,4"/>
+                    <Setter Property="FontSize" Value="11.5"/>
 
                     <Setter Property="Template">
                         <Setter.Value>

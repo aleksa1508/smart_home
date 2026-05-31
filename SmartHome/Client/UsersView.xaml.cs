@@ -34,7 +34,7 @@ namespace Client
             StatusComboBox.SelectedIndex = 0;
 
             DataContext = this;
-            // Sakrij action panel ako nije admin
+
             if (currentUser.Role != UserRole.OWNER)
                 ActionPanel.Visibility = Visibility.Collapsed;
         }
@@ -72,16 +72,13 @@ namespace Client
                 return condition1 && condition2;
             };
             EntitiesView.Refresh();
-
-
-
         }
 
         private void UsersDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (UsersDataGrid.SelectedItem is User selectedUser && currentUser.Role == UserRole.OWNER)
             {
-                // Ne dozvoli adminu da mijenja samog sebe
+                // admin cannot changed your role only change other users
                 if (selectedUser.ID == currentUser.ID)
                 {
                     ActionPanel.Visibility = Visibility.Collapsed;
@@ -107,11 +104,9 @@ namespace Client
             ComboBoxItem selectedItem = NewRoleComboBox.SelectedItem as ComboBoxItem;
             if (selectedItem == null) return;
 
-            UserRole newRole = selectedItem.Content.ToString() == "OWNER"
-                ? UserRole.OWNER
-                : UserRole.USER;
+            UserRole newRole = selectedItem.Content.ToString() == "OWNER" ? UserRole.OWNER : UserRole.USER;
 
-            // Pošalji UDP komandu serveru
+            // sending UDP command to server
             var adminCmd = new OwnerCommandDTO
             {
                 Action = "userRole",
