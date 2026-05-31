@@ -64,7 +64,7 @@ namespace Client
         private void button_close_Click(object sender, RoutedEventArgs e)
         {
             ConnectionService.UdpSocket.SendTo(aesClass.EncryptMessage("ne", aesClass.Key, aesClass.IV), ConnectionService.UdpEndpoint);
-            OdjavaKlijenta();
+            UserLogOut();
         }
 
         private void Window_MouseDown(object sender, MouseButtonEventArgs e)
@@ -151,7 +151,6 @@ namespace Client
         {
             Dispatcher.Invoke(() =>
             {
-                // npr notification
                 Console.WriteLine(msg);
             });
         }
@@ -174,7 +173,6 @@ namespace Client
 
         private void exit_menu_button_Click(object sender, RoutedEventArgs e)
         {
-            //button_close_Click(sender, e);
             var result = MessageBox.Show("Do you sure that you want to exit now?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result == MessageBoxResult.Yes)
             {
@@ -194,7 +192,7 @@ namespace Client
             Title.Content = "Control Table";
             MainContent.Content = new ControlTableView(devices, CommandRegister, notificationManager, aesClass, user);
         }
-        private void OdjavaKlijenta()
+        private void UserLogOut()
         {
             try
             {

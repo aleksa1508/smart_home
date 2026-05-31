@@ -40,9 +40,10 @@ namespace TCPServer
             string publicKeyXml = rsaClass.ExportPublicKey();
             byte[] publicKeyBytes = Encoding.UTF8.GetBytes(publicKeyXml);
             Dictionary<Socket, (byte[] Key, byte[] IV)> klijentKljucevi = new Dictionary<Socket, (byte[], byte[])>();
+
+            const int MAX_NEAKTIVNIH_CIKLUSA = 20;
             User k = new User();
             Device u = new Device();
-            const int MAX_NEAKTIVNIH_CIKLUSA = 20;
             IUserReository userReository = new UserRepository();
             //server initialization
             Socket serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -448,9 +449,7 @@ namespace TCPServer
                                         Socket udpZaOvogKorisnika = tcpUdpVeza[s];
                                         if (udpSockets.Contains(udpZaOvogKorisnika))
                                         {
-                                            userReository.DeactivateByPort(
-                                                ((IPEndPoint)udpZaOvogKorisnika.LocalEndPoint).Port
-                                            );
+                                            userReository.DeactivateByPort(((IPEndPoint)udpZaOvogKorisnika.LocalEndPoint).Port);
                                             udpZaOvogKorisnika.Close();
                                             udpSockets.Remove(udpZaOvogKorisnika);
                                             udpNeaktivnost.Remove(udpZaOvogKorisnika);
@@ -468,17 +467,15 @@ namespace TCPServer
 
                         }
                     }
-                    // serverService.UserActivity(udpNeaktivnost, userReository, klijenti, klijentKljucevi, udpSockets,tcpUdpVeza);
                     foreach (var udpSocket in new List<Socket>(udpNeaktivnost.Keys))
                     {
-                        udpNeaktivnost[udpSocket]++; // Povećaj broj neaktivnih ciklusa
+                        udpNeaktivnost[udpSocket]++;
 
                         if (udpNeaktivnost[udpSocket] >= MAX_NEAKTIVNIH_CIKLUSA)
                         {
                             Console.WriteLine($"UDP session on port {((IPEndPoint)udpSocket.LocalEndPoint).Port}  has been closed due the client inactivity.");
                             userReository.DeactivateByPort(((IPEndPoint)udpSocket.LocalEndPoint).Port);
                             userReository.PrintAllUsers();
-                            // Pronaći TCP socket povezan sa ovim UDP socketom
                             Socket tcpSocket = klijenti.FirstOrDefault(s => ((IPEndPoint)s.RemoteEndPoint).Port == ((IPEndPoint)udpSocket.LocalEndPoint).Port);
 
                             if (tcpSocket != null)
@@ -493,12 +490,12 @@ namespace TCPServer
                                     Console.WriteLine("Error while sending notification to user");
                                 }
 
-                                // Zatvoriti TCP konekciju i ukloniti korisnika iz liste
+                                // closing TCP connection and removing user from the list
                                 tcpSocket.Close();
                                 klijenti.Remove(tcpSocket);
                             }
 
-                            // Zatvaramo UDP socket i uklanjamo ga iz liste
+                            // closing UDP socket and removing from the list
                             udpSocket.Close();
                             udpSockets.Remove(udpSocket);
                             udpNeaktivnost.Remove(udpSocket);
