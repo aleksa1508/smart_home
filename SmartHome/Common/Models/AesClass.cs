@@ -1,5 +1,7 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace Common.Models
 {
@@ -43,24 +45,30 @@ namespace Common.Models
         }
         public string DecryptMessage(byte[] encryptText, byte[] key, byte[] IV)
         {
-            string decrypted = string.Empty;
-            using (var aes = Aes.Create())
+            try
             {
-                aes.Key = key;
-                aes.IV = IV;
-                var encryptor = aes.CreateDecryptor(aes.Key, aes.IV);
-                using (var memoryStream = new MemoryStream(encryptText))
+                using (var aes = Aes.Create())
                 {
-                    using (var cryStream = new CryptoStream(memoryStream, encryptor, CryptoStreamMode.Read))
+                    aes.Key = key;
+                    aes.IV = IV;
+                    aes.Padding = PaddingMode.PKCS7;
+                    var decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
+                    using (var memoryStream = new MemoryStream(encryptText))
+                    using (var cryStream = new CryptoStream(memoryStream, decryptor, CryptoStreamMode.Read))
+                    using (var output = new MemoryStream())
                     {
-                        using (var streamReader = new StreamReader(cryStream))
-                        {
-                            decrypted = streamReader.ReadToEnd();
-                        }
+                        cryStream.CopyTo(output);
+                        return Encoding.UTF8.GetString(output.ToArray());
                     }
                 }
             }
-            return decrypted;
+            catch (CryptographicException ex)
+            {
+                Console.WriteLine($"Decrypt failed! Bytes: {BitConverter.ToString(encryptText)}\nError:",ex.ToString());
+                Console.WriteLine($"Key: {BitConverter.ToString(key)}");
+                Console.WriteLine($"IV: {BitConverter.ToString(IV)}");
+                throw;
+            }
         }
     }
 }

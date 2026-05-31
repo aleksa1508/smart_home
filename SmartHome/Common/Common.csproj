@@ -61,6 +61,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DTOs\CommandDTO.cs" />
+    <Compile Include="DTOs\DeviceCardViewDTO.cs" />
+    <Compile Include="DTOs\Function.cs" />
     <Compile Include="DTOs\OwnerCommandDTO.cs" />
     <Compile Include="DTOs\ResponseDTO.cs" />
     <Compile Include="DTOs\SmartRuleDTO.cs" />

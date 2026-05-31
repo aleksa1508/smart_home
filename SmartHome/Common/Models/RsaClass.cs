@@ -13,39 +13,35 @@
             _rsa = new RSACryptoServiceProvider(2048);
         }
 
-        // Klijent — prima XML javni ključ
+        // client recieve xml public key
         public RsaClass(string publicKeyXml)
         {
             _rsa = new RSACryptoServiceProvider(2048);
             _rsa.FromXmlString(publicKeyXml);
         }
 
-        // Server izvozi javni ključ kao XML string
+        // server exoort public key in xml format
         public string ExportPublicKey()
         {
-            return _rsa.ToXmlString(false); // false = samo javni ključ
+            return _rsa.ToXmlString(false); // false =only public key
         }
 
-        // Klijent enkriptuje javnim ključem
+        // client encription with public key
         public byte[] Encrypt(string plainText)
         {
             byte[] data = Encoding.UTF8.GetBytes(plainText);
-            return _rsa.Encrypt(data, false); // false = PKCS#1
+            return _rsa.Encrypt(data, false);
         }
 
-        // Server dekriptuje privatnim ključem
         public string Decrypt(byte[] cipherText)
         {
             byte[] data = _rsa.Decrypt(cipherText, false);
             return Encoding.UTF8.GetString(data);
         }
-        // Enkriptuje byte[] umjesto stringa
         public byte[] EncryptBytes(byte[] data)
         {
             return _rsa.Encrypt(data, false);
         }
-
-        // Dekriptuje nazad u byte[]
         public byte[] DecryptBytes(byte[] cipherText)
         {
             return _rsa.Decrypt(cipherText, false);

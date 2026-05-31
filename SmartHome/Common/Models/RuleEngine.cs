@@ -1,5 +1,4 @@
 ﻿using Common.DTOs;
-using Common.Enums;
 using Common.Repositories.DevicesRepositories;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,11 +27,8 @@ namespace Common.Models
                      command.SelectedDevice.Name.Contains("Vault")) &&
                      command.Value == "OPEN")
                 {
-                    if (user.Role != UserRole.OWNER)
-                    {
-                        message = "Security Mode blocks door unlocking.";
-                        return true;
-                    }
+                    message = "Security Mode blocks door unlocking.";
+                    return true;
                 }
             }
 
@@ -48,7 +44,7 @@ namespace Common.Models
 
             return false;
         }
-        public void ApplyRuleEffects(SmartRule rule,IDeviceRepository deviceRepository)
+        public void ApplyRuleEffects(SmartRule rule, IDeviceRepository deviceRepository)
         {
             List<Device> devices = deviceRepository.GetAllDevices().ToList();
             if (rule.Name == "NightMode" && rule.IsEnabled)
@@ -57,7 +53,7 @@ namespace Common.Models
                 {
                     foreach (var f in device.Functions)
                     {
-                        if(f.Value.Name.Equals("temperature") && int.Parse(f.Value.Value) > 20)
+                        if (f.Value.Name.Equals("temperature") && int.Parse(f.Value.Value) > 20)
                         {
                             f.Value.Value = "20";
                             deviceRepository.UpdateDeviceFunction(device.Id, f.Key, "temperature", "20");
@@ -85,7 +81,7 @@ namespace Common.Models
             }
             if (rule.Name == "SecurityMode" && rule.IsEnabled)
             {
-                foreach (var device in devices.Where(x=>x.Name.Contains("Door") || x.Name.Contains("Vault")))
+                foreach (var device in devices.Where(x => x.Name.Contains("Door") || x.Name.Contains("Vault")))
                 {
                     foreach (var f in device.Functions)
                     {

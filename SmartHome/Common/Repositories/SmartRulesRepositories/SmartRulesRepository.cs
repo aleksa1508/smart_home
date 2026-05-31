@@ -1,6 +1,7 @@
 ﻿using Common.Models;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Linq;
 
 namespace Common.Repositories.SmartRulesRepositories
 {
@@ -61,6 +62,28 @@ namespace Common.Repositories.SmartRulesRepositories
                 sqlCommand.Parameters.AddWithValue("@name", smartRule.Name);
 
                 sqlCommand.ExecuteNonQuery();
+            }
+        }
+        public void ExistsSmartRules()
+        {
+            var list = GetAllSmartRules().ToList();
+            if (list.Count == 0)
+            {
+                AddNewSmartRules();
+            }
+        }
+
+        public void AddNewSmartRules()
+        {
+            List<SmartRule> rules1 = new List<SmartRule>
+            {
+                new SmartRule{ IsEnabled=false, Name="NightMode",Description="Limits temperature to 20°C, restricts lights and locks garage during night hours."},
+                new SmartRule{ IsEnabled=false, Name="SecurityMode",Description="Lock all doors and vaults."},
+                new SmartRule{ IsEnabled=false, Name="EnergySaving",Description="Limits brightness and reduces energy usage."},
+            };
+            foreach (var r in rules1)
+            {
+                AddSmartRule(r.Name, r.Description, r.IsEnabled);
             }
         }
     }

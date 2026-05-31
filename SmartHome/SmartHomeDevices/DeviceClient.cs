@@ -25,7 +25,6 @@ namespace SmartHomeDevices
             IPEndPoint destinationEP = new IPEndPoint(IPAddress.Any, number);
             udpSocket.Bind(destinationEP);
             EndPoint senderEP = new IPEndPoint(IPAddress.Any, 0);
-            //Device d = new Device();
             IDeviceRepository deviceRepository = new DeviceRepository();
             List<Device> devices = new List<Device>();
             bool end = false;
@@ -67,7 +66,7 @@ namespace SmartHomeDevices
                 }
             }
             Console.WriteLine("Device has shut down");
-            udpSocket.Close(); // Zatvaramo soket na kraju rada
+            udpSocket.Close(); // closing socket
             Console.ReadKey();
         }
     }

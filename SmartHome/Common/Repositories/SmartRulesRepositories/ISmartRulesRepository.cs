@@ -8,5 +8,7 @@ namespace Common.Repositories.SmartRulesRepositories
         IEnumerable<SmartRule> GetAllSmartRules();
         void UpdateSmartRule(SmartRule smartRule);
         void AddSmartRule(string name, string description, bool isEnabled);
+        void ExistsSmartRules();
+        void AddNewSmartRules();
     }
 }

@@ -26,13 +26,11 @@ namespace Common.Repositories.UsersRepositories
                 cmd.Parameters.AddWithValue("@lastName", lastName);
                 cmd.Parameters.AddWithValue("@username", username);
 
-                // 🔐 hash password (preporučeno)
                 string hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
                 cmd.Parameters.AddWithValue("@password", hashedPassword);
 
                 cmd.Parameters.AddWithValue("@role", role);
 
-                // početne vrijednosti
                 cmd.Parameters.AddWithValue("@port", 0);
                 cmd.Parameters.AddWithValue("@status", "INACTIVE");
 
@@ -156,22 +154,12 @@ namespace Common.Repositories.UsersRepositories
         public void PrintAllUsers()
         {
             List<User> list = GetAllUsers().ToList();
-
-            //Console.WriteLine("-------------------------------------------------------------------------------------------");
-            //Console.WriteLine("| {0,-15} | {1,-12} | {2,-15} | {3,-8} | {4,-6} | {5,-10} |",
-            //    "FirstName", "LastName", "Username", "Status", "Port", "Role");
-            //Console.WriteLine("-------------------------------------------------------------------------------------------");
             var tablee = new ConsoleTable("FirstName", "LastName", "Username", "Online", "Port", "Role");
             foreach (var user in list)
             {
                 tablee.AddRow(user.FirstName, user.LastName, user.Username, user.Status == ActiveStatus.ACTIVE ? "YES" : "NO", user.Port, user.Role);
-                //Console.WriteLine("| {0,-15} | {1,-12} | {2,-15} | {3,-8} | {4,-6} | {5,-10} |",
-                //    user.FirstName, user.LastName, user.Username, user.Status == ActiveStatus.ACTIVE ? "YES" : "NO", user.Port, user.Role);
             }
             tablee.Write(Format.Alternative);
-
-
-
         }
 
         public User GetUserById(int id)

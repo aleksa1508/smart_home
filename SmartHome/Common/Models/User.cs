@@ -5,7 +5,7 @@ using System.ComponentModel;
 namespace Common
 {
     [Serializable]
-    public class User : INotifyPropertyChanged     //ako budem nekad u ui menjao objekat onda dodati notify property changed
+    public class User : INotifyPropertyChanged
     {
         private string firstName;
         public int ID { get; set; }
@@ -19,7 +19,7 @@ namespace Common
             }
         }
         public string LastName { get; set; }
-        public string FullName => $"{FirstName} {LastName}";  //for profile popup
+        public string FullName => $"{FirstName} {LastName}";
         public string Username { get; set; }
         public string Password { get; set; }
         public ActiveStatus Status { get; set; }

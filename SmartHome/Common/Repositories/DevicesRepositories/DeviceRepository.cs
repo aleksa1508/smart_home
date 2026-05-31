@@ -1,4 +1,5 @@
-﻿using Common.Enums;
+﻿using Common.DTOs;
+using Common.Enums;
 using Common.Models;
 using ConsoleTables;
 using System;
@@ -158,7 +159,6 @@ namespace Common.Repositories.DevicesRepositories
             foreach (var device in list)
             {
                 string functions = string.Join(", ", device.Functions.Select(f => $"{f.Value.Name}: {f.Value.Value}"));
-                // Pretvaranje funkcija u format ključ: vrednost
                 table.AddRow(device.Name, device.Port, functions);
             }
             string[] linije = table.ToMarkDownString().Split('\n');
@@ -166,7 +166,6 @@ namespace Common.Repositories.DevicesRepositories
             {
                 foreach (string linija in linije)
                 {
-                    // Bojenje po statusu
                     if (linija.Contains(deviceName))
                     {
                         Console.ForegroundColor = ConsoleColor.Green;
@@ -179,7 +178,6 @@ namespace Common.Repositories.DevicesRepositories
                     }
 
                 }
-                // Obavezno resetuj boju na kraju!
                 Console.ResetColor();
                 return;
             }
