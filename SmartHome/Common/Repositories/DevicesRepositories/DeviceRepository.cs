@@ -151,60 +151,94 @@ namespace Common.Repositories.DevicesRepositories
             }
             return commands;
         }
-
-        public void PrintAllDevices(string deviceName)
+        private static string Center(string text, int width)
         {
-            List<Device> list = GetAllDevices().ToList();
-            var table = new ConsoleTable("Device name", "Port", "Functions");
-            foreach (var device in list)
-            {
-                string functions = string.Join(", ", device.Functions.Select(f => $"{f.Value.Name}: {f.Value.Value}"));
-                table.AddRow(device.Name, device.Port, functions);
-            }
-            string[] linije = table.ToMarkDownString().Split('\n');
-            if (!deviceName.Equals(""))
-            {
-                foreach (string linija in linije)
-                {
-                    if (linija.Contains(deviceName))
-                    {
-                        Console.ForegroundColor = ConsoleColor.Green;
-                        Console.WriteLine(linija);
-                        Console.ResetColor();
-                    }
-                    else
-                    {
-                        Console.WriteLine(linija);
-                    }
+            if (text.Length >= width) return text;
+            int totalPadding = width - text.Length;
+            int leftPad = totalPadding / 2;
+            int rightPad = totalPadding - leftPad;
+            return new string(' ', leftPad) + text + new string(' ', rightPad);
+        }
+        public void PrintAllDevices(string deviceName = "")
+        {
+            var devices = GetAllDevices().ToList();
 
-                }
-                Console.ResetColor();
-                return;
-            }
-            table.Write(Format.Alternative);
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            Console.WriteLine("  ╔══════════════════════════════════════════════════════════════════════════════════╗");
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("  ║" + Center("REGISTERED DEVICES", 82) + "║");
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            Console.WriteLine("  ╠══════╦══════════════════════╦════════╦═══════════════════════════════════════════╣");
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("  ║  #   ║ Device Name          ║  Port  ║ Functions                                 ║");
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            Console.WriteLine("  ╠══════╬══════════════════════╬════════╬═══════════════════════════════════════════╣");
 
+            int i = 1;
+
+            foreach (var device in devices)
+            {
+                string functions = FormatFunctions(device);
+
+                bool highlight =
+                    !string.IsNullOrWhiteSpace(deviceName) &&
+                    device.Name.Equals(deviceName, StringComparison.OrdinalIgnoreCase);
+
+                Console.ForegroundColor = ConsoleColor.DarkCyan;
+                Console.Write("  ║");
+
+                Console.ForegroundColor = highlight ? ConsoleColor.Green : ConsoleColor.White;
+                Console.Write($" {i++,-4}");
+
+                Console.ForegroundColor = ConsoleColor.DarkCyan;
+                Console.Write(" ║ ");
+
+                Console.ForegroundColor = highlight ? ConsoleColor.Green : ConsoleColor.White;
+                Console.Write($"{device.Name,-21}");
+
+                Console.ForegroundColor = ConsoleColor.DarkCyan;
+                Console.Write("║ ");
+
+                Console.ForegroundColor = highlight ? ConsoleColor.Green : ConsoleColor.White;
+                Console.Write($"{device.Port,-7}");
+
+                Console.ForegroundColor = ConsoleColor.DarkCyan;
+                Console.Write("║ ");
+
+                Console.ForegroundColor = highlight ? ConsoleColor.Green : ConsoleColor.White;
+
+                Console.Write($"{functions,-42}");
+
+                Console.ForegroundColor = ConsoleColor.DarkCyan;
+                Console.WriteLine("║");
+            }
+
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            Console.WriteLine("  ╚══════╩══════════════════════╩════════╩═══════════════════════════════════════════╝");
+
+            Console.ResetColor();
+            Console.WriteLine();
         }
 
         public string PrintDeviceFunctions(Device device)
         {
-            string funkcije = string.Join(", ", device.Functions.Select(f => $"{f.Value.Name}: {f.Value.Value}"));
-
-            var tablee = new ConsoleTable("Device name", "Port", "Functions");
-
-            tablee.AddRow(device.Name, device.Port, funkcije);
-
-            return tablee.ToStringAlternative();
+            var table = new ConsoleTable("Device Name", "Port", "Functions");
+            table.AddRow(device.Name, device.Port, FormatFunctions(device));
+            return table.ToStringAlternative();
         }
+
         public string PrintDeviceCommands(Device device)
         {
-            var tablee = new ConsoleTable("Date and Time", "Log", "Username");
-            foreach (var c in device.CommandRegister.OrderByDescending(x => x.CreationDate).ToList())
-            {
-                tablee.AddRow(c.CreationDate, c.Log, c.Username);
-            }
+            var table = new ConsoleTable("Date and Time", "Log", "Username");
 
-            return tablee.ToStringAlternative();
+            foreach (var cmd in device.CommandRegister.OrderByDescending(x => x.CreationDate))
+                table.AddRow(cmd.CreationDate.ToString("yyyy-MM-dd HH:mm:ss"), cmd.Log, cmd.Username);
+
+            return table.ToStringAlternative();
         }
+
+        private string FormatFunctions(Device device) =>
+            string.Join(", ", device.Functions.Select(f => $"{f.Value.Name}: {f.Value.Value}"));
         public void UpdateDeviceFunction(int deviceId, int id, string name, string value)
         {
             using (SqlConnection connection = new SqlConnection(connectionString))

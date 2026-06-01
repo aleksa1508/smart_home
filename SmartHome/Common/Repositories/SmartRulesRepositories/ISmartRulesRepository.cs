@@ -10,5 +10,6 @@ namespace Common.Repositories.SmartRulesRepositories
         void AddSmartRule(string name, string description, bool isEnabled);
         void ExistsSmartRules();
         void AddNewSmartRules();
+        void PrintAllSmartRules();
     }
 }

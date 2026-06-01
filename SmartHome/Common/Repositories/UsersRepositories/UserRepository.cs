@@ -153,15 +153,62 @@ namespace Common.Repositories.UsersRepositories
         }
         public void PrintAllUsers()
         {
-            List<User> list = GetAllUsers().ToList();
-            var tablee = new ConsoleTable("FirstName", "LastName", "Username", "Online", "Port", "Role");
-            foreach (var user in list)
+            var users = GetAllUsers().ToList();
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            Console.WriteLine("  ╔═════════════════════════════════════════════════════════════════════╗");
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("  ║" + Center("REGISTERED USERS", 69) + "║");
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            Console.WriteLine("  ╠══════╦══════════════════╦══════════════╦════════╦═══════╦═══════════╣");
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("  ║  #   ║  Name            ║  Username    ║ Online ║  Port ║  Role     ║");
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            Console.WriteLine("  ╠══════╬══════════════════╬══════════════╬════════╬═══════╬═══════════╣");
+            int i = 1;
+            foreach (var u in users)
             {
-                tablee.AddRow(user.FirstName, user.LastName, user.Username, user.Status == ActiveStatus.ACTIVE ? "YES" : "NO", user.Port, user.Role);
+                Console.ResetColor();
+                bool online = u.Status == ActiveStatus.ACTIVE;
+                Console.ForegroundColor = ConsoleColor.DarkCyan;
+                Console.Write("  ║");
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Write($" {i++,-4}");
+                Console.ForegroundColor = ConsoleColor.DarkCyan;
+                Console.Write(" ║ ");
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Write($"{$"{u.FirstName} {u.LastName}",-17}");
+                Console.ForegroundColor = ConsoleColor.DarkCyan;
+                Console.Write("║ ");
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Write($"{u.Username,-13}");
+                Console.ForegroundColor = ConsoleColor.DarkCyan;
+                Console.Write("║ ");
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Write($"{(online ? "YES" : "NO"),-7}");
+                Console.ForegroundColor = ConsoleColor.DarkCyan;
+                Console.Write("║ ");
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Write($"{u.Port,-6}");
+                Console.ForegroundColor = ConsoleColor.DarkCyan;
+                Console.Write("║ ");
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.Write($"{u.Role,-10}");
+                Console.ForegroundColor = ConsoleColor.DarkCyan;
+                Console.WriteLine("║");
             }
-            tablee.Write(Format.Alternative);
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            Console.WriteLine("  ╚══════╩══════════════════╩══════════════╩════════╩═══════╩═══════════╝");
+            Console.ResetColor();
+            Console.WriteLine();
         }
-
+        private static string Center(string text, int width)
+        {
+            if (text.Length >= width) return text;
+            int totalPadding = width - text.Length;
+            int leftPad = totalPadding / 2;
+            int rightPad = totalPadding - leftPad;
+            return new string(' ', leftPad) + text + new string(' ', rightPad);
+        }
         public User GetUserById(int id)
         {
             using (SqlConnection connection = new SqlConnection(connectionString))

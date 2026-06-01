@@ -1,5 +1,8 @@
-﻿using Common.Models;
+﻿using Common.Enums;
+using Common.Models;
+using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 
@@ -85,6 +88,62 @@ namespace Common.Repositories.SmartRulesRepositories
             {
                 AddSmartRule(r.Name, r.Description, r.IsEnabled);
             }
+        }
+        private static string Center(string text, int width)
+        {
+            if (text.Length >= width) return text;
+            int totalPadding = width - text.Length;
+            int leftPad = totalPadding / 2;
+            int rightPad = totalPadding - leftPad;
+            return new string(' ', leftPad) + text + new string(' ', rightPad);
+        }
+        public void PrintAllSmartRules()
+        {
+            var rules = GetAllSmartRules().ToList();
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            Console.WriteLine("  ╔════════════════════════════════════════╗");
+
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("  ║" + Center("SMART RULES", 40) + "║");
+
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            Console.WriteLine("  ╠══════╦══════════════════════╦══════════╣");
+
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("  ║  #   ║ Rule Name            ║ Status   ║");
+
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            Console.WriteLine("  ╠══════╬══════════════════════╬══════════╣");
+
+            int i = 1;
+            foreach (var rule in rules)
+            {
+                bool enabled = rule.IsEnabled;
+                Console.ForegroundColor = ConsoleColor.DarkCyan;
+                Console.Write("  ║");
+
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Write($" {i++,-4}");
+
+                Console.ForegroundColor = ConsoleColor.DarkCyan;
+                Console.Write(" ║ ");
+
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Write($"{rule.Name,-21}");
+
+                Console.ForegroundColor = ConsoleColor.DarkCyan;
+                Console.Write("║ ");
+
+                Console.ForegroundColor = ConsoleColor.White;
+
+                Console.Write($"{(rule.IsEnabled ? "ENABLED" : "DISABLED"),-9}");
+                Console.ForegroundColor = ConsoleColor.DarkCyan;
+                Console.WriteLine("║");
+            }
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            Console.WriteLine("  ╚══════╩══════════════════════╩══════════╝");
+            Console.ResetColor();
+            Console.WriteLine();
         }
     }
 }

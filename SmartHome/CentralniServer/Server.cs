@@ -180,6 +180,7 @@ namespace TCPServer
                                             SmartRules = smartRulesRepository.GetAllSmartRules().ToList()
 
                                         };
+                                        smartRulesRepository.PrintAllSmartRules();
                                         string json = JsonSerializer.Serialize(content);
                                         byte[] data = aesClass.EncryptMessage(json, klijentKljucevi[s].Key, klijentKljucevi[s].IV);
                                         s.SendTo(data, clientEP);
@@ -410,7 +411,7 @@ namespace TCPServer
 
                                             udpSocket.Blocking = false;
                                             Console.WriteLine($"Message from UDP client : {receivedMessage}");
-
+                                            Console.WriteLine("All users:");
                                             userReository.PrintAllUsers();
 
                                             klijentKljucevi[udpSocket] = (key, iv); //add keys in dictionary
@@ -419,6 +420,8 @@ namespace TCPServer
                                             List<SmartRule> smartRules = smartRulesRepository.GetAllSmartRules().ToList();
                                             Console.WriteLine("All devices:");
                                             deviceRepository.PrintAllDevices("");
+                                            Console.WriteLine("All smart rules:");
+                                            smartRulesRepository.PrintAllSmartRules();
 
                                             var commands = deviceRepository.GetAllCommands().ToList();
                                             var content = new ResponseDTO
