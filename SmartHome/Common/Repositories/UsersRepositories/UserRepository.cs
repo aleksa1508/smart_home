@@ -1,5 +1,4 @@
 ﻿using Common.Enums;
-using ConsoleTables;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;

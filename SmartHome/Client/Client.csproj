@@ -166,6 +166,10 @@
     <Compile Include="Helpers\TimeViewModel.cs" />
     <Compile Include="Helpers\ToastNotification.cs" />
     <Compile Include="Helpers\ValidateCommand.cs" />
+    <Compile Include="Helpers\ValueOption.cs" />
+    <Compile Include="NewSmartRuleView.xaml.cs">
+      <DependentUpon>NewSmartRuleView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="PasswordView.xaml.cs">
       <DependentUpon>PasswordView.xaml</DependentUpon>
     </Compile>
@@ -215,6 +219,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="NewSmartRuleView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="PasswordView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

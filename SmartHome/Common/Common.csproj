@@ -65,6 +65,7 @@
     <Compile Include="DTOs\Function.cs" />
     <Compile Include="DTOs\OwnerCommandDTO.cs" />
     <Compile Include="DTOs\ResponseDTO.cs" />
+    <Compile Include="DTOs\RuleActionDTO.cs" />
     <Compile Include="DTOs\SmartRuleDTO.cs" />
     <Compile Include="Enums\ActiveStatus.cs" />
     <Compile Include="Enums\RoomType.cs" />
@@ -73,12 +74,15 @@
     <Compile Include="Models\Command.cs" />
     <Compile Include="Models\Device.cs" />
     <Compile Include="Models\RsaClass.cs" />
+    <Compile Include="Models\RuleAction.cs" />
     <Compile Include="Models\RuleEngine.cs" />
     <Compile Include="Models\SmartRule.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\DevicesRepositories\DeviceRepository.cs" />
     <Compile Include="Repositories\DevicesRepositories\IDeviceRepository.cs" />
+    <Compile Include="Repositories\RuleActionRepository\IRuleActionRepository.cs" />
+    <Compile Include="Repositories\RuleActionRepository\RuleActionRepository.cs" />
     <Compile Include="Repositories\SmartRulesRepositories\ISmartRulesRepository.cs" />
     <Compile Include="Repositories\SmartRulesRepositories\SmartRulesRepository.cs" />
     <Compile Include="Repositories\UsersRepositories\IUserReository.cs" />

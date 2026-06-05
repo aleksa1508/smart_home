@@ -1,8 +1,6 @@
-﻿using Common.Enums;
-using Common.Models;
+﻿using Common.Models;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 
@@ -45,11 +43,30 @@ namespace Common.Repositories.SmartRulesRepositories
                 while (reader.Read())
                 {
 
-                    lista.Add(new SmartRule { Name = reader["name"].ToString(), Description = reader["description"].ToString(), IsEnabled = bool.Parse(reader["isEnabled"].ToString()) });
+                    lista.Add(new SmartRule { Id = int.Parse(reader["id"].ToString()), Name = reader["name"].ToString(), Description = reader["description"].ToString(), IsEnabled = bool.Parse(reader["isEnabled"].ToString()) });
 
                 }
 
                 return lista;
+            }
+        }
+        public int GetSmartRuleByName(string name)
+        {
+            int result = 0;
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                string query = "SELECT * from smartRules where name=@name";
+                SqlCommand command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@name", name);
+                SqlDataReader reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    result = int.Parse(reader["id"].ToString());
+                }
+
+                return result;
             }
         }
 
@@ -58,37 +75,16 @@ namespace Common.Repositories.SmartRulesRepositories
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
-                string query = "UPDATE smartRules SET isEnabled=@isEnabled where name = @name";
+                string query = "UPDATE smartRules SET isEnabled=@isEnabled where id = @id";
                 SqlCommand sqlCommand = new SqlCommand(query, connection);
 
                 sqlCommand.Parameters.AddWithValue("@isEnabled", smartRule.IsEnabled.ToString());
-                sqlCommand.Parameters.AddWithValue("@name", smartRule.Name);
+                sqlCommand.Parameters.AddWithValue("@id", smartRule.Id);
 
                 sqlCommand.ExecuteNonQuery();
             }
         }
-        public void ExistsSmartRules()
-        {
-            var list = GetAllSmartRules().ToList();
-            if (list.Count == 0)
-            {
-                AddNewSmartRules();
-            }
-        }
 
-        public void AddNewSmartRules()
-        {
-            List<SmartRule> rules1 = new List<SmartRule>
-            {
-                new SmartRule{ IsEnabled=false, Name="NightMode",Description="Limits temperature to 20°C, restricts lights and locks garage during night hours."},
-                new SmartRule{ IsEnabled=false, Name="SecurityMode",Description="Lock all doors and vaults."},
-                new SmartRule{ IsEnabled=false, Name="EnergySaving",Description="Limits brightness and reduces energy usage."},
-            };
-            foreach (var r in rules1)
-            {
-                AddSmartRule(r.Name, r.Description, r.IsEnabled);
-            }
-        }
         private static string Center(string text, int width)
         {
             if (text.Length >= width) return text;

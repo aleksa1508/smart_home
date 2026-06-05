@@ -1,14 +1,17 @@
 ﻿using CentralniServer.Helpers;
 using CentralniServer.Service;
+using CentralniServer.Services;
 using Common;
 using Common.DTOs;
 using Common.Enums;
 using Common.Models;
 using Common.Repositories.DevicesRepositories;
+using Common.Repositories.RuleActionRepository;
 using Common.Repositories.SmartRulesRepositories;
 using Common.Repositories.UsersRepositories;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
@@ -29,10 +32,12 @@ namespace TCPServer
             int deviceNumber = 8;
             IDeviceRepository deviceRepository = new DeviceRepository();
             IServerService serverService = new ServerService();
-            Random random = new Random();
-
             ISmartRulesRepository smartRulesRepository = new SmartRulesRepository();
-            smartRulesRepository.ExistsSmartRules();
+            IRuleActionRepository ruleActionRepository = new RuleActionRepository();
+            Random random = new Random();
+            SmartRulesService smartRulesService = new SmartRulesService(smartRulesRepository, ruleActionRepository);
+            smartRulesService.AddNewSmartRules();
+
 
             RuleEngine ruleEngine = new RuleEngine();
             AesClass aesClass = new AesClass();
@@ -167,16 +172,65 @@ namespace TCPServer
                                         byte[] data = aesClass.EncryptMessage(json, klijentKljucevi[s].Key, klijentKljucevi[s].IV);
                                         s.SendTo(data, clientEP);
                                     }
+                                    else if (receivedMessage.Contains("\"Action\":\"newUser\""))
+                                    {
+                                        var user = JsonSerializer.Deserialize<OwnerCommandDTO>(receivedMessage);
+                                        var exist = userReository.GetAllUsers().Where(x => x.Username == user.ChangedUser.Username).ToList();
+                                        string response = exist.Count > 0 ? "Username has already exist" : "Successfully create user";
+                                        userReository.AddUser(user.ChangedUser.FirstName, user.ChangedUser.LastName, user.ChangedUser.Username, user.ChangedUser.Password, user.ChangedUser.Role.ToString());
+                                        var content = new ResponseDTO
+                                        {
+                                            Message = "Users",
+                                            Value = response,
+                                            Users = userReository.GetAllUsers().ToList()
+                                        };
+                                        userReository.PrintAllUsers();
+                                        string json = JsonSerializer.Serialize(content);
+                                        byte[] data = aesClass.EncryptMessage(json, klijentKljucevi[s].Key, klijentKljucevi[s].IV);
+                                        s.SendTo(data, clientEP);
+
+                                    }
                                     else if (receivedMessage.Contains("\"Action\":\"smartRule\""))
                                     {
                                         var rule = JsonSerializer.Deserialize<SmartRuleDTO>(receivedMessage);
                                         smartRulesRepository.UpdateSmartRule(rule.SmartRule);
-
-                                        ruleEngine.ApplyRuleEffects(rule.SmartRule, deviceRepository);
+                                        var actions = ruleActionRepository.GetAllActionsByRuleId(rule.SmartRule.Id).ToList();
+                                        ruleEngine.ApplyRuleEffects(rule.SmartRule, actions, deviceRepository);
                                         var content = new ResponseDTO
                                         {
                                             Message = "Smart Rules",
                                             Value = $"Smart rule {rule.SmartRule.Name} is {(rule.SmartRule.IsEnabled == true ? "ON" : "OFF")}",
+                                            SmartRules = smartRulesRepository.GetAllSmartRules().ToList()
+
+                                        };
+                                        smartRulesRepository.PrintAllSmartRules();
+                                        string json = JsonSerializer.Serialize(content);
+                                        byte[] data = aesClass.EncryptMessage(json, klijentKljucevi[s].Key, klijentKljucevi[s].IV);
+                                        s.SendTo(data, clientEP);
+
+                                    }
+                                    else if (receivedMessage.Contains("\"Action\":\"newRule\""))
+                                    {
+                                        var rule = JsonSerializer.Deserialize<SmartRuleDTO>(receivedMessage);
+                                        smartRulesRepository.AddSmartRule(rule.SmartRule.Name, rule.SmartRule.Description, rule.SmartRule.IsEnabled);
+                                        int id = smartRulesRepository.GetSmartRuleByName(rule.SmartRule.Name);
+                                        foreach (var a in rule.Actions)
+                                        {
+
+                                            if (a.Device is null)
+                                            {
+                                                ruleActionRepository.AddRuleAction(id, a.FunctionName, a.Value, a.DeviceGroup, null, null);
+                                            }
+                                            else
+                                            {
+                                                ruleActionRepository.AddRuleAction(id, a.FunctionName, a.Value, null, a.FunctionId, a.Device.Id);
+
+                                            }
+                                        }
+                                        var content = new ResponseDTO
+                                        {
+                                            Message = "Smart Rules",
+                                            Value = $"Smart rule is successfully created",
                                             SmartRules = smartRulesRepository.GetAllSmartRules().ToList()
 
                                         };
@@ -227,6 +281,7 @@ namespace TCPServer
                                         var komanda = JsonSerializer.Deserialize<CommandDTO>(receivedMessage);
                                         var users = userReository.GetAllUsers().ToList();
                                         var rules = smartRulesRepository.GetAllSmartRules().ToList();
+                                        var actions = ruleActionRepository.GetAllActions().ToList();
                                         var u1 = komanda.SelectedDevice;
                                         var id = komanda.FunctionID;
                                         var funkcija = komanda.Function;
@@ -237,7 +292,7 @@ namespace TCPServer
                                         string blockMessage;
                                         if (existUser.Role != UserRole.OWNER)
                                         {
-                                            if (ruleEngine.BlockCommand(rules, komanda, existUser, out blockMessage))
+                                            if (ruleEngine.BlockCommand(rules, actions, komanda, out blockMessage))
                                             {
                                                 var blockedResponse = new ResponseDTO
                                                 {

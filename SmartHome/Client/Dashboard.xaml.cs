@@ -232,7 +232,7 @@ namespace Client
         private void SmartRules_Tab_Button_Click(object sender, RoutedEventArgs e)
         {
             Title.Content = "Smart rules";
-            MainContent.Content = new SmartRulesView(SmartRules, aesClass);
+            MainContent.Content = new SmartRulesView(SmartRules, devices, aesClass);
         }
 
         private void HandleResponse(ResponseDTO response)

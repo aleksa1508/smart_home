@@ -15,12 +15,14 @@ namespace Client
     public partial class SmartRulesView : UserControl
     {
         public ObservableCollection<SmartRule> SmartRules { get; set; }
+        public ObservableCollection<Device> Devices { get; set; }
         private AesClass aesClass;
-        public SmartRulesView(ObservableCollection<SmartRule> rules, AesClass aesClass)
+        public SmartRulesView(ObservableCollection<SmartRule> rules, ObservableCollection<Device> devices, AesClass aesClass)
         {
             InitializeComponent();
             SmartRules = rules;
             DataContext = this;
+            Devices = devices;
             this.aesClass = aesClass;
         }
 
@@ -61,6 +63,11 @@ namespace Client
 
                 ConnectionService.UdpSocket.SendTo(aesClass.EncryptMessage(json, aesClass.Key, aesClass.IV), ConnectionService.UdpEndpoint);
             }
+        }
+        private void add_rule_button_Click(object sender, RoutedEventArgs e)
+        {
+            Dashboard dashboard = Window.GetWindow(this) as Dashboard;
+            dashboard.MainContent.Content = new NewSmartRuleView(Devices, aesClass);
         }
     }
 }

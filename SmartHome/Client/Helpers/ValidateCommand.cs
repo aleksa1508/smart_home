@@ -10,6 +10,51 @@ namespace Client.Helpers
 {
     public static class ValidateCommand
     {
+        public static bool ValidateAction(KeyValuePair<int, Function> selectedFunction, Dashboard parentWindow, Device device, string text, string value)
+        {
+            if (device == null)
+            {
+                parentWindow?.ShowToastNotification(new ToastNotification("Error", "Select device", NotificationType.Error));
+                return false;
+            }
+            if (selectedFunction.Value == null)
+            {
+                parentWindow?.ShowToastNotification(new ToastNotification("Error", "Select function", NotificationType.Error));
+                return false;
+            }
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                parentWindow?.ShowToastNotification(new ToastNotification("Error", "Value must be filled", NotificationType.Error));
+                return false;
+            }
+
+            string functionName = selectedFunction.Value.Name.ToLower();
+
+            if (functionName == "temperature" || functionName == "brightness" || functionName == "channel")
+            {
+                if (!int.TryParse(text, out _))
+                {
+                    parentWindow?.ShowToastNotification(new ToastNotification("Error", "Value must be a number", NotificationType.Error));
+                    return false;
+                }
+            }
+            else if (functionName == "state")
+            {
+                bool isDoorOrVault = device.Name.Contains("Door") || device.Name.Contains("Vault");
+                var allowed = isDoorOrVault
+                    ? new[] { "OPEN", "CLOSED" }
+                    : new[] { "ON", "OFF" };
+
+                if (!allowed.Contains(text.ToUpper()))
+                {
+                    string expected = isDoorOrVault ? "OPEN or CLOSED" : "ON or OFF";
+                    parentWindow?.ShowToastNotification(new ToastNotification("Error", $"Value must be: {expected}", NotificationType.Error));
+                    return false;
+                }
+            }
+
+            return true;
+        }
         public static bool CommandValidation(Regex regex, KeyValuePair<int, Function> selectedFunction, string text, Dashboard parentWindow, Device device)
         {
             if (regex.IsMatch(selectedFunction.Value.Name))

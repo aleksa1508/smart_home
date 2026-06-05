@@ -7,93 +7,133 @@ namespace Common.Models
 {
     public class RuleEngine
     {
-        public bool BlockCommand(List<SmartRule> _rules, CommandDTO command, User user, out string message)
+        private bool DeviceMatchesAction(Device device, RuleAction action)
+        {
+            if (action.DeviceId.HasValue)
+                return device.Id == action.DeviceId.Value;
+
+            switch (action.DeviceGroup)
+            {
+                case "ALL_LIGHTS":
+                    return device.Name.Contains("Light");
+
+                case "ALL_DOORS":
+                    return device.Name.Contains("Door");
+
+                case "ALL_CLIMATES":
+                    return device.Name.Contains("Climate");
+
+                case "ALL_VAULTS":
+                    return device.Name.Contains("Vault");
+
+                default:
+                    return false;
+            }
+        }
+        public bool BlockCommand(
+    List<SmartRule> rules,
+    List<RuleAction> actions,
+    CommandDTO command,
+    out string message)
         {
             message = string.Empty;
 
-            if (_rules.Any(r => r.Name == "NightMode" && r.IsEnabled))
+            foreach (var rule in rules.Where(r => r.IsEnabled))
             {
-                if (command.Function == "temperature" &&
-                    int.Parse(command.Value) > 20)
+                foreach (var action in actions.Where(a => a.RuleId == rule.Id))
                 {
-                    message = "Night Mode limits climate temperature to 20°C.";
-                    return true;
-                }
-            }
+                    if (!DeviceMatchesAction(command.SelectedDevice, action))
+                        continue;
 
-            if (_rules.Any(r => r.Name == "SecurityMode" && r.IsEnabled))
-            {
-                if ((command.SelectedDevice.Name.Contains("Door") ||
-                     command.SelectedDevice.Name.Contains("Vault")) &&
-                     command.Value == "OPEN")
-                {
-                    message = "Security Mode blocks door unlocking.";
-                    return true;
-                }
-            }
+                    if (!command.Function.Equals(action.FunctionName))
+                        continue;
 
-            if (_rules.Any(r => r.Name == "EnergySaving" && r.IsEnabled))
-            {
-                if (command.Function == "brightness" &&
-                    int.Parse(command.Value) > 50)
-                {
-                    message = "Energy Saving Mode limits brightness to 50°C.";
-                    return true;
+                    // TEMPERATURE / BRIGHTNESS
+                    if (int.TryParse(action.Value, out int limit) &&
+                        int.TryParse(command.Value, out int requestedValue))
+                    {
+                        if (requestedValue > limit)
+                        {
+                            message =
+                                $"Rule '{rule.Name}' limits {action.FunctionName} to {limit}.";
+                            return true;
+                        }
+
+                        continue;
+                    }
+
+                    // STATE RULES
+
+                    if (action.Value == "OFF" &&
+                        command.Value == "ON")
+                    {
+                        message =
+                            $"Rule '{rule.Name}' prevents turning this device ON.";
+                        return true;
+                    }
+
+                    if (action.Value == "CLOSED" &&
+                        command.Value == "OPEN")
+                    {
+                        message =
+                            $"Rule '{rule.Name}' prevents opening this device.";
+                        return true;
+                    }
                 }
             }
 
             return false;
         }
-        public void ApplyRuleEffects(SmartRule rule, IDeviceRepository deviceRepository)
+        public void ApplyRuleEffects(SmartRule rule, List<RuleAction> actions, IDeviceRepository deviceRepository)
         {
-            List<Device> devices = deviceRepository.GetAllDevices().ToList();
-            if (rule.Name == "NightMode" && rule.IsEnabled)
+            var devices = deviceRepository.GetAllDevices().ToList();
+
+            foreach (var action in actions.Where(a => a.RuleId == rule.Id))
             {
-                foreach (var device in devices)
+                var targetDevices = devices.Where(d => DeviceMatchesAction(d, action)).ToList();
+
+                foreach (var device in targetDevices)
                 {
-                    foreach (var f in device.Functions)
+                    var functionPair = device.Functions
+                        .FirstOrDefault(f => f.Value.Name == action.FunctionName);
+
+                    if (functionPair.Value == null)
+                        continue;
+
+                    int functionId = functionPair.Key;
+                    Function function = functionPair.Value;
+
+                    // TEMPERATURE / BRIGHTNESS LIMITS
+                    if (int.TryParse(action.Value, out int limit) &&
+                        int.TryParse(function.Value, out int current))
                     {
-                        if (f.Value.Name.Equals("temperature") && int.Parse(f.Value.Value) > 20)
+                        if (current > limit)
                         {
-                            f.Value.Value = "20";
-                            deviceRepository.UpdateDeviceFunction(device.Id, f.Key, "temperature", "20");
+                            function.Value = limit.ToString();
+
+                            deviceRepository.UpdateDeviceFunction(
+                                device.Id,
+                                functionId,
+                                function.Name,
+                                limit.ToString());
                         }
+
+                        continue;
                     }
 
-                }
-            }
+                    // STATE RULES
 
-            if (rule.Name == "EnergySaving" && rule.IsEnabled)
-            {
-                foreach (var device in devices)
-                {
-                    foreach (var f in device.Functions)
+                    if (function.Value != action.Value)
                     {
-                        if (f.Value.Name.Equals("brightness") && int.Parse(f.Value.Value) > 50)
-                        {
-                            f.Value.Value = "50";
-                            deviceRepository.UpdateDeviceFunction(device.Id, f.Key, "brightness", "50");
-                        }
+                        function.Value = action.Value;
+
+                        deviceRepository.UpdateDeviceFunction(
+                            device.Id,
+                            functionId,
+                            function.Name,
+                            action.Value);
                     }
-
                 }
-
-            }
-            if (rule.Name == "SecurityMode" && rule.IsEnabled)
-            {
-                foreach (var device in devices.Where(x => x.Name.Contains("Door") || x.Name.Contains("Vault")))
-                {
-                    foreach (var f in device.Functions)
-                    {
-                        if (f.Value.Name.Equals("state") && f.Value.Value.Equals("OPEN"))
-                        {
-                            f.Value.Value = "CLOSED";
-                            deviceRepository.UpdateDeviceFunction(device.Id, f.Key, "state", "CLOSED");
-                        }
-                    }
-
-                }
-
             }
         }
     }

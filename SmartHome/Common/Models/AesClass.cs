@@ -64,7 +64,7 @@ namespace Common.Models
             }
             catch (CryptographicException ex)
             {
-                Console.WriteLine($"Decrypt failed! Bytes: {BitConverter.ToString(encryptText)}\nError:",ex.ToString());
+                Console.WriteLine($"Decrypt failed! Bytes: {BitConverter.ToString(encryptText)}\nError:", ex.ToString());
                 Console.WriteLine($"Key: {BitConverter.ToString(key)}");
                 Console.WriteLine($"IV: {BitConverter.ToString(IV)}");
                 throw;
