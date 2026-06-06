@@ -84,6 +84,19 @@ namespace Common.Repositories.SmartRulesRepositories
                 sqlCommand.ExecuteNonQuery();
             }
         }
+        public void DeleteSmartRule(SmartRule smartRule)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                string query = "DELETE FROM smartRules WHERE id = @id";
+                SqlCommand sqlCommand = new SqlCommand(query, connection);
+
+                sqlCommand.Parameters.AddWithValue("@id", smartRule.Id);
+
+                sqlCommand.ExecuteNonQuery();
+            }
+        }
 
         private static string Center(string text, int width)
         {

@@ -69,5 +69,23 @@ namespace Client
             Dashboard dashboard = Window.GetWindow(this) as Dashboard;
             dashboard.MainContent.Content = new NewSmartRuleView(Devices, aesClass);
         }
+
+        private void delete_button_Click(object sender, RoutedEventArgs e)
+        {
+            var rule = (sender as Button)?.Tag as SmartRule;
+
+            if (rule != null)
+            {
+                var content = new SmartRuleDTO
+                {
+                    Action = "deleteRule",
+                    SmartRule = rule
+                };
+
+                string json = JsonSerializer.Serialize(content);
+
+                ConnectionService.UdpSocket.SendTo(aesClass.EncryptMessage(json, aesClass.Key, aesClass.IV), ConnectionService.UdpEndpoint);
+            }
+        }
     }
 }

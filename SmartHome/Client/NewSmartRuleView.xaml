@@ -23,22 +23,22 @@
                     <RowDefinition Height="*"></RowDefinition>
                     <RowDefinition Height="*"></RowDefinition>
                 </Grid.RowDefinitions>
-                <Label Grid.Row="0" Grid.Column="0" Content="Rule name:" Foreground="White" FontSize="17" Margin="10,8,0,0"/>
-                <Label Grid.Row="1" Grid.Column="0" Content="Description:" Foreground="White" FontSize="17" Margin="10,8,0,0"/>
-                <Label Grid.Row="2" Grid.Column="0" Content="Group:" Foreground="White" FontSize="17" Margin="10,8,0,0"/>
-                <Label Grid.Row="3" Grid.Column="0" Content="Device:" Foreground="White" FontSize="17" Margin="10,8,0,0"/>
-                <Label Grid.Row="4" Grid.Column="0" Content="Name:" Foreground="White" FontSize="17" Margin="10,8,0,0"/>
-                <Label Grid.Row="5" Grid.Column="0" Content="Value:" Foreground="White" FontSize="17" Margin="10,8,0,0"/>
+                <Label Grid.Row="0" Grid.Column="0" Content="Rule name:" Foreground="White" FontSize="17" Margin="10,5,0,0"/>
+                <Label Grid.Row="1" Grid.Column="0" Content="Description:" Foreground="White" FontSize="17" Margin="10,5,0,0"/>
+                <Label Grid.Row="2" Grid.Column="0" Content="Group:" Foreground="White" FontSize="17" Margin="10,5,0,0"/>
+                <Label Grid.Row="3" Grid.Column="0" Content="Device:" Foreground="White" FontSize="17" Margin="10,5,0,0"/>
+                <Label Grid.Row="4" Grid.Column="0" Content="Name:" Foreground="White" FontSize="17" Margin="10,5,0,0"/>
+                <Label Grid.Row="5" Grid.Column="0" Content="Value:" Foreground="White" FontSize="17" Margin="10,5,0,0"/>
                 <TextBox x:Name="RuleNameTextBox" Grid.Row="0" Grid.Column="1" Style="{StaticResource txt_box}"/>
                 <TextBox x:Name="DesriptionTextBox" Grid.Row="1" Grid.Column="1" Style="{StaticResource txt_box}"/>
-                    <ComboBox x:Name="ScopeComboBox" Grid.Row="2" Grid.Column="1" Style="{StaticResource combo_box2}" SelectionChanged="ScopeComboBox_SelectionChanged">
+                    <ComboBox x:Name="ScopeComboBox" Grid.Row="2" Grid.Column="1" Style="{StaticResource scope_combo_box}"  SelectionChanged="ScopeComboBox_SelectionChanged">
                         <ComboBoxItem Content="Single Device"/>
                         <ComboBoxItem Content="All Lights"/>
                         <ComboBoxItem Content="All Doors"/>
                         <ComboBoxItem Content="All Climates"/>
                     </ComboBox>
-                    <ComboBox x:Name="DeviceComboBox" Grid.Row="3" Grid.Column="1" Width="180" Height="30" Style="{StaticResource combo_box1}" ItemsSource="{Binding Devices}" DisplayMemberPath="Name"  SelectionChanged="DeviceComboBox_SelectionChanged"/>
-                <ComboBox x:Name="FunctionComboBox" IsEnabled="False" Grid.Row="4" Grid.Column="1" Style="{StaticResource combo_box2}"  DisplayMemberPath="Value.Name" SelectionChanged="FunctionComboBox_SelectionChanged"/>
+                <ComboBox x:Name="DeviceComboBox" Grid.Row="3" Grid.Column="1" Width="180" Height="30" Style="{StaticResource combo_box1}" ItemsSource="{Binding Devices}" DisplayMemberPath="Name"  SelectionChanged="DeviceComboBox_SelectionChanged"/>
+                <ComboBox x:Name="FunctionComboBox" IsEnabled="False" Grid.Row="4" Grid.Column="1" Style="{StaticResource combo_box1}"  DisplayMemberPath="Name" SelectionChanged="FunctionComboBox_SelectionChanged"/>
                 <TextBox x:Name="ValueTextBox" Grid.Row="5" Grid.Column="1" Style="{StaticResource txt_box}"/>
                     
                     <Button x:Name="action_button" Grid.Row="6" Grid.Column="1" HorizontalAlignment="Center" Foreground="White" Background="#4C5FF2" FontSize="20" ToolTip="Add action" Click="action_button_Click">
@@ -71,7 +71,8 @@
                         <DataTemplate>
                             <Border Background="#324766" CornerRadius="10" Padding="8" Margin="5">
                                 <StackPanel Width="170">
-                                    <TextBlock Text="{Binding Device.Name}" Foreground="White" FontWeight="Bold"/>
+                                    <TextBlock Text="{Binding Device.Name}" Foreground="White" FontWeight="Bold" Style="{StaticResource HideIfEmptyTextBlock}"/>
+                                        <TextBlock Text="{Binding DeviceGroup}" Foreground="White" FontWeight="Bold" Style="{StaticResource HideIfEmptyTextBlock}"/>
                                         <TextBlock>
                                              <Run Text="Function: "/>
                                              <Run Text="{Binding FunctionName}" FontWeight="Bold"/>

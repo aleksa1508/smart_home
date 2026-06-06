@@ -209,11 +209,43 @@ namespace TCPServer
                                         s.SendTo(data, clientEP);
 
                                     }
+                                    else if (receivedMessage.Contains("\"Action\":\"deleteRule\""))
+                                    {
+                                        var rule = JsonSerializer.Deserialize<SmartRuleDTO>(receivedMessage);
+                                        smartRulesRepository.DeleteSmartRule(rule.SmartRule);
+                                        ruleActionRepository.DeleteRuleAction(rule.SmartRule.Id);
+                                        var content = new ResponseDTO
+                                        {
+                                            Message = "Smart Rules",
+                                            Value = "Successfully delete smart rule",
+                                            SmartRules = smartRulesRepository.GetAllSmartRules().ToList()
+
+                                        };
+                                        smartRulesRepository.PrintAllSmartRules();
+                                        string json = JsonSerializer.Serialize(content);
+                                        byte[] data = aesClass.EncryptMessage(json, klijentKljucevi[s].Key, klijentKljucevi[s].IV);
+                                        s.SendTo(data, clientEP);
+
+                                    }
                                     else if (receivedMessage.Contains("\"Action\":\"newRule\""))
                                     {
                                         var rule = JsonSerializer.Deserialize<SmartRuleDTO>(receivedMessage);
+                                        int id = 0;
+                                        id=smartRulesRepository.GetSmartRuleByName(rule.SmartRule.Name);
+                                        if (id != 0)
+                                        {
+                                            var cont = new ResponseDTO
+                                            {
+                                                Message = "Smart Rules",
+                                                Value = $"Smart rule with this name has already exist",
+                                                SmartRules = smartRulesRepository.GetAllSmartRules().ToList()
+                                            };
+                                            string jsonContent = JsonSerializer.Serialize(cont);
+                                            byte[] dataContent = aesClass.EncryptMessage(jsonContent, klijentKljucevi[s].Key, klijentKljucevi[s].IV);
+                                            s.SendTo(dataContent, clientEP);
+                                            continue;
+                                        }
                                         smartRulesRepository.AddSmartRule(rule.SmartRule.Name, rule.SmartRule.Description, rule.SmartRule.IsEnabled);
-                                        int id = smartRulesRepository.GetSmartRuleByName(rule.SmartRule.Name);
                                         foreach (var a in rule.Actions)
                                         {
 

@@ -6,7 +6,7 @@ namespace Common.DTOs
     {
         public Device Device { get; set; }
         public string DeviceGroup { get; set; }
-        public int FunctionId { get; set; }
+        public int? FunctionId { get; set; }
 
         public string FunctionName { get; set; }
 

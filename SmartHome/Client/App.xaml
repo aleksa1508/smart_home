@@ -4,6 +4,21 @@
              xmlns:local="clr-namespace:Client"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
+        
+        <Style x:Key="HideIfEmptyTextBlock" TargetType="TextBlock">
+            <Setter Property="Visibility" Value="Visible"/>
+
+            <Style.Triggers>
+                <Trigger Property="Text" Value="">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </Trigger>
+
+                <Trigger Property="Text" Value="{x:Null}">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        
         <Style x:Key="button_minimize" TargetType="Button">
             <Setter Property="FontWeight" Value="Bold"></Setter>
             <Setter Property="Foreground" Value="Black"></Setter>
@@ -51,7 +66,29 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+        <Style x:Key="delete_button" TargetType="Button">
+            <Setter Property="FontWeight" Value="Bold"></Setter>
+            <Setter Property="Foreground" Value="Black"></Setter>
+            <Setter Property="Cursor" Value="Hand"></Setter>
+            <Setter Property="Content" Value="X"></Setter>
+            <Setter Property="ToolTip" Value="Close"></Setter>
 
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Height="20" CornerRadius="10" Width="20" Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Background" Value="#EF7070"></Setter>
+            <Style.Triggers >
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#EA2626"></Setter>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
         <Style x:Key="txt_box_input" TargetType="TextBox">
             <Setter Property="Foreground" Value="White"></Setter>
             <Setter Property="Background" Value="#324766"></Setter>
@@ -328,9 +365,9 @@
                                     <ContentPresenter 
                                 Margin="10,0,0,0"
                                 VerticalAlignment="Center"
-                                 Content="{Binding SelectedItem, RelativeSource={RelativeSource TemplatedParent}}"/>
+                                 Content="{TemplateBinding SelectionBoxItem}"/>
 
-                                    <!-- ARROW -->
+                                   
                                     <TextBlock Grid.Column="1"
                                        Text="▼"
                                        Foreground="White"

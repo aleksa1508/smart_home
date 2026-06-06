@@ -21,10 +21,10 @@ namespace Client
         public AesClass aesClass;
         Dictionary<string, List<ValueOption>> functionMap = new Dictionary<string, List<ValueOption>>()
         {
-            ["Light"] = new List<ValueOption> { new ValueOption { Name = "brightness" },new ValueOption { Name = "state" } },
+            ["Light"] = new List<ValueOption> { new ValueOption { Name = "brightness" }, new ValueOption { Name = "state" } },
             ["Climate"] = new List<ValueOption> { new ValueOption { Name = "temperature" }, new ValueOption { Name = "state" } },
             ["Door"] = new List<ValueOption> { new ValueOption { Name = "state" } },
-            ["Vault"] = new List<ValueOption> {  new ValueOption { Name = "state" } }
+            ["Vault"] = new List<ValueOption> { new ValueOption { Name = "state" } }
         };
         public NewSmartRuleView(ObservableCollection<Device> devices, AesClass aes)
         {
@@ -58,8 +58,8 @@ namespace Client
                 return;
             }
 
-            FunctionComboBox.ItemsSource = device.Functions;
-
+            FunctionComboBox.ItemsSource = device.Functions.Select(x => new ValueOption { FunctionId = x.Key, Name = x.Value.Name });
+            FunctionComboBox.IsEnabled = true;
             if (device.Functions.Any())
             {
                 FunctionComboBox.SelectedIndex = 0;
@@ -91,6 +91,13 @@ namespace Client
             string json = JsonSerializer.Serialize(rule);
 
             ConnectionService.UdpSocket.SendTo(aesClass.EncryptMessage(json, aesClass.Key, aesClass.IV), ConnectionService.UdpEndpoint);
+            RuleNameTextBox.Text = string.Empty;
+            DesriptionTextBox.Text = string.Empty;
+            DeviceComboBox.SelectedIndex = -1;
+            ScopeComboBox.SelectedIndex = -1;
+            ActionsListBox.ItemsSource = null;
+            ValueTextBox.Text = string.Empty;
+            ValueTextBox.IsEnabled = true;
         }
 
         private void action_button_Click(object sender, RoutedEventArgs e)
@@ -100,34 +107,37 @@ namespace Client
 
             if (FunctionComboBox.SelectedItem == null) return;
 
-            var function = (KeyValuePair<int, Function>)FunctionComboBox.SelectedItem;
+            var function = (ValueOption)FunctionComboBox.SelectedItem;
             string value = ValueTextBox.Text.Trim().ToUpper();
 
-            if (ValidateCommand.ValidateAction(function, parentWindow, device, value, value))
+            string scope = (ScopeComboBox.SelectedItem as ComboBoxItem)?.Content.ToString();
+            bool isGroupMode = scope != "Single Device";
+            if (!isGroupMode)
             {
-                string scope = (ScopeComboBox.SelectedItem as ComboBoxItem)?.Content.ToString();
-                bool isGroupMode = scope != "Single Device";
-                if (!isGroupMode)
+
+                if (ValidateCommand.ValidateAction(function.Name, parentWindow, device, value, value))
                 {
                     var action = new RuleActionDTO
                     {
                         Device = device,
-                        FunctionId = function.Key,
-                        FunctionName = function.Value.Name,
+                        FunctionId = function.FunctionId,
+                        FunctionName = function.Name,
                         Value = value
                     };
 
                     actions.Add(action);
                 }
-                else
+            }
+            else
+            {
+                if (ValidateCommand.ValidateValue(scope, function.Name, value, parentWindow))
                 {
-                    var functionName = FunctionComboBox.SelectedItem as string;
 
                     var action = new RuleActionDTO
                     {
                         Device = null,
-                        FunctionName = functionName,
-                        Value = value
+                        FunctionName = function.Name,
+                        Value = ValueTextBox.Text.Trim().ToUpper()
                     };
                     switch (scope)
                     {
@@ -145,25 +155,23 @@ namespace Client
                     }
                     actions.Add(action);
                 }
-                ActionsListBox.ItemsSource = null;
-                ActionsListBox.ItemsSource = actions;
-                ValueTextBox.Text = string.Empty;
             }
+            ActionsListBox.ItemsSource = null;
+            ActionsListBox.ItemsSource = actions;
+            ValueTextBox.Text = string.Empty;
+
         }
         private void FunctionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (DeviceComboBox.SelectedItem == null || FunctionComboBox.SelectedItem == null)
                 return;
 
-            var device = (Device)DeviceComboBox.SelectedItem;
-
-            var function = (KeyValuePair<int, Function>)FunctionComboBox.SelectedItem;
-
-            ConfigureValueControl(device, function.Value);
+            var function = (ValueOption)FunctionComboBox.SelectedItem;
+            ConfigureValueControl(function.Name);
         }
-        private void ConfigureValueControl(Device device, Function function)
+        private void ConfigureValueControl(string function)
         {
-            string functionName = function.Name.ToLower();
+            string functionName = function.ToLower();
             ValueTextBox.IsEnabled = true;
             ValueTextBox.Text = string.Empty;
         }
@@ -177,19 +185,16 @@ namespace Client
             if (isGroupMode)
             {
                 DeviceComboBox.IsEnabled = false;
+                DeviceComboBox.SelectedIndex = -1;
                 UpdateFunctions(scope);
             }
             else
             {
                 DeviceComboBox.IsEnabled = true;
-                var device = DeviceComboBox.SelectedItem as Device;
-                if (device != null)
-                    FunctionComboBox.ItemsSource = device.Functions;
             }
         }
         private void UpdateFunctions(string scope)
         {
-
             string deviceType = null;
 
             if (scope == "All Lights")
@@ -209,6 +214,7 @@ namespace Client
             {
                 FunctionComboBox.ItemsSource = functionMap[deviceType];
                 FunctionComboBox.SelectedIndex = 0;
+                FunctionComboBox.IsEnabled = true;
             }
         }
     }

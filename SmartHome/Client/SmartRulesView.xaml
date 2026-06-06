@@ -7,8 +7,12 @@
              mc:Ignorable="d" 
              d:DesignHeight="370" d:DesignWidth="610">
     <Grid Background="#1D3557">
-        <StackPanel>
-                    <Button x:Name="add_rule_button" HorizontalAlignment="Right" Foreground="White" Background="#4C5FF2" FontSize="20" Margin="0,10,10,10" ToolTip="Add new rule" Click="add_rule_button_Click">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Button Grid.Row="0" x:Name="add_rule_button" HorizontalAlignment="Right" Foreground="White" Background="#4C5FF2" FontSize="20" Margin="0,10,10,10" ToolTip="Add new rule" Click="add_rule_button_Click">
             <Button.Template>
                 <ControlTemplate TargetType="Button">
                     <Border x:Name="border" Height="30" CornerRadius="20" Width="180" Background="{TemplateBinding Background}">
@@ -23,41 +27,45 @@
                 </ControlTemplate>
             </Button.Template>
         </Button>
-        <ItemsControl ItemsSource="{Binding SmartRules}">
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
+        <ScrollViewer Grid.Row="1"
+                  VerticalScrollBarVisibility="Auto">
 
-                    <Border Background="#2A4A75"
+            <ItemsControl ItemsSource="{Binding SmartRules}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+
+                        <Border Background="#2A4A75"
         CornerRadius="10"
         Padding="12"
         Margin="0,0,0,10">
 
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
 
-                            <!-- LEFT SIDE -->
-                            <StackPanel Grid.Column="0">
+                                <!-- LEFT SIDE -->
+                                <StackPanel Grid.Column="0">
 
-                                <!-- TITLE -->
-                                <TextBlock Text="{Binding Name}"
+                                    <!-- TITLE -->
+                                    <TextBlock Text="{Binding Name}"
                        FontSize="18"
                        FontWeight="Bold"
                        Foreground="White"/>
 
-                                <!-- DESCRIPTION (aligned under title) -->
-                                <TextBlock Text="{Binding Description}"
+                                    <!-- DESCRIPTION (aligned under title) -->
+                                    <TextBlock Text="{Binding Description}"
                        Margin="0,4,0,0"
                        HorizontalAlignment="Left"
                        TextWrapping="Wrap"
                        Foreground="#CCCCCC"
                        Width="350"/>
-                            </StackPanel>
+                                </StackPanel>
 
-                            <!-- TOGGLE -->
-                            <ToggleButton Grid.Column="1"
+                                <!-- TOGGLE -->
+                                <ToggleButton Grid.Column="1"
                       Width="70"
                       Height="30"
                       Margin="15,0,0,0"
@@ -66,50 +74,49 @@
                       Unchecked="ToggleButton_Unchecked"
                       Tag="{Binding}">
 
-                                <ToggleButton.Style>
-                                    <Style TargetType="ToggleButton">
+                                    <ToggleButton.Style>
+                                        <Style TargetType="ToggleButton">
 
-                                        <Setter Property="Content" Value="OFF"/>
-                                        <Setter Property="Foreground" Value="White"/>
-                                        <Setter Property="Background" Value="#555"/>
+                                            <Setter Property="Content" Value="OFF"/>
+                                            <Setter Property="Foreground" Value="White"/>
+                                            <Setter Property="Background" Value="#555"/>
 
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="ToggleButton">
-                                                    <Border x:Name="bg"
-                                        CornerRadius="5"
-                                        Background="{TemplateBinding Background}"
-                                        Padding="5"
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center">
-
-                                                        <ContentPresenter HorizontalAlignment="Center"
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="ToggleButton">
+                                                        <Border x:Name="bg"
+                                                                CornerRadius="5"
+                                                                Background="{TemplateBinding Background}"
+                                                                Padding="5"
+                                                                HorizontalAlignment="Center"
+                                                                VerticalAlignment="Center">
+                                                            <ContentPresenter HorizontalAlignment="Center"
                                                       VerticalAlignment="Center"/>
-                                                    </Border>
+                                                        </Border>
 
-                                                    <ControlTemplate.Triggers>
-                                                        <Trigger Property="IsChecked" Value="True">
-                                                            <Setter TargetName="bg" Property="Background" Value="#4CAF50"/>
-                                                            <Setter Property="Content" Value="ON"/>
-                                                        </Trigger>
-                                                    </ControlTemplate.Triggers>
+                                                        <ControlTemplate.Triggers>
+                                                            <Trigger Property="IsChecked" Value="True">
+                                                                <Setter TargetName="bg" Property="Background" Value="#4CAF50"/>
+                                                                <Setter Property="Content" Value="ON"/>
+                                                            </Trigger>
+                                                        </ControlTemplate.Triggers>
 
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
 
-                                    </Style>
-                                </ToggleButton.Style>
+                                        </Style>
+                                    </ToggleButton.Style>
 
-                            </ToggleButton>
+                                </ToggleButton>
+                                <Button x:Name="delete_button"  VerticalAlignment="Top" HorizontalAlignment="Right"  Tag="{Binding}"
+                                        Margin="0,-8,-8,0" Grid.Column="2" Content="X" Style="{StaticResource delete_button}" Click="delete_button_Click" />
+                            </Grid>
+                        </Border>
 
-                        </Grid>
-                    </Border>
-
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
-        </StackPanel>
-
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
     </Grid>
 </UserControl>

@@ -88,22 +88,34 @@ namespace Common.Repositories.RuleActionRepository
                     {
                         RuleId = int.Parse(reader["ruleId"].ToString()),
                         DeviceId = reader["deviceId"] == DBNull.Value
-        ? (int?)null
-        : Convert.ToInt32(reader["deviceId"]),
-
+                        ? (int?)null
+                        : Convert.ToInt32(reader["deviceId"]),
                         FunctionId = reader["functionId"] == DBNull.Value
-        ? (int?)null
-        : Convert.ToInt32(reader["functionId"]),
+                        ? (int?)null
+                        : Convert.ToInt32(reader["functionId"]),
                         FunctionName = reader["functionName"].ToString(),
                         Value = reader["value"].ToString(),
                         DeviceGroup = reader["deviceGroup"] == DBNull.Value
-        ? null
-        : reader["deviceGroup"].ToString()
+                        ? null
+                        : reader["deviceGroup"].ToString()
                     });
 
                 }
 
                 return lista;
+            }
+        }
+        public void DeleteRuleAction(int id)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                string query = "DELETE FROM ruleActions WHERE ruleId = @id";
+                SqlCommand sqlCommand = new SqlCommand(query, connection);
+
+                sqlCommand.Parameters.AddWithValue("@id", id);
+
+                sqlCommand.ExecuteNonQuery();
             }
         }
     }

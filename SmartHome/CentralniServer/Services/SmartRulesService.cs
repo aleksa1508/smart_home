@@ -34,9 +34,9 @@ namespace CentralniServer.Services
 
                 List<SmartRule> rules1 = new List<SmartRule>
                 {
-                    new SmartRule{ IsEnabled=false, Name="NightMode",Description="Limits temperature to 20°C, restricts lights and locks garage during night hours.",Actions=new List<RuleAction>{ new RuleAction { RuleId = 1,DeviceGroup="ALL_CLIMATES" ,FunctionName = "temperature", Value = "111" } }},
-                    new SmartRule{ IsEnabled=false, Name="SecurityMode",Description="Lock all doors and vaults.",Actions=new List<RuleAction>{ new RuleAction { RuleId = 1, DeviceGroup = "ALL_DOORS", FunctionName = "state", Value = "CLOSED" } } },
-                    new SmartRule{ IsEnabled=false, Name="EnergySaving",Description="Limits brightness and reduces energy usage.",Actions=new List<RuleAction>{ new RuleAction { RuleId = 3, DeviceId = 1, FunctionId = 1, FunctionName = "brightness",Value="2" } }},
+                    new SmartRule{ IsEnabled=false, Name="NightMode",Description="Limits temperature to 20°C, restricts lights and locks garage during night hours.",Actions=new List<RuleAction>{ new RuleAction { RuleId = 1,DeviceGroup="ALL_CLIMATES" ,FunctionName = "temperature", Value = "25" } }},
+                    new SmartRule{ IsEnabled=false, Name="SecurityMode",Description="Lock all doors and vaults.",Actions=new List<RuleAction>{ new RuleAction { RuleId = 2, DeviceGroup = "ALL_DOORS", FunctionName = "state", Value = "CLOSED" }, new RuleAction { RuleId = 2, DeviceGroup = "ALL_VAULTS", FunctionName = "state", Value = "CLOSED" } } },
+                    new SmartRule{ IsEnabled=false, Name="EnergySaving",Description="Limits brightness and reduces energy usage.",Actions=new List<RuleAction>{ new RuleAction { RuleId = 3, DeviceId = 1, FunctionId = 1, FunctionName = "brightness",Value="40" } }},
                 };
 
                 foreach (var s in rules1)

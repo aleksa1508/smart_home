@@ -8,5 +8,6 @@ namespace Common.Repositories.RuleActionRepository
         IEnumerable<RuleAction> GetAllActions();
         void AddRuleAction(int ruleId, string functionName, string value, string deviceGroup, int? functionId, int? deviceId);
         IEnumerable<RuleAction> GetAllActionsByRuleId(int ruleId);
+        void DeleteRuleAction(int id);
     }
 }
