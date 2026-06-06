@@ -170,6 +170,9 @@
     <Compile Include="NewSmartRuleView.xaml.cs">
       <DependentUpon>NewSmartRuleView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="NewUserView.xaml.cs">
+      <DependentUpon>NewUserView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="PasswordView.xaml.cs">
       <DependentUpon>PasswordView.xaml</DependentUpon>
     </Compile>
@@ -220,6 +223,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="NewSmartRuleView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="NewUserView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -18,7 +18,7 @@ namespace CentralniServer.Service
                 clientProcess.Start(); // runing device
                 proccess.Add(clientProcess);
 
-                Console.WriteLine($"Start device at #{clientProcess.Id}");
+                Console.WriteLine($"Start device with ID: {clientProcess.Id}");
             }
         }
 

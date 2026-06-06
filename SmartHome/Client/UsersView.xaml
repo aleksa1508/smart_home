@@ -13,13 +13,46 @@
             <RowDefinition Height="2*"></RowDefinition>
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right">
-            
-        <ComboBox x:Name="RolesComboBox" Style="{StaticResource combo_box3}" HorizontalAlignment="Center" Margin="0,10,20,0"   SelectionChanged="ComboBox_SelectionChanged" >
+            <Button x:Name="add_new_user_button"
+                    Grid.Column="3"
+                    Content="Add new user"
+                    Width="120"
+                    Height="30"
+                    Cursor="Hand"
+                    Click="add_new_user_button_Click"
+                    VerticalAlignment="Center"  HorizontalAlignment="Center" Margin="0,10,20,0">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Background" Value="#457B9D"/>
+                        <Setter Property="Foreground" Value="White"/>
+                        <Setter Property="FontWeight" Value="Bold"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="{TemplateBinding Background}"
+                                    CornerRadius="20"
+                                    Padding="10,5">
+                                        <ContentPresenter HorizontalAlignment="Center"
+                              VerticalAlignment="Center"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#3664a4"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+            <ComboBox x:Name="RolesComboBox" Style="{StaticResource combo_box3}" HorizontalAlignment="Center" Margin="0,10,20,0" Width="120"   SelectionChanged="ComboBox_SelectionChanged" >
             <ComboBoxItem Content="All users"/>
             <ComboBoxItem Content="Owner"/>
             <ComboBoxItem Content="User"/>
         </ComboBox>
-            <ComboBox x:Name="StatusComboBox" Style="{StaticResource combo_box3}" HorizontalAlignment="Center" Margin="0,10,10,0"  SelectionChanged="ComboBox_SelectionChanged" >
+            <ComboBox x:Name="StatusComboBox" Style="{StaticResource combo_box3}" HorizontalAlignment="Center" Margin="0,10,10,0" Width="120"  SelectionChanged="ComboBox_SelectionChanged" >
             <ComboBoxItem Content="All status"/>
             <ComboBoxItem Content="Active"/>
             <ComboBoxItem Content="Inactive"/>
@@ -154,24 +187,24 @@
             Padding="15,5">
             <Grid>
                 <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="7*"/>
+                    <ColumnDefinition Width="4*"/>
+                    <ColumnDefinition Width="3*"/>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
                 <!-- Info o selektovanom korisniku -->
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock Text="Selected: " Foreground="#A8DADC" FontWeight="Bold"/>
                     <TextBlock x:Name="SelectedUserText" Foreground="White"/>
-                    <TextBlock Text="  |  Current role: " Foreground="#A8DADC" FontWeight="Bold"/>
+                    <TextBlock Text=" | Current role: " Foreground="#A8DADC" FontWeight="Bold"/>
                     <TextBlock x:Name="CurrentRoleText" Foreground="#FF60F360" FontWeight="Bold"/>
                 </StackPanel>
 
                 <!-- Odabir nove role -->
                 <ComboBox x:Name="NewRoleComboBox"
                       Grid.Column="1"
-                      Width="120"
-                      Margin="10,-5"
+                      Width="110"
                       VerticalAlignment="Center"
                       Style="{StaticResource combo_box3}">
                     <ComboBoxItem Content="OWNER"/>
@@ -182,9 +215,10 @@
                 <Button x:Name="ChangeRoleButton"
                     Grid.Column="2"
                     Content="Change Role"
-                    Width="110"
+                    Width="90"
                     Height="35"
                     Cursor="Hand"
+                        Margin="-10,0,0,0"
                     Click="ChangeRoleButton_Click"
                     VerticalAlignment="Center">
                     <Button.Style>
@@ -207,7 +241,41 @@
                             </Setter>
                             <Style.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="#E63946"/>
+                                    <Setter Property="Background" Value="#3664a4"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <Button x:Name="DeleteUserButton"
+        Grid.Column="3"
+        Content="X"
+        Width="30"
+        Height="35"
+        Cursor="Hand"
+        Click="DeleteUserButton_Click"
+        VerticalAlignment="Center">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Background" Value="#457B9D"/>
+                            <Setter Property="Foreground" Value="White"/>
+                            <Setter Property="FontWeight" Value="Bold"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}"
+                        CornerRadius="8"
+                        Padding="10,5">
+                                            <ContentPresenter HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#3664a4"/>
                                 </Trigger>
                             </Style.Triggers>
                         </Style>

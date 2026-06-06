@@ -12,6 +12,7 @@ namespace Common.Repositories.UsersRepositories
         User GetKorisnik(string username, string password);
         User GetUserById(int id);
         IEnumerable<User> GetAllUsers();
+        void DeleteUser(int id);
         void UpdateStatus(int id, ActiveStatus status, int port);
         void UpdatePassword(int id, string password);
         void UpdateUserRole(int id, UserRole role);

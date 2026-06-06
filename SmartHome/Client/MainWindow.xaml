@@ -46,7 +46,7 @@
             </StackPanel>
             <StackPanel x:Name="PasswordStackPanel" Margin="50,10,40,0" HorizontalAlignment="Center">
                 <Label Content="Password" Foreground="White" FontSize="18" HorizontalAlignment="Left" />
-                <PasswordBox x:Name="PasswordTextBox" Style="{StaticResource password_box}"/>
+                <PasswordBox x:Name="PasswordTextBox" Style="{StaticResource password_box}"  Height="40" Width="300"/>
             </StackPanel>
 
             <Button x:Name="button_signIn" HorizontalAlignment="Center" Margin="10,25,0,0" Foreground="White" Background="#4C5FF2" FontSize="20" ToolTip="Sign In" Click="button_signIn_Click">

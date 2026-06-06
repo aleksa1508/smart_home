@@ -120,7 +120,7 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="PasswordBox">
-                        <Border x:Name="border" Height="40" CornerRadius="20" Width="300" Background="{TemplateBinding Background}"  BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                        <Border x:Name="border" CornerRadius="20" Background="{TemplateBinding Background}"  BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
                             <ScrollViewer x:Name="PART_ContentHost" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="15 0 0 0 "/>
                         </Border>
                     </ControlTemplate>
@@ -538,7 +538,7 @@
                             <!-- MAIN -->
                             <Border x:Name="MainBorder"
                             CornerRadius="20"
-                            Height="30" Width="120"
+                            Height="30" 
                             Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}">

@@ -120,5 +120,28 @@ namespace Client
             ConnectionService.UdpSocket.SendTo(data, ConnectionService.UdpEndpoint);
         }
 
+        private void DeleteUserButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (UsersDataGrid.SelectedItem == null) return;
+            User selectedUser = UsersDataGrid.SelectedItem as User;
+            if (selectedUser == null) return;
+
+            var adminCmd = new OwnerCommandDTO
+            {
+                Action = "deleteUser",
+                Owner = currentUser,
+                ChangedUser = selectedUser,
+            };
+
+            string json = JsonSerializer.Serialize(adminCmd);
+            byte[] data = aesClass.EncryptMessage(json, aesClass.Key, aesClass.IV);
+            ConnectionService.UdpSocket.SendTo(data, ConnectionService.UdpEndpoint);
+        }
+
+        private void add_new_user_button_Click(object sender, RoutedEventArgs e)
+        {
+            Dashboard dashboard = Window.GetWindow(this) as Dashboard;
+            dashboard.MainContent.Content = new NewUserView(aesClass);
+        }
     }
 }

@@ -30,7 +30,7 @@ namespace Common.Models
                     return false;
             }
         }
-        public bool BlockCommand(List<SmartRule> rules,List<RuleAction> actions,CommandDTO command,out string message)
+        public bool BlockCommand(List<SmartRule> rules, List<RuleAction> actions, CommandDTO command, out string message)
         {
             message = string.Empty;
 
@@ -50,7 +50,7 @@ namespace Common.Models
                     {
                         if (requestedValue > limit)
                         {
-                            message =$"Rule '{rule.Name}' limits {action.FunctionName} to {limit}.";
+                            message = $"Rule '{rule.Name}' limits {action.FunctionName} to {limit}.";
                             return true;
                         }
 
@@ -58,8 +58,8 @@ namespace Common.Models
                     }
 
                     // STATE RULES
-                    if(action.Value != command.Value)
-{
+                    if (action.Value != command.Value)
+                    {
                         message = $"Rule '{rule.Name}' set {action.FunctionName} on value {action.Value}.You can`t change that.";
                         return true;
                     }
@@ -95,7 +95,7 @@ namespace Common.Models
                         {
                             function.Value = limit.ToString();
 
-                            deviceRepository.UpdateDeviceFunction(device.Id,functionId,function.Name,limit.ToString());
+                            deviceRepository.UpdateDeviceFunction(device.Id, functionId, function.Name, limit.ToString());
                         }
 
                         continue;
@@ -107,7 +107,7 @@ namespace Common.Models
                     {
                         function.Value = action.Value;
 
-                        deviceRepository.UpdateDeviceFunction(device.Id,functionId,function.Name,action.Value);
+                        deviceRepository.UpdateDeviceFunction(device.Id, functionId, function.Name, action.Value);
                     }
                 }
             }

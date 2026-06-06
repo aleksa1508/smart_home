@@ -129,6 +129,18 @@ namespace Common.Repositories.UsersRepositories
                 sqlCommand.ExecuteNonQuery();
             }
         }
+        public void DeleteUser(int id)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                string query = "DELETE FROM users WHERE id=@id";
+                SqlCommand sqlCommand = new SqlCommand(query, connection);
+                sqlCommand.Parameters.AddWithValue("@id", id);
+
+                sqlCommand.ExecuteNonQuery();
+            }
+        }
         public void UpdateStatus(int id, ActiveStatus status, int port)
         {
             List<User> list = GetAllUsers().ToList();

@@ -165,12 +165,44 @@ namespace TCPServer
                                         var users = userReository.GetAllUsers().ToList();
                                         var content = new ResponseDTO
                                         {
-                                            Message = "Users",
+                                            Message = "AllUsers",
                                             Users = users
                                         };
                                         string json = JsonSerializer.Serialize(content);
                                         byte[] data = aesClass.EncryptMessage(json, klijentKljucevi[s].Key, klijentKljucevi[s].IV);
                                         s.SendTo(data, clientEP);
+                                    }
+                                    else if (receivedMessage.Contains("\"Action\":\"deleteUser\""))
+                                    {
+                                        var user = JsonSerializer.Deserialize<OwnerCommandDTO>(receivedMessage);
+                                        userReository.DeleteUser(user.ChangedUser.ID);
+                                        var content = new ResponseDTO
+                                        {
+                                            Message = "UpdateUsers",
+                                            Value = "Successfully delete user",
+                                            Users = userReository.GetAllUsers().ToList()
+                                        };
+                                        userReository.PrintAllUsers();
+                                        string json = JsonSerializer.Serialize(content);
+                                        byte[] data = aesClass.EncryptMessage(json, klijentKljucevi[s].Key, klijentKljucevi[s].IV);
+                                        s.SendTo(data, clientEP);
+
+                                    }
+                                    else if (receivedMessage.Contains("\"Action\":\"updateUser\""))
+                                    {
+                                        var user = JsonSerializer.Deserialize<OwnerCommandDTO>(receivedMessage);
+                                        userReository.UpdateData(user.ChangedUser.ID, user.ChangedUser.FirstName, user.ChangedUser.LastName, user.ChangedUser.Username);
+                                        var content = new ResponseDTO
+                                        {
+                                            Message = "UpdateUsers",
+                                            Value = "Successfully update user details",
+                                            Users = userReository.GetAllUsers().ToList()
+                                        };
+                                        userReository.PrintAllUsers();
+                                        string json = JsonSerializer.Serialize(content);
+                                        byte[] data = aesClass.EncryptMessage(json, klijentKljucevi[s].Key, klijentKljucevi[s].IV);
+                                        s.SendTo(data, clientEP);
+
                                     }
                                     else if (receivedMessage.Contains("\"Action\":\"newUser\""))
                                     {
@@ -180,7 +212,7 @@ namespace TCPServer
                                         userReository.AddUser(user.ChangedUser.FirstName, user.ChangedUser.LastName, user.ChangedUser.Username, user.ChangedUser.Password, user.ChangedUser.Role.ToString());
                                         var content = new ResponseDTO
                                         {
-                                            Message = "Users",
+                                            Message = "UpdateUsers",
                                             Value = response,
                                             Users = userReository.GetAllUsers().ToList()
                                         };
@@ -231,7 +263,7 @@ namespace TCPServer
                                     {
                                         var rule = JsonSerializer.Deserialize<SmartRuleDTO>(receivedMessage);
                                         int id = 0;
-                                        id=smartRulesRepository.GetSmartRuleByName(rule.SmartRule.Name);
+                                        id = smartRulesRepository.GetSmartRuleByName(rule.SmartRule.Name);
                                         if (id != 0)
                                         {
                                             var cont = new ResponseDTO
@@ -288,7 +320,7 @@ namespace TCPServer
                                             var content = new ResponseDTO
                                             {
                                                 Message = "AdminCommand",
-                                                Value = "Role change unsuccessful"
+                                                Value = "Role change unsuccessful",
                                             };
                                             json = JsonSerializer.Serialize(content);
                                         }
@@ -297,8 +329,9 @@ namespace TCPServer
                                             userReository.UpdateUserRole(user.ID, newRole);
                                             var content = new ResponseDTO
                                             {
-                                                Message = "AdminCommand",
-                                                Value = "Role change successful"
+                                                Message = "UpdateUsers",
+                                                Value = "Role change successful",
+                                                Users = userReository.GetAllUsers().ToList()
                                             };
                                             json = JsonSerializer.Serialize(content);
 

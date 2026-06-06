@@ -220,7 +220,7 @@ namespace Client
         private void button_profile_Click(object sender, RoutedEventArgs e)
         {
             Title.Content = "Edit profile";
-            MainContent.Content = new ProfileView(user, userReository);
+            MainContent.Content = new ProfileView(user, aesClass);
         }
 
         private void button_password_Click(object sender, RoutedEventArgs e)
@@ -260,14 +260,19 @@ namespace Client
                         AddSmartRules(response, mainWindow);
                         break;
                     }
+                case "UpdateUsers":
+                    {
+                        UpdateUsers(response, mainWindow);
+                        break;
+                    }
                 case "Devices List":
                     {
                         UpdateDevices(response);
                         break;
                     }
-                case "Users":
+                case "AllUsers":
                     {
-                        UpdateUser(response);
+                        AllUsers(response);
                         break;
                     }
             }
@@ -297,11 +302,16 @@ namespace Client
             foreach (var s in list)
                 SmartRules.Add(s);
         }
-        private void UpdateUser(ResponseDTO response)
+        private void AllUsers(ResponseDTO response)
         {
             var users = response.Users;
             Title.Content = "Users";
             MainContent.Content = new UsersView(user, new ObservableCollection<User>(users), aesClass);
+        }
+        private void UpdateUsers(ResponseDTO response, MainWindow mainWindow)
+        {
+            mainWindow.ShowToastNotification(new ToastNotification("Success", response.Value, NotificationType.Success));
+            AllUsers(response);
         }
         private void UpdateDevices(ResponseDTO response)
         {
