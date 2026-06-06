@@ -3,12 +3,9 @@ using Common;
 using Common.DTOs;
 using Common.Enums;
 using Common.Models;
-using Common.Repositories.DevicesRepositories;
-using Common.Repositories.UsersRepositories;
 using Notification.Wpf;
 using System;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text.Json;
@@ -28,20 +25,24 @@ namespace Client
         private ObservableCollection<Device> devices;
         private ObservableCollection<Command> CommandRegister;
         private ObservableCollection<SmartRule> SmartRules;
-        private IUserReository userReository;
-        private IDeviceRepository deviceRepository;
         private AesClass aesClass;
         private DashboardView dashboardView;
-        public Dashboard(User userParameter, AesClass aes)
+        public Dashboard(AesClass aes, User loggedUser, ResponseDTO initialData)
         {
             InitializeComponent();
             aesClass = aes;
-            userReository = new UserRepository();
-            deviceRepository = new DeviceRepository();
-            user = userParameter;
+            user = loggedUser;
+
             devices = new ObservableCollection<Device>();
-            CommandRegister = new ObservableCollection<Command>();
             SmartRules = new ObservableCollection<SmartRule>();
+            CommandRegister = new ObservableCollection<Command>();
+            foreach (var d in initialData.Devices)
+                devices.Add(d);
+            foreach (var s in initialData.SmartRules)
+                SmartRules.Add(s);
+            foreach (var c in initialData.Commands)
+                CommandRegister.Add(c);
+
             notificationManager = new NotificationManager();
             StartUdpListener();
             ConnectionService.OnServerMessage += ShowMessage;
@@ -54,7 +55,7 @@ namespace Client
             }
             dashboardView = new DashboardView(user, devices);
             MainContent.Content = dashboardView;
-            DataContext = userParameter;
+            DataContext = user;
         }
         private void button_minimize_Click(object sender, RoutedEventArgs e)
         {
@@ -78,10 +79,9 @@ namespace Client
 
         private void Dashboard_Tab_Button_Click(object sender, RoutedEventArgs e)
         {
-            var u = userReository.GetUserById(user.ID);
             dashboardView = new DashboardView(user, devices);
             MainContent.Content = dashboardView;
-            Title.Content = $"Hello,{u.FirstName}";
+            Title.Content = $"Hello,{user.FirstName}";
         }
 
         private void StartUdpListener()
@@ -89,11 +89,6 @@ namespace Client
 
             Task.Run(() =>
             {
-                byte[] request = aesClass.EncryptMessage($"Client is connected on UDP port: {ConnectionService.UdpEndpoint.Port}", aesClass.Key, aesClass.IV);
-                ConnectionService.UdpSocket.SendTo(request, ConnectionService.UdpEndpoint);
-
-                Console.WriteLine("UDP: Sent first message, wait response...");
-
                 byte[] buffer = new byte[65507];
                 EndPoint remoteEP = new IPEndPoint(IPAddress.Any, 0);
 
@@ -182,7 +177,7 @@ namespace Client
 
         private void devices_menu_button_Click(object sender, RoutedEventArgs e)
         {
-            var d = deviceRepository.GetAllDevices().ToList();
+            var d = devices;
             Title.Content = "Devices";
             MainContent.Content = new DevicesView(new ObservableCollection<Device>(d), user);
         }
@@ -226,7 +221,7 @@ namespace Client
         private void button_password_Click(object sender, RoutedEventArgs e)
         {
             Title.Content = "Change password";
-            MainContent.Content = new PasswordView(user, userReository);
+            MainContent.Content = new PasswordView(user, aesClass);
         }
 
         private void SmartRules_Tab_Button_Click(object sender, RoutedEventArgs e)
@@ -311,7 +306,10 @@ namespace Client
         private void UpdateUsers(ResponseDTO response, MainWindow mainWindow)
         {
             mainWindow.ShowToastNotification(new ToastNotification("Success", response.Value, NotificationType.Success));
-            AllUsers(response);
+            if (!response.Value.Equals("Successfully update password"))
+            {
+                AllUsers(response);
+            }
         }
         private void UpdateDevices(ResponseDTO response)
         {

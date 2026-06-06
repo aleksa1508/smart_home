@@ -1,7 +1,7 @@
 ﻿using Common.Models;
 using System.Collections.Generic;
 
-namespace Common.Repositories.RuleActionRepository
+namespace CentralniServer.Repositories.RuleActionRepository
 {
     public interface IRuleActionRepository
     {

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 
-namespace Common.Repositories.RuleActionRepository
+namespace CentralniServer.Repositories.RuleActionRepository
 {
     public class RuleActionRepository : IRuleActionRepository
     {

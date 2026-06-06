@@ -1,12 +1,14 @@
 ﻿using Client.Helpers;
 using Common;
+using Common.DTOs;
 using Common.Models;
-using Common.Repositories.UsersRepositories;
 using Notification.Wpf;
 using System;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -19,14 +21,11 @@ namespace Client
     public partial class MainWindow : Window
     {
         private NotificationManager notificationManager;
-        private IUserReository userReository;
-
         public MainWindow()
         {
             InitializeComponent();
             notificationManager = new NotificationManager();
             Conncection();
-            userReository = new UserRepository();
         }
 
 
@@ -162,9 +161,22 @@ namespace Client
                 ConnectionService.UdpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
                 ConnectionService.UdpEndpoint = new IPEndPoint(IPAddress.Loopback, port);
 
-                User user = userReository.GetKorisnik(UsernameTextBox.Text, PasswordTextBox.Password);
+                ConnectionService.UdpSocket.Blocking = true;
 
-                Dashboard dashboardWindow = new Dashboard(user, aes);
+                byte[] initMsg = aes.EncryptMessage($"Client is connected on UDP port: {port}", aes.Key, aes.IV);
+                ConnectionService.UdpSocket.SendTo(initMsg, ConnectionService.UdpEndpoint);
+                byte[] udpBuffer = new byte[65507];
+                EndPoint remoteEP = new IPEndPoint(IPAddress.Any, 0);
+                int udpBytes = ConnectionService.UdpSocket.ReceiveFrom(udpBuffer, ref remoteEP);
+
+                byte[] udpData = new byte[udpBytes];
+                Array.Copy(udpBuffer, udpData, udpBytes);
+                string udpJson = aes.DecryptMessage(udpData, aes.Key, aes.IV);
+
+                var firstResponse = JsonSerializer.Deserialize<ResponseDTO>(udpJson);
+                User loggedUser = firstResponse.Users.FirstOrDefault();
+                //ConnectionService.UdpSocket.Blocking = false;
+                Dashboard dashboardWindow = new Dashboard(aes, loggedUser, firstResponse);
                 dashboardWindow.Closed += DashboardWindow_Closed;
                 dashboardWindow.Show();
 

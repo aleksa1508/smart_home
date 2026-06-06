@@ -1,6 +1,6 @@
-﻿using Common.Models;
-using Common.Repositories.RuleActionRepository;
-using Common.Repositories.SmartRulesRepositories;
+﻿using CentralniServer.Repositories.RuleActionRepository;
+using CentralniServer.Repositories.SmartRulesRepositories;
+using Common.Models;
 using System.Collections.Generic;
 using System.Linq;
 

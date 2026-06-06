@@ -1,7 +1,7 @@
 ﻿using Common.Models;
 using System.Collections.Generic;
 
-namespace Common.Repositories.SmartRulesRepositories
+namespace CentralniServer.Repositories.SmartRulesRepositories
 {
     public interface ISmartRulesRepository
     {

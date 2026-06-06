@@ -4,7 +4,7 @@ using Common.Models;
 using System;
 using System.Collections.Generic;
 
-namespace Common.Repositories.DevicesRepositories
+namespace CentralniServer.Repositories.DevicesRepositories
 {
     public interface IDeviceRepository
     {

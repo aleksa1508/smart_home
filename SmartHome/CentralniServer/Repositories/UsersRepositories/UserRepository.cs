@@ -1,10 +1,11 @@
-﻿using Common.Enums;
+﻿using Common;
+using Common.Enums;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 
-namespace Common.Repositories.UsersRepositories
+namespace CentralniServer.Repositories.UsersRepositories
 {
     public class UserRepository : IUserReository
     {

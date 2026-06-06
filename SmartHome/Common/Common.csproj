@@ -75,18 +75,9 @@
     <Compile Include="Models\Device.cs" />
     <Compile Include="Models\RsaClass.cs" />
     <Compile Include="Models\RuleAction.cs" />
-    <Compile Include="Models\RuleEngine.cs" />
     <Compile Include="Models\SmartRule.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Repositories\DevicesRepositories\DeviceRepository.cs" />
-    <Compile Include="Repositories\DevicesRepositories\IDeviceRepository.cs" />
-    <Compile Include="Repositories\RuleActionRepository\IRuleActionRepository.cs" />
-    <Compile Include="Repositories\RuleActionRepository\RuleActionRepository.cs" />
-    <Compile Include="Repositories\SmartRulesRepositories\ISmartRulesRepository.cs" />
-    <Compile Include="Repositories\SmartRulesRepositories\SmartRulesRepository.cs" />
-    <Compile Include="Repositories\UsersRepositories\IUserReository.cs" />
-    <Compile Include="Repositories\UsersRepositories\UserRepository.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -1,7 +1,8 @@
-﻿using Common.Enums;
+﻿using Common;
+using Common.Enums;
 using System.Collections.Generic;
 
-namespace Common.Repositories.UsersRepositories
+namespace CentralniServer.Repositories.UsersRepositories
 {
     public interface IUserReository
     {

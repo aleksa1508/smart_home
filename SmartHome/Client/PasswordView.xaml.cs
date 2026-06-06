@@ -1,7 +1,9 @@
 ﻿using Client.Helpers;
 using Common;
-using Common.Repositories.UsersRepositories;
+using Common.DTOs;
+using Common.Models;
 using Notification.Wpf;
+using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -13,12 +15,12 @@ namespace Client
     public partial class PasswordView : UserControl
     {
         private User user;
-        private IUserReository userReository;
-        public PasswordView(User u, IUserReository repo)
+        private AesClass aesClass;
+        public PasswordView(User u, AesClass aes)
         {
             InitializeComponent();
-            userReository = repo;
             user = u;
+            aesClass = aes;
             DataContext = this;
         }
 
@@ -27,33 +29,37 @@ namespace Client
             Dashboard parentWindow = (Dashboard)Window.GetWindow(this);
             if (CurrentPasswordTextBox.Password.Length > 0 && NewPasswordTextBox.Password.Length > 0)
             {
-                if (userReository.GetKorisnik(user.Username, CurrentPasswordTextBox.Password) != null)
+                if (NewPasswordTextBox.Password.Length < 8)
                 {
-                    userReository.UpdatePassword(user.ID, NewPasswordTextBox.Password);
-                    parentWindow.ShowToastNotification(new ToastNotification("Success", "Password is update successfully", NotificationType.Success));
-                    button_save.IsEnabled = false;
-                    CurrentPasswordTextBox.Password = string.Empty;
-                    NewPasswordTextBox.Password = string.Empty;
+                    parentWindow.ShowToastNotification(new ToastNotification("Error", "Password must have minimum 8 characters", NotificationType.Error));
+                    return;
                 }
-                else
+                var command = new OwnerCommandDTO
                 {
-                    parentWindow.ShowToastNotification(new ToastNotification("Error", "Current password is not valid", NotificationType.Error));
-                }
+                    Action = "updatePassword",
+                    ChangedUser = new User
+                    {
+                        ID = user.ID,
+                        FirstName = user.FirstName,
+                        LastName = user.LastName,
+                        Username = user.Username,
+                        Password = NewPasswordTextBox.Password,
+                        Role = user.Role,
+                    },
+                };
+
+                string json = JsonSerializer.Serialize(command);
+                byte[] data = aesClass.EncryptMessage(json, aesClass.Key, aesClass.IV);
+                ConnectionService.UdpSocket.SendTo(data, ConnectionService.UdpEndpoint);
+                //reset data
+                button_save.IsEnabled = false;
+                CurrentPasswordTextBox.Password = string.Empty;
+                NewPasswordTextBox.Password = string.Empty;
+
             }
             else
             {
                 parentWindow.ShowToastNotification(new ToastNotification("Error", "Fill current and new password", NotificationType.Error));
-            }
-        }
-        private void CurrentPasswordTextBox_PasswordChanged(object sender, RoutedEventArgs e)
-        {
-            if (CurrentPasswordTextBox.Password.Length > 0 && NewPasswordTextBox.Password.Length > 0)
-            {
-                button_save.IsEnabled = true;
-            }
-            else
-            {
-                button_save.IsEnabled = false;
             }
         }
     }

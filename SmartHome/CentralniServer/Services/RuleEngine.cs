@@ -1,9 +1,10 @@
-﻿using Common.DTOs;
-using Common.Repositories.DevicesRepositories;
+﻿using CentralniServer.Repositories.DevicesRepositories;
+using Common.DTOs;
+using Common.Models;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Common.Models
+namespace CentralniServer.Services
 {
     public class RuleEngine
     {
@@ -70,8 +71,8 @@ namespace Common.Models
         }
         public void ApplyRuleEffects(SmartRule rule, List<RuleAction> actions, IDeviceRepository deviceRepository)
         {
-            var devices = deviceRepository.GetAllDevices().ToList();
 
+            var devices = deviceRepository.GetAllDevices().ToList();
             foreach (var action in actions.Where(a => a.RuleId == rule.Id))
             {
                 var targetDevices = devices.Where(d => DeviceMatchesAction(d, action)).ToList();

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 
-namespace Common.Repositories.SmartRulesRepositories
+namespace CentralniServer.Repositories.SmartRulesRepositories
 {
     public class SmartRulesRepository : ISmartRulesRepository
     {

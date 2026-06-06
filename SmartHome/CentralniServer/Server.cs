@@ -1,14 +1,14 @@
 ﻿using CentralniServer.Helpers;
+using CentralniServer.Repositories.DevicesRepositories;
+using CentralniServer.Repositories.RuleActionRepository;
+using CentralniServer.Repositories.SmartRulesRepositories;
+using CentralniServer.Repositories.UsersRepositories;
 using CentralniServer.Service;
 using CentralniServer.Services;
 using Common;
 using Common.DTOs;
 using Common.Enums;
 using Common.Models;
-using Common.Repositories.DevicesRepositories;
-using Common.Repositories.RuleActionRepository;
-using Common.Repositories.SmartRulesRepositories;
-using Common.Repositories.UsersRepositories;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -196,6 +196,22 @@ namespace TCPServer
                                         {
                                             Message = "UpdateUsers",
                                             Value = "Successfully update user details",
+                                            Users = userReository.GetAllUsers().ToList()
+                                        };
+                                        userReository.PrintAllUsers();
+                                        string json = JsonSerializer.Serialize(content);
+                                        byte[] data = aesClass.EncryptMessage(json, klijentKljucevi[s].Key, klijentKljucevi[s].IV);
+                                        s.SendTo(data, clientEP);
+
+                                    }
+                                    else if (receivedMessage.Contains("\"Action\":\"updatePassword\""))
+                                    {
+                                        var user = JsonSerializer.Deserialize<OwnerCommandDTO>(receivedMessage);
+                                        userReository.UpdatePassword(user.ChangedUser.ID, user.ChangedUser.Password);
+                                        var content = new ResponseDTO
+                                        {
+                                            Message = "UpdateUsers",
+                                            Value = "Successfully update password",
                                             Users = userReository.GetAllUsers().ToList()
                                         };
                                         userReository.PrintAllUsers();
@@ -549,7 +565,8 @@ namespace TCPServer
                                                 Message = "Devices List",
                                                 Devices = devices,
                                                 Commands = commands,
-                                                SmartRules = smartRules
+                                                SmartRules = smartRules,
+                                                Users = new List<User> { logInUser }
                                             };
                                             string json = JsonSerializer.Serialize(content);
                                             byte[] data = aesClass.EncryptMessage(json, key, iv);

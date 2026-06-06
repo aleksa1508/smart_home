@@ -8,7 +8,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 
-namespace Common.Repositories.DevicesRepositories
+namespace CentralniServer.Repositories.DevicesRepositories
 {
     public class DeviceRepository : IDeviceRepository
     {

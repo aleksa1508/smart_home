@@ -1,5 +1,4 @@
 ﻿using Common.Models;
-using Common.Repositories.DevicesRepositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
