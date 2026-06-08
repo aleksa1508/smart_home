@@ -55,9 +55,9 @@
     <Compile Include="Repositories\SmartRulesRepositories\SmartRulesRepository.cs" />
     <Compile Include="Repositories\UsersRepositories\IUserReository.cs" />
     <Compile Include="Repositories\UsersRepositories\UserRepository.cs" />
-    <Compile Include="Services\IServerService.cs" />
+    <Compile Include="Services\IDeviceService.cs" />
     <Compile Include="Services\RuleEngine.cs" />
-    <Compile Include="Services\ServerService.cs" />
+    <Compile Include="Services\DeviceService.cs" />
     <Compile Include="Server.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\SmartRulesService.cs" />

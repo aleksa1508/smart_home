@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace CentralniServer.Helpers
 {
-    public interface IServerService
+    public interface IDeviceService
     {
         void RunDevices(List<Process> proccess, int deviceNumber);
     }

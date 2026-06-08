@@ -153,6 +153,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\CentralniServer\CentralniServer.csproj">
+      <Project>{5CF5A565-58F9-4DC9-B0AE-187889BBB128}</Project>
+      <Name>CentralniServer</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Common\Common.csproj">
       <Project>{efc0ca4d-4335-40b7-acd9-6a0c45010084}</Project>
       <Name>Common</Name>

@@ -31,7 +31,7 @@ namespace TCPServer
 
             int deviceNumber = 8;
             IDeviceRepository deviceRepository = new DeviceRepository();
-            IServerService serverService = new ServerService();
+            IDeviceService serverService = new DeviceService();
             ISmartRulesRepository smartRulesRepository = new SmartRulesRepository();
             IRuleActionRepository ruleActionRepository = new RuleActionRepository();
             Random random = new Random();

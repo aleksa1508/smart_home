@@ -5,7 +5,7 @@ using System.Diagnostics;
 
 namespace CentralniServer.Service
 {
-    public class ServerService : IServerService
+    public class DeviceService : IDeviceService
     {
         public void RunDevices(List<Process> proccess, int deviceNumber)
         {
