@@ -45,6 +45,7 @@ namespace TCPServer
             string publicKeyXml = rsaClass.ExportPublicKey();
             byte[] publicKeyBytes = Encoding.UTF8.GetBytes(publicKeyXml);
             Dictionary<Socket, (byte[] Key, byte[] IV)> klijentKljucevi = new Dictionary<Socket, (byte[], byte[])>();
+            Dictionary<Socket, RsaClass> klijentiRsaKljucevi = new Dictionary<Socket, RsaClass>();
 
             const int MAX_NEAKTIVNIH_CIKLUSA = 20;
             User k = new User();
@@ -395,9 +396,9 @@ namespace TCPServer
                                         }
                                         deviceRepository.UpdateDeviceFunction(u1.Id, id, funkcija, vrednost);
                                         //connecting between device and server
-                                        IPEndPoint uredjajEP = new IPEndPoint(IPAddress.Loopback, u1.Port);
+                                        IPEndPoint deviceEP = new IPEndPoint(IPAddress.Loopback, u1.Port);
                                         byte[] initialData = Encoding.UTF8.GetBytes(u1.Name + ":" + funkcija + ":" + vrednost);
-                                        s.SendTo(initialData, uredjajEP);
+                                        s.SendTo(initialData, deviceEP);
 
                                         DateTime timestamp = DateTime.Now;
                                         string log = $"[{timestamp}] {u1.Name}: {funkcija} changed on {vrednost}";
@@ -438,6 +439,7 @@ namespace TCPServer
                                         catch { }
                                         s.Close();
                                         klijenti.Remove(s);
+                                        klijentiRsaKljucevi.Remove(s);
                                         Console.WriteLine($"Number of active clients: {klijenti.Count}");
 
                                         // check active clients
@@ -471,8 +473,30 @@ namespace TCPServer
                                     }
                                     else
                                     {
-                                        byte[] encryptedLogin = new byte[receivedBytes1];
-                                        Array.Copy(buffer, encryptedLogin, receivedBytes1);
+                                        //login data and client RSA public key
+                                        byte[] primljenoSve = new byte[receivedBytes1];
+                                        Array.Copy(buffer, primljenoSve, receivedBytes1);
+
+                                        RsaClass clientRsa;
+                                        byte[] encryptedLogin;
+                                        try
+                                        {
+                                            int clientKeyLen = BitConverter.ToInt32(primljenoSve, 0);
+                                            byte[] clientPubKeyBytes = new byte[clientKeyLen];
+                                            Array.Copy(primljenoSve, 4, clientPubKeyBytes, 0, clientKeyLen);
+                                            string clientPublicKeyXml = Encoding.UTF8.GetString(clientPubKeyBytes);
+                                            clientRsa = new RsaClass(clientPublicKeyXml);
+
+                                            int loginOffset = 4 + clientKeyLen;
+                                            int loginLen = receivedBytes1 - loginOffset;
+                                            encryptedLogin = new byte[loginLen];
+                                            Array.Copy(primljenoSve, loginOffset, encryptedLogin, 0, loginLen);
+                                        }
+                                        catch
+                                        {
+                                            s.Send(Encoding.UTF8.GetBytes("UNSUCCESS"));
+                                            continue;
+                                        }
 
                                         string loginData;
                                         try
@@ -491,6 +515,8 @@ namespace TCPServer
 
                                         if (djelovi.Length == 2 && logInUser != null)
                                         {
+                                            //save client RSA public key
+                                            klijentiRsaKljucevi[s] = clientRsa;
 
                                             byte[] key = new byte[16];
                                             byte[] iv = new byte[16];
@@ -507,8 +533,14 @@ namespace TCPServer
                                             byte[] keyData = new byte[32];
                                             Array.Copy(key, 0, keyData, 0, 16);
                                             Array.Copy(iv, 0, keyData, 16, 16);
-                                            s.Send(keyData);
+
+                                            byte[] encryptedKeyData = clientRsa.EncryptBytes(keyData);
+                                            byte[] encKeyLenBytes = BitConverter.GetBytes(encryptedKeyData.Length);
+                                            s.Send(encKeyLenBytes);
+                                            Thread.Sleep(50);
+                                            s.Send(encryptedKeyData);
                                             Thread.Sleep(200);
+
                                             udpPort1 = random.Next(50002, 60000);
 
                                             logInUser.Port = udpPort1;
@@ -600,6 +632,7 @@ namespace TCPServer
                                     s.Close();
                                     checkRead.Remove(s);      //remove socket form lists
                                     klijenti.Remove(s);
+                                    klijentiRsaKljucevi.Remove(s); // NOVO: ciscenje sacuvanog klijentovog RSA kljuca
                                     continue;
                                 }
                             }
@@ -633,6 +666,7 @@ namespace TCPServer
                                 // closing TCP connection and removing user from the list
                                 tcpSocket.Close();
                                 klijenti.Remove(tcpSocket);
+                                klijentiRsaKljucevi.Remove(tcpSocket); // NOVO: ciscenje sacuvanog klijentovog RSA kljuca
                             }
 
                             // closing UDP socket and removing from the list

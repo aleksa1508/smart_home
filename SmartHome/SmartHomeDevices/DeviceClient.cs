@@ -7,9 +7,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-
 namespace SmartHomeDevices
-
 {
     public class DeviceClient
     {
@@ -44,10 +42,9 @@ namespace SmartHomeDevices
                         continue;
                     }
 
-                    Console.WriteLine($"Response received from the server, length {numberOfBytes}->:{receivedMessage}"); // 4
+                    Console.WriteLine($"Response received from the server, length {numberOfBytes} bytes->:{receivedMessage}");
 
                     string[] parts = receivedMessage.Split(':');
-                    Console.WriteLine(parts.Length + " " + parts[0] + " " + parts[1] + " " + parts[2]);
                     devices = deviceRepository.GetAllDevices().ToList();
                     foreach (var device in devices)
                     {

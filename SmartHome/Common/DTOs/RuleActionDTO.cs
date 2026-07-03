@@ -14,7 +14,8 @@ namespace Common.DTOs
 
         public override string ToString()
         {
-            return $"{Device.Name}: {FunctionName} -> {Value}";
+            string device = Device != null ? Device.Name : DeviceGroup;
+            return $"{device}: {FunctionName} -> {Value}";
         }
     }
 }

@@ -123,9 +123,23 @@ namespace Client
 
                 RsaClass rsa = new RsaClass(publicKeyXml);
 
+                RsaClass clientRsa = new RsaClass();
+                string clientPublicKeyXml = clientRsa.ExportPublicKey();
+                byte[] clientPubKeyBytes = Encoding.UTF8.GetBytes(clientPublicKeyXml);
+
                 string login = $"{UsernameTextBox.Text}:{PasswordTextBox.Password}";
                 byte[] encryptedLogin = rsa.Encrypt(login);
-                ConnectionService.TcpSocket.Send(encryptedLogin);
+
+                // NOVO: saljemo u JEDNOM Send pozivu: [4 bajta duzina klijentovog javnog kljuca]
+                // [klijentov javni kljuc XML][RSA sifrovani login], da server sve dobije u istom
+                // dogadjaju citanja (isti stil kao i ostatak protokola)
+                byte[] clientKeyLenBytes = BitConverter.GetBytes(clientPubKeyBytes.Length);
+                byte[] combined = new byte[clientKeyLenBytes.Length + clientPubKeyBytes.Length + encryptedLogin.Length];
+                Buffer.BlockCopy(clientKeyLenBytes, 0, combined, 0, clientKeyLenBytes.Length);
+                Buffer.BlockCopy(clientPubKeyBytes, 0, combined, clientKeyLenBytes.Length, clientPubKeyBytes.Length);
+                Buffer.BlockCopy(encryptedLogin, 0, combined, clientKeyLenBytes.Length + clientPubKeyBytes.Length, encryptedLogin.Length);
+
+                ConnectionService.TcpSocket.Send(combined);
 
 
                 // receive UDP port
@@ -137,12 +151,25 @@ namespace Client
                     mainWindow.ShowToastNotification(new ToastNotification("Error", "Invalid username or password.", NotificationType.Error));
                     return;
                 }
-                buffer = new byte[1024];
-                bytes = ConnectionService.TcpSocket.Receive(buffer);
+
+                byte[] encKeyLenBuf = new byte[4];
+                ConnectionService.TcpSocket.Receive(encKeyLenBuf);
+                int encKeyLen = BitConverter.ToInt32(encKeyLenBuf, 0);
+
+                byte[] encKeyData = new byte[encKeyLen];
+                int totalKeyReceived = 0;
+                while (totalKeyReceived < encKeyLen)
+                {
+                    int received = ConnectionService.TcpSocket.Receive(
+                        encKeyData, totalKeyReceived, encKeyLen - totalKeyReceived, SocketFlags.None);
+                    totalKeyReceived += received;
+                }
+
+                byte[] keyData = clientRsa.DecryptBytes(encKeyData);
                 byte[] key = new byte[16];
                 byte[] iv = new byte[16];
-                Array.Copy(buffer, 0, key, 0, 16);
-                Array.Copy(buffer, 16, iv, 0, 16);
+                Array.Copy(keyData, 0, key, 0, 16);
+                Array.Copy(keyData, 16, iv, 0, 16);
 
                 AesClass aes = new AesClass(key, iv);
 

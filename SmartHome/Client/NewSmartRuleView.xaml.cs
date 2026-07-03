@@ -117,6 +117,13 @@ namespace Client
 
                 if (ValidateCommand.ValidateAction(function.Name, parentWindow, device, value, value))
                 {
+                    bool exists = actions.Any(x => x.Device!=null && x.Device.Id == device.Id && x.FunctionName == function.Name);
+
+                    if (exists)
+                    {
+                        parentWindow?.ShowToastNotification(new ToastNotification("Error", "This action has already existed", NotificationType.Error));
+                        return;
+                    }
                     var action = new RuleActionDTO
                     {
                         Device = device,
@@ -124,7 +131,6 @@ namespace Client
                         FunctionName = function.Name,
                         Value = value
                     };
-
                     actions.Add(action);
                 }
             }
@@ -152,6 +158,13 @@ namespace Client
                         case "All Climates":
                             action.DeviceGroup = "ALL_CLIMATES";
                             break;
+                    }
+                    bool exists = actions.Any(x =>x.Device == null && x.DeviceGroup == action.DeviceGroup && x.FunctionName == action.FunctionName);
+
+                    if (exists)
+                    {
+                        parentWindow?.ShowToastNotification(new ToastNotification("Error", "This action has already existed", NotificationType.Error));
+                        return;
                     }
                     actions.Add(action);
                 }
