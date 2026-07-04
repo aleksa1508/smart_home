@@ -5,20 +5,20 @@ The application enables centralized management of smart devices, secure communic
 through an intuitive desktop application.
 
 ## 📋 Table of contents
-- [About project](#about-project)
-- [Technologies](#technologies)
-- [Features](#features)
-- [Project structure](#project-structure)
-- [System architecture](#system-arhitecture)
-    - [Client architecture](#client-arhitecture)
-    - [Server architecture](#server-arhitecture)
-- [Database design](#database-design)
-- [Database configuration](#database-configuration)
-- [Running the project](#running-the-project)
-    - [Requirements](#requiremets)
+- [About project](#-about-project)
+- [Technologies](#-technologies)
+- [Features](#-features)
+- [Project structure](#-project-structure)
+- [System architecture](#-system-architecture)
+    - [Client architecture](#client-architecture)
+    - [Server architecture](#server-architecture)
+- [Database design](#-database-design)
+- [Database configuration](#-database-configuration)
+- [Running the project](#-running-the-project)
+    - [Requirements](#requirements)
     - [Setup](#setup)
-- [Screenshots](#screenshots)
-- [License](#license)
+- [Screenshots](#-screenshots)
+- [License](#-license)
 
 ## 📖 About project
 
@@ -69,7 +69,7 @@ SmartHome
     └── script.sql      # Database creation script
 ```
 
-## 🏗️ System architecture
+## 🌐 System architecture
 
 The Smart Home system follows a client-server architecture. This architecture allows multiple clients and smart devices to communicate 
 with a centralized server while maintaining data consistency, scalability, and easier application maintenance.
@@ -84,7 +84,7 @@ The client application is implemented as a desktop application using WPF and XAM
 for interacting with the Smart Home system.
 
 <p align="center">
-  <img src="SmartHome/Images/client_arch.png" alt="Client architecture"/>
+  <img src="SmartHome/Images/client_arch.png" alt="Client architecture" />
 </p>
 
 ### Server architecture
@@ -96,7 +96,7 @@ approach enables efficient handling of multiple simultaneous client connections 
   <img src="SmartHome/Images/server_arch.png" alt="Server architecture" height=400/>
 </p>
 
-## 🗄️ Database design
+## 📦 Database design
 
 The application uses SQL Server Express as the primary relational database.
 
@@ -111,7 +111,7 @@ The database stores information about:
 - Commands
 - Functions
 
-## ⚙️ Database configuration
+## 🔧 Database configuration
 
 To configure the database, follow these steps:
 
