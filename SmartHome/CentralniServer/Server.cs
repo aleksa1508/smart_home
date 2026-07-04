@@ -364,10 +364,10 @@ namespace TCPServer
                                         var users = userReository.GetAllUsers().ToList();
                                         var rules = smartRulesRepository.GetAllSmartRules().ToList();
                                         var actions = ruleActionRepository.GetAllActions().ToList();
-                                        var u1 = komanda.SelectedDevice;
+                                        var selectedDevice = komanda.SelectedDevice;
                                         var id = komanda.FunctionID;
-                                        var funkcija = komanda.Function;
-                                        var vrednost = komanda.Value;
+                                        var function = komanda.Function;
+                                        var commandValue = komanda.Value;
                                         var username = komanda.Username;
                                         var existUser = users.Find(x => x.Username == username);
 
@@ -394,22 +394,22 @@ namespace TCPServer
                                                 continue;
                                             }
                                         }
-                                        deviceRepository.UpdateDeviceFunction(u1.Id, id, funkcija, vrednost);
+                                        deviceRepository.UpdateDeviceFunction(selectedDevice.Id, id, function, commandValue);
                                         //connecting between device and server
-                                        IPEndPoint deviceEP = new IPEndPoint(IPAddress.Loopback, u1.Port);
-                                        byte[] initialData = Encoding.UTF8.GetBytes(u1.Name + ":" + funkcija + ":" + vrednost);
+                                        IPEndPoint deviceEP = new IPEndPoint(IPAddress.Loopback, selectedDevice.Port);
+                                        byte[] initialData = Encoding.UTF8.GetBytes(selectedDevice.Name + ":" + function + ":" + commandValue);
                                         s.SendTo(initialData, deviceEP);
 
                                         DateTime timestamp = DateTime.Now;
-                                        string log = $"[{timestamp}] {u1.Name}: {funkcija} changed on {vrednost}";
-                                        deviceRepository.AddDeviceCommands(log, DateTime.Now, u1.Id, username);
+                                        string log = $"[{timestamp}] {selectedDevice.Name}: {function} changed on {commandValue}";
+                                        deviceRepository.AddDeviceCommands(log, DateTime.Now, selectedDevice.Id, username);
 
                                         var content = new ResponseDTO
                                         {
                                             Message = "Command",
-                                            Device = u1,
-                                            Function = funkcija,
-                                            Value = vrednost,
+                                            Device = selectedDevice,
+                                            Function = function,
+                                            Value = commandValue,
                                             Username = username,
                                             Timestamp = timestamp
                                         };
@@ -417,7 +417,7 @@ namespace TCPServer
                                         byte[] data = aesClass.EncryptMessage(json, klijentKljucevi[s].Key, klijentKljucevi[s].IV);
                                         s.SendTo(data, clientEP);
                                         Console.WriteLine("All devices (green device currenty changed):");
-                                        deviceRepository.PrintAllDevices(u1.Name);
+                                        deviceRepository.PrintAllDevices(selectedDevice.Name);
 
                                     }
                                 }
