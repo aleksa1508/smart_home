@@ -84,7 +84,7 @@ The client application is implemented as a desktop application using WPF and XAM
 for interacting with the Smart Home system.
 
 <p align="center">
-  <img src="SmartHome/Images/client_arch.png" alt="Client architecture" />
+  <img src="SmartHome/Images/client_arch.png" alt="Client architecture" height=800 />
 </p>
 
 ### Server architecture
